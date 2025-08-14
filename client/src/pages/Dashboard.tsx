@@ -246,7 +246,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Upload Interface */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle>議事録アップロード</CardTitle>
           <p className="text-sm text-gray-600">紙資料をOCR処理してデジタル化します</p>
@@ -265,7 +265,7 @@ export default function Dashboard() {
       </Card>
 
       {/* AI Analysis Preview */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle>AI規約改訂分析</CardTitle>
           <p className="text-sm text-gray-600">法改正内容と現行規約の差分を自動分析します</p>
