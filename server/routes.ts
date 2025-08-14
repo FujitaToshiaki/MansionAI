@@ -7,6 +7,7 @@ import { insertKnowledgeDocumentSchema } from "@shared/schema";
 import multer from "multer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  const knowledgeService = new KnowledgeService();
   // Dashboard stats endpoint
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
@@ -126,7 +127,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { id } = req.params;
     
     try {
-      const knowledgeService = new KnowledgeService();
       
       // Get decision history documents
       const knowledgeDocuments = await knowledgeService.getKnowledgeDocuments(id);
@@ -844,11 +844,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Load all attached assets into RAG system
+  app.post('/api/condominiums/:id/load-assets', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      const assetsDir = 'attached_assets';
+      const files = fs.readdirSync(assetsDir);
+      const loadedFiles = [];
+
+      for (const fileName of files) {
+        const filePath = path.join(assetsDir, fileName);
+        
+        // Skip non-text files
+        if (!fileName.endsWith('.txt')) continue;
+
+        try {
+          const stats = fs.statSync(filePath);
+          const content = fs.readFileSync(filePath, 'utf-8');
+          
+          // Determine document type based on filename
+          let type = 'document';
+          if (fileName.includes('議事録')) {
+            type = 'meeting_minutes';
+          } else if (fileName.includes('管理規約')) {
+            type = 'current_regulation';
+          } else if (fileName.includes('決議')) {
+            type = 'decision_history';
+          } else if (fileName.includes('変更議案')) {
+            type = 'amendment_proposal';
+          }
+
+          await knowledgeService.addKnowledgeDocument(
+            id,
+            fileName.replace(/_\d+\.txt$/, ''),
+            content,
+            type,
+            { originalFileName: fileName, fileSize: stats.size }
+          );
+
+          loadedFiles.push({ fileName, type, size: stats.size });
+        } catch (fileError) {
+          console.error(`Error processing file ${fileName}:`, fileError);
+        }
+      }
+
+      res.json({ 
+        message: `Loaded ${loadedFiles.length} files into RAG system`,
+        files: loadedFiles 
+      });
+    } catch (error) {
+      console.error('Error loading assets:', error);
+      res.status(500).json({ error: 'Failed to load assets into RAG system' });
+    }
+  });
+
   // Manual endpoint to load meeting minutes into RAG system
   app.post("/api/condominiums/:id/load-minutes", async (req, res) => {
     try {
       const condominiumId = req.params.id;
-      const knowledgeService = new KnowledgeService();
       
       // Sample content based on uploaded files - this would be actual file content in production
       const sampleMinutesContent = `
