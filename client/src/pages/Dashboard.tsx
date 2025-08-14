@@ -37,12 +37,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* DEBUG: Clear indication this is Dashboard */}
-      <div className="bg-red-100 border-2 border-red-500 p-4 rounded-lg">
-        <h2 className="text-red-800 font-bold">DEBUG: これはダッシュボードページです</h2>
-        <p className="text-red-700">このメッセージが見えている場合、ダッシュボードが正常に表示されています</p>
-      </div>
-      
+
       {/* Header Section with Image, Name and Buttons */}
       <div className="flex items-center justify-between bg-white rounded-lg p-6 shadow-sm border">
         <div className="flex items-center space-x-6">

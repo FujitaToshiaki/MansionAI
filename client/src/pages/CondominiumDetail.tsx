@@ -61,20 +61,44 @@ export default function CondominiumDetail() {
 
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{condominium.name}</h1>
-            <p className="text-gray-600 mt-1">{condominium.address}</p>
-            <p className="text-sm text-gray-500 mt-1">
-              築{new Date().getFullYear() - condominium.buildYear}年 / {condominium.units}戸 / 
-              管理開始：{new Date(condominium.managementStartDate).toLocaleDateString('ja-JP')}
-            </p>
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center space-x-6">
+            <img 
+              src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&w=80&h=80&fit=crop" 
+              alt={condominium.name} 
+              className="w-20 h-20 rounded-lg object-cover"
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{condominium.name}</h1>
+              <p className="text-gray-600 mt-1">{condominium.address}</p>
+              <p className="text-sm text-gray-500 mt-1">
+                築{new Date().getFullYear() - condominium.buildYear}年 / {condominium.units}戸 / 
+                管理開始：{new Date(condominium.managementStartDate).toLocaleDateString('ja-JP')}
+              </p>
+            </div>
           </div>
-          <img 
-            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&w=120&h=80&fit=crop" 
-            alt={condominium.name} 
-            className="w-32 h-20 rounded-lg object-cover"
-          />
+          
+          {/* Right-aligned Button Group */}
+          <div className="flex items-center space-x-3">
+            <Link href={`/condominiums/${id}/upload`}>
+              <Button variant="outline" size="sm">
+                <Upload className="w-4 h-4 mr-2" />
+                議事録アップロード
+              </Button>
+            </Link>
+            <Link href={`/condominiums/${id}/analysis`}>
+              <Button variant="outline" size="sm">
+                <FileText className="w-4 h-4 mr-2" />
+                規約改訂履歴
+              </Button>
+            </Link>
+            <Link href={`/condominiums/${id}/decisions`}>
+              <Button variant="outline" size="sm">
+                <Bot className="w-4 h-4 mr-2" />
+                決議取り扱い
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Info Cards */}
@@ -121,39 +145,7 @@ export default function CondominiumDetail() {
           </Card>
         </div>
 
-        {/* Action Menu */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
-          <Link href={`/condominiums/${id}/upload`}>
-            <Button className="w-full" variant="outline">
-              <Upload className="mr-2" size={16} />
-              議事録アップロード
-            </Button>
-          </Link>
-          <Link href={`/condominiums/${id}/analysis`}>
-            <Button className="w-full" variant="outline">
-              <Bot className="mr-2" size={16} />
-              規約改訂開始
-            </Button>
-          </Link>
-          <Link href={`/condominiums/${id}/decisions`}>
-            <Button className="w-full" variant="outline">
-              <FileText className="mr-2" size={16} />
-              決議履歴表示
-            </Button>
-          </Link>
-          <Button className="w-full" variant="outline">
-            <FileText className="mr-2" size={16} />
-            現行規約表示
-          </Button>
-          <Button className="w-full" variant="outline">
-            <FileText className="mr-2" size={16} />
-            レポート出力
-          </Button>
-          <Button className="w-full" variant="outline">
-            <FileText className="mr-2" size={16} />
-            理事会資料作成
-          </Button>
-        </div>
+
       </div>
 
       {/* Tabs */}
