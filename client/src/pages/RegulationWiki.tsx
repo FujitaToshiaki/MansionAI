@@ -39,25 +39,29 @@ interface RegulationChunk {
   };
 }
 
-interface TableOfContent {
+interface Chapter {
   id: string;
+  number: number;
   title: string;
-  subtitle?: string;
-  level: number;
-  startPosition: number;
-  content?: string;
-  children?: TableOfContent[];
-  expanded?: boolean;
+  articles: Article[];
+  expanded: boolean;
+}
+
+interface Article {
+  id: string;
+  number: number;
+  title: string;
+  content: string;
 }
 
 export default function RegulationWiki() {
   const { id } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedChunk, setSelectedChunk] = useState<RegulationChunk | null>(null);
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [tableOfContents, setTableOfContents] = useState<TableOfContent[]>([]);
-  const [activeSection, setActiveSection] = useState<string>("");
-  const [selectedSection, setSelectedSection] = useState<TableOfContent | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [activeChapter, setActiveChapter] = useState<string>("");
 
   const { data: condominium } = useQuery({
     queryKey: ['/api/condominiums', id],
@@ -81,121 +85,214 @@ export default function RegulationWiki() {
     enabled: !!searchQuery.trim()
   });
 
-  // Generate table of contents from document content
+  // Parse regulation content into chapters and articles
   useEffect(() => {
     if (knowledgeDocuments?.[0]?.content) {
+      console.log('Parsing regulation content...');
       const content = knowledgeDocuments[0].content;
-      const toc = generateTableOfContents(content);
-      setTableOfContents(toc);
+      console.log('Content preview (first 1000 chars):', content.substring(0, 1000));
+      console.log('Content length:', content.length);
+      
+      // Look for patterns in content
+      const lines = content.split('\n');
+      console.log('Total lines:', lines.length);
+      
+      // Check first 20 lines for patterns
+      lines.slice(0, 20).forEach((line, i) => {
+        if (line.trim()) console.log(`Line ${i}: "${line.trim()}"`);
+      });
+      
+      const parsedChapters = parseRegulationContent(content);
+      console.log('Parsed chapters:', parsedChapters.length);
+      parsedChapters.forEach(c => console.log(`- Chapter ${c.number}: ${c.title} (${c.articles.length} articles)`));
+      setChapters(parsedChapters);
     }
   }, [knowledgeDocuments]);
 
-  const generateTableOfContents = (content: string): TableOfContent[] => {
+  const parseRegulationContent = (content: string): Chapter[] => {
     const lines = content.split('\n');
-    const toc: TableOfContent[] = [];
-    let currentId = 0;
-    let currentChapter: TableOfContent | null = null;
+    const chapters: Chapter[] = [];
+    let currentChapter: Chapter | null = null;
+    let currentArticle: Article | null = null;
+    let articleContent = '';
+
+    console.log('Starting to parse', lines.length, 'lines');
 
     lines.forEach((line, index) => {
-      // Match chapter headers like **第X章**
-      const chapterMatch = line.match(/\*\*第(\d+)章\s*(.+?)\*\*/);
-      // Match article headers like **第X条**
-      const articleMatch = line.match(/\*\*第(\d+)条[^*]*\*\*/);
-      // Match article subtitles like **（条文名）**
-      const subtitleMatch = line.match(/\*\*（(.+?)）\*\*/);
+      const trimmedLine = line.trim();
+      if (!trimmedLine) return;
+      
+      // Match chapter: **第X章** or any variant
+      const chapterMatch = trimmedLine.match(/\*\*第(\d+)章\s*(.+?)\*\*/) || 
+                          trimmedLine.match(/^第(\d+)章\s*(.+?)$/) ||
+                          trimmedLine.match(/第(\d+)章\s*(.+)/);
       
       if (chapterMatch) {
-        // Create new chapter
-        currentChapter = {
-          id: `chapter-${currentId++}`,
-          title: `第${chapterMatch[1]}章`,
-          subtitle: chapterMatch[2].trim(),
-          level: 1,
-          startPosition: index,
-          children: [],
-          expanded: false
-        };
-        toc.push(currentChapter);
-      } else if (articleMatch) {
-        // Extract content for this article
-        const articleContent = extractSectionContent(content, index);
-        const nextLine = lines[index + 1];
-        let articleSubtitle = '';
+        console.log('Found chapter:', chapterMatch[0]);
         
-        // Check if next line contains subtitle
-        if (nextLine && nextLine.match(/\*\*（(.+?)）\*\*/)) {
-          const match = nextLine.match(/\*\*（(.+?)）\*\*/);
-          if (match) articleSubtitle = match[1].trim();
+        // Save previous article if exists
+        if (currentArticle && articleContent.trim()) {
+          currentArticle.content = articleContent.trim();
         }
         
-        const article: TableOfContent = {
-          id: `article-${currentId++}`,
-          title: `第${articleMatch[1]}条`,
-          subtitle: articleSubtitle,
-          level: 2,
-          startPosition: index,
-          content: articleContent,
-          children: [],
+        currentChapter = {
+          id: `chapter-${chapterMatch[1]}`,
+          number: parseInt(chapterMatch[1]),
+          title: chapterMatch[2].trim(),
+          articles: [],
           expanded: false
+        };
+        chapters.push(currentChapter);
+        currentArticle = null;
+        articleContent = '';
+        return;
+      }
+
+      // Match article: **第X条** or any variant
+      const articleMatch = trimmedLine.match(/\*\*第(\d+)条[^*]*\*\*/) ||
+                          trimmedLine.match(/^第(\d+)条/) ||
+                          trimmedLine.match(/第(\d+)条/);
+      
+      if (articleMatch) {
+        console.log('Found article:', articleMatch[0]);
+        
+        // Save previous article if exists
+        if (currentArticle && articleContent.trim()) {
+          currentArticle.content = articleContent.trim();
+        }
+
+        // Get article title
+        let articleTitle = '';
+        const sameLine = trimmedLine.replace(/\*\*第\d+条[^*]*\*\*/, '').trim();
+        const sameLineMatch = sameLine.match(/（(.+?)）/) || sameLine.match(/\((.+?)\)/);
+        if (sameLineMatch) {
+          articleTitle = sameLineMatch[1].trim();
+        } else {
+          const nextLine = lines[index + 1];
+          if (nextLine) {
+            const titleMatch = nextLine.match(/\*\*（(.+?)）\*\*/) || 
+                             nextLine.match(/（(.+?)）/) ||
+                             nextLine.match(/\((.+?)\)/);
+            if (titleMatch) {
+              articleTitle = titleMatch[1].trim();
+            }
+          }
+        }
+
+        currentArticle = {
+          id: `article-${articleMatch[1]}`,
+          number: parseInt(articleMatch[1]),
+          title: articleTitle,
+          content: ''
         };
         
         if (currentChapter) {
-          currentChapter.children?.push(article);
+          currentChapter.articles.push(currentArticle);
         } else {
-          // If no chapter, add as top level
-          toc.push(article);
+          // Create a default chapter if no chapter found
+          currentChapter = {
+            id: 'chapter-default',
+            number: 1,
+            title: '規約条文',
+            articles: [currentArticle],
+            expanded: false
+          };
+          chapters.push(currentChapter);
         }
+        
+        articleContent = '';
+        return;
+      }
+
+      // Skip title lines
+      if (trimmedLine.match(/\*\*（.+?）\*\*/)) {
+        return;
+      }
+
+      // Accumulate content for current article
+      if (currentArticle) {
+        articleContent += line + '\n';
       }
     });
 
-    return toc;
+    // Save the last article content
+    if (currentArticle && articleContent.trim()) {
+      currentArticle.content = articleContent.trim();
+    }
+
+    console.log('Final parsed chapters:', chapters.map(c => ({ 
+      id: c.id, 
+      title: c.title, 
+      articlesCount: c.articles.length 
+    })));
+
+    return chapters;
   };
 
-  const extractSectionContent = (content: string, startIndex: number): string => {
+  const renderArticleContent = (content: string) => {
+    if (!content) return null;
+    
     const lines = content.split('\n');
-    let endIndex = lines.length;
+    const elements: React.ReactNode[] = [];
     
-    // Find the next main section
-    for (let i = startIndex + 1; i < lines.length; i++) {
-      if (lines[i].match(/\*\*第\d+条[^*]*\*\*/)) {
-        endIndex = i;
-        break;
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) return;
+      
+      // Article headers (第X条)
+      if (trimmedLine.match(/\*\*第\d+条[^*]*\*\*/)) {
+        const headerText = trimmedLine.replace(/\*\*/g, '');
+        elements.push(
+          <h1 key={index} className="text-2xl font-bold text-gray-900 mb-4 mt-8 pb-2 border-b border-gray-200">
+            {headerText}
+          </h1>
+        );
       }
-    }
-    
-    return lines.slice(startIndex, endIndex).join('\n').trim();
-  };
-
-  const extractSubsectionContent = (content: string, startIndex: number): string => {
-    const lines = content.split('\n');
-    let endIndex = lines.length;
-    
-    // Find the next subsection or main section
-    for (let i = startIndex + 1; i < lines.length; i++) {
-      if (lines[i].match(/\*\*（.+?）\*\*/) || lines[i].match(/\*\*第\d+条[^*]*\*\*/)) {
-        endIndex = i;
-        break;
+      // Sub headers (（条文名）)
+      else if (trimmedLine.match(/\*\*（.+?）\*\*/)) {
+        const headerText = trimmedLine.replace(/\*\*/g, '').replace(/[（）]/g, '');
+        elements.push(
+          <h2 key={index} className="text-xl font-semibold text-gray-800 mb-3 mt-6">
+            {headerText}
+          </h2>
+        );
       }
-    }
+      // Numbered items (1. 2. etc.)
+      else if (trimmedLine.match(/^\d+\./)) {
+        elements.push(
+          <div key={index} className="mb-3 pl-4 border-l-2 border-blue-100">
+            <p className="text-gray-900 leading-relaxed">{trimmedLine}</p>
+          </div>
+        );
+      }
+      // Regular paragraphs
+      else if (trimmedLine.length > 0 && !trimmedLine.match(/^\*\*/)) {
+        elements.push(
+          <p key={index} className="text-gray-800 leading-relaxed mb-4">
+            {trimmedLine}
+          </p>
+        );
+      }
+    });
     
-    return lines.slice(startIndex, endIndex).join('\n').trim();
+    return elements;
   };
 
   const handleSearch = () => {
     // Trigger search by updating the query key
   };
 
-  const toggleSection = (sectionId: string) => {
-    setTableOfContents(prev => prev.map(section => 
-      section.id === sectionId 
-        ? { ...section, expanded: !section.expanded }
-        : section
+  const toggleChapter = (chapterId: string) => {
+    setChapters(prev => prev.map(chapter => 
+      chapter.id === chapterId 
+        ? { ...chapter, expanded: !chapter.expanded }
+        : chapter
     ));
+    setActiveChapter(chapterId);
   };
 
-  const selectSection = (section: TableOfContent) => {
-    setSelectedSection(section);
-    setActiveSection(section.id);
+  const selectArticle = (article: Article) => {
+    setSelectedArticle(article);
   };
 
   if (isLoading) {
@@ -338,15 +435,15 @@ export default function RegulationWiki() {
             {/* Table of Contents */}
             <ScrollArea className="h-[calc(100vh-200px)]">
               <nav className="space-y-1">
-                {tableOfContents.map((chapter) => (
+                {chapters.map((chapter) => (
                   <div key={chapter.id}>
                     {/* Chapter Header */}
                     <div className="flex">
                       <button
-                        onClick={() => toggleSection(chapter.id)}
+                        onClick={() => toggleChapter(chapter.id)}
                         className="p-2 hover:bg-gray-100 transition-colors"
                       >
-                        {chapter.children && chapter.children.length > 0 ? (
+                        {chapter.articles.length > 0 ? (
                           chapter.expanded ? 
                             <ChevronDown size={14} className="text-gray-400" /> : 
                             <ChevronRight size={14} className="text-gray-400" />
@@ -355,39 +452,37 @@ export default function RegulationWiki() {
                         )}
                       </button>
                       <div className={`flex-1 p-2 rounded-md text-sm cursor-pointer hover:bg-gray-100 transition-colors ${
-                        activeSection === chapter.id ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-gray-700'
+                        activeChapter === chapter.id ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-gray-700'
                       }`}>
-                        <div className="flex flex-col">
-                          <div className="flex items-center space-x-2">
-                            <BookOpen size={12} className="text-gray-400" />
-                            <span className="font-semibold text-sm">{chapter.title}</span>
+                        <div className="flex items-center space-x-2">
+                          <BookOpen size={12} className="text-gray-400" />
+                          <div>
+                            <div className="font-semibold">第{chapter.number}章</div>
+                            <div className="text-xs text-gray-500 mt-0.5">{chapter.title}</div>
                           </div>
-                          {chapter.subtitle && (
-                            <span className="text-xs text-gray-500 ml-5 mt-1">{chapter.subtitle}</span>
-                          )}
                         </div>
                       </div>
                     </div>
                     
                     {/* Articles under Chapter */}
-                    {chapter.expanded && chapter.children && (
+                    {chapter.expanded && (
                       <div className="ml-6 space-y-1">
-                        {chapter.children.map((article) => (
+                        {chapter.articles.map((article) => (
                           <button
                             key={article.id}
-                            onClick={() => selectSection(article)}
+                            onClick={() => selectArticle(article)}
                             className={`w-full text-left p-2 rounded-md text-sm hover:bg-gray-100 transition-colors ${
-                              activeSection === article.id ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-600' : 'text-gray-600'
+                              selectedArticle?.id === article.id ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-600' : 'text-gray-600'
                             }`}
                           >
-                            <div className="flex flex-col">
-                              <div className="flex items-center space-x-2">
-                                <Hash size={10} className="text-gray-400" />
-                                <span className="font-medium text-xs">{article.title}</span>
+                            <div className="flex items-center space-x-2">
+                              <Hash size={10} className="text-gray-400" />
+                              <div>
+                                <div className="font-medium">第{article.number}条</div>
+                                {article.title && (
+                                  <div className="text-xs text-gray-500 mt-0.5">（{article.title}）</div>
+                                )}
                               </div>
-                              {article.subtitle && (
-                                <span className="text-xs text-gray-500 ml-4 mt-0.5">（{article.subtitle}）</span>
-                              )}
                             </div>
                           </button>
                         ))}
@@ -408,8 +503,12 @@ export default function RegulationWiki() {
                     <span>{Math.round(knowledgeDocuments[0].metadata?.fileSize / 1024 || 0)}KB</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>チャンク数:</span>
-                    <span>{knowledgeDocuments[0].chunkCount}</span>
+                    <span>章数:</span>
+                    <span>{chapters.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>条文数:</span>
+                    <span>{chapters.reduce((total, chapter) => total + chapter.articles.length, 0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>アップロード日:</span>
@@ -449,19 +548,20 @@ export default function RegulationWiki() {
 
         {/* Main Content Area */}
         <main className="flex-1 bg-white">
-          {selectedSection ? (
+          {selectedArticle ? (
             <div className="p-8">
-              {/* Section Header */}
+              {/* Article Header */}
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                      {selectedSection.title}
+                      第{selectedArticle.number}条
+                      {selectedArticle.title && ` （${selectedArticle.title}）`}
                     </h1>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <span>{condominium?.name} 管理規約</span>
                       <span>•</span>
-                      <span>レベル {selectedSection.level}</span>
+                      <span>条文</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -477,10 +577,10 @@ export default function RegulationWiki() {
                 </div>
               </div>
 
-              {/* Section Content */}
+              {/* Article Content */}
               <div className="prose max-w-none">
-                <article className="regulation-content">
-                  {renderRegulationContent(selectedSection.content || '')}
+                <article className="regulation-content bg-white border rounded-lg p-6">
+                  {renderArticleContent(selectedArticle.content)}
                 </article>
               </div>
 
@@ -489,7 +589,7 @@ export default function RegulationWiki() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => setSelectedSection(null)}
+                  onClick={() => setSelectedArticle(null)}
                 >
                   <ArrowLeft className="mr-2" size={14} />
                   目次に戻る
@@ -523,12 +623,12 @@ export default function RegulationWiki() {
                 
                 <div className="text-sm text-gray-600 mb-4">
                   最終更新: {new Date(knowledgeDocuments[0].uploadedAt).toLocaleDateString('ja-JP')} | 
-                  全{knowledgeDocuments[0].chunkCount}章節 | 
+                  全{chapters.length}章 {chapters.reduce((total, chapter) => total + chapter.articles.length, 0)}条 | 
                   {Math.round(knowledgeDocuments[0].metadata?.fileSize / 1024 || 0)}KB
                 </div>
 
                 <p className="text-gray-700 leading-relaxed">
-                  この文書は{condominium?.name}の管理規約文書です。左側の目次から特定の条文を選択してください。
+                  この文書は{condominium?.name}の管理規約文書です。左側の目次から章を展開し、特定の条文を選択してください。
                 </p>
               </div>
 
@@ -536,13 +636,18 @@ export default function RegulationWiki() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <h2 className="text-lg font-semibold text-blue-900 mb-3">はじめに</h2>
                 <p className="text-blue-800 mb-4">
-                  左側の目次から閲覧したい条文を選択してください。各条文は構造化されて表示され、読みやすくフォーマットされています。
+                  左側の目次から章を展開し、閲覧したい条文を選択してください。各条文は構造化されて表示され、読みやすくフォーマットされています。
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center p-4 bg-white rounded-lg">
+                    <BookOpen className="mx-auto mb-2 text-blue-600" size={24} />
+                    <h3 className="font-medium text-gray-900 mb-1">章を展開</h3>
+                    <p className="text-sm text-gray-600">左メニューの章をクリックして展開</p>
+                  </div>
+                  <div className="text-center p-4 bg-white rounded-lg">
                     <Hash className="mx-auto mb-2 text-blue-600" size={24} />
                     <h3 className="font-medium text-gray-900 mb-1">条文を選択</h3>
-                    <p className="text-sm text-gray-600">左メニューから条文をクリック</p>
+                    <p className="text-sm text-gray-600">展開された条文をクリック</p>
                   </div>
                   <div className="text-center p-4 bg-white rounded-lg">
                     <Search className="mx-auto mb-2 text-blue-600" size={24} />
@@ -567,7 +672,7 @@ export default function RegulationWiki() {
                 </p>
                 <Link href={`/condominiums/${id}/knowledge`}>
                   <Button>
-                    <Upload className="mr-2" size={16} />
+                    <FileText className="mr-2" size={16} />
                     文書をアップロード
                   </Button>
                 </Link>
