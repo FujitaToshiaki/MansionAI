@@ -125,13 +125,24 @@ export default function CondominiumDetail() {
         </div>
 
         {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
           <Card>
             <CardContent className="p-4">
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-600">管理組合理事長</p>
                 <p className="text-lg font-semibold text-gray-900">田中 一郎様</p>
                 <p className="text-sm text-gray-500">連絡先: xxx-xxx-xxxx</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-center">
+                <p className="text-sm font-medium text-gray-600">次回会議・総会</p>
+                <p className="text-sm text-gray-500 mt-1">前回: 2025年3月</p>
+                <p className="text-lg font-semibold text-gray-900">次回: 2025年8月</p>
+                <p className="text-sm text-gray-500">議事録更新</p>
               </div>
             </CardContent>
           </Card>
