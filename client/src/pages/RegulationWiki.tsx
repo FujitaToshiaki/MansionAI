@@ -114,13 +114,12 @@ export default function RegulationWiki() {
     const chapters: Chapter[] = [];
     let currentChapter: Chapter | null = null;
     let currentArticle: Article | null = null;
-    let articleContent = '';
+    let articleContent: string[] = [];
 
     console.log('Starting to parse', lines.length, 'lines');
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
-      if (!trimmedLine) return;
       
       // Match chapter: **第X章** or any variant
       const chapterMatch = trimmedLine.match(/\*\*第(\d+)章\s*(.+?)\*\*/) || 
@@ -131,20 +130,23 @@ export default function RegulationWiki() {
         console.log('Found chapter:', chapterMatch[0]);
         
         // Save previous article if exists
-        if (currentArticle && articleContent.trim()) {
-          currentArticle.content = articleContent.trim();
+        if (currentArticle) {
+          currentArticle.content = articleContent.join('\n').trim();
+          console.log(`Saved article ${currentArticle.number} with ${currentArticle.content.length} chars`);
         }
         
+        // Fix duplicate chapter IDs issue
+        const chapterId = `chapter-${chapterMatch[1]}-${chapters.length}`;
         currentChapter = {
-          id: `chapter-${chapterMatch[1]}`,
+          id: chapterId,
           number: parseInt(chapterMatch[1]),
-          title: chapterMatch[2].trim(),
+          title: chapterMatch[2].trim().replace(/\*\*/g, ''),
           articles: [],
           expanded: false
         };
         chapters.push(currentChapter);
         currentArticle = null;
-        articleContent = '';
+        articleContent = [];
         return;
       }
 
@@ -157,30 +159,39 @@ export default function RegulationWiki() {
         console.log('Found article:', articleMatch[0]);
         
         // Save previous article if exists
-        if (currentArticle && articleContent.trim()) {
-          currentArticle.content = articleContent.trim();
+        if (currentArticle) {
+          currentArticle.content = articleContent.join('\n').trim();
+          console.log(`Saved article ${currentArticle.number} with ${currentArticle.content.length} chars`);
         }
 
-        // Get article title
+        // Get article title - look for title in current line or next few lines
         let articleTitle = '';
-        const sameLine = trimmedLine.replace(/\*\*第\d+条[^*]*\*\*/, '').trim();
-        const sameLineMatch = sameLine.match(/（(.+?)）/) || sameLine.match(/\((.+?)\)/);
-        if (sameLineMatch) {
-          articleTitle = sameLineMatch[1].trim();
+        
+        // Try to extract title from same line
+        const fullLine = trimmedLine.replace(/\*\*/g, '');
+        const titleInLine = fullLine.match(/第\d+条\s*（(.+?)）/) || fullLine.match(/第\d+条\s*\((.+?)\)/);
+        if (titleInLine) {
+          articleTitle = titleInLine[1].trim();
         } else {
-          const nextLine = lines[index + 1];
-          if (nextLine) {
+          // Check next 3 lines for title pattern
+          for (let i = 1; i <= 3 && (index + i) < lines.length; i++) {
+            const nextLine = lines[index + i].trim();
+            if (!nextLine) continue;
+            
             const titleMatch = nextLine.match(/\*\*（(.+?)）\*\*/) || 
-                             nextLine.match(/（(.+?)）/) ||
-                             nextLine.match(/\((.+?)\)/);
+                             nextLine.match(/^（(.+?)）$/) ||
+                             nextLine.match(/^\((.+?)\)$/);
             if (titleMatch) {
               articleTitle = titleMatch[1].trim();
+              break;
             }
           }
         }
 
+        // Fix duplicate article IDs issue
+        const articleId = `article-${articleMatch[1]}-${Date.now()}-${Math.random()}`;
         currentArticle = {
-          id: `article-${articleMatch[1]}`,
+          id: articleId,
           number: parseInt(articleMatch[1]),
           title: articleTitle,
           content: ''
@@ -200,47 +211,50 @@ export default function RegulationWiki() {
           chapters.push(currentChapter);
         }
         
-        articleContent = '';
+        articleContent = [];
+        // Add the article header line to content
+        articleContent.push(line);
         return;
       }
 
-      // Skip title lines
-      if (trimmedLine.match(/\*\*（.+?）\*\*/)) {
-        return;
-      }
-
-      // Accumulate content for current article
+      // Add content to current article (including empty lines for spacing)
       if (currentArticle) {
-        articleContent += line + '\n';
+        articleContent.push(line);
       }
     });
 
     // Save the last article content
-    if (currentArticle && articleContent.trim()) {
-      currentArticle.content = articleContent.trim();
+    if (currentArticle) {
+      currentArticle.content = articleContent.join('\n').trim();
+      console.log(`Saved final article ${currentArticle.number} with ${currentArticle.content.length} chars`);
     }
 
     console.log('Final parsed chapters:', chapters.map(c => ({ 
       id: c.id, 
       title: c.title, 
-      articlesCount: c.articles.length 
+      articlesCount: c.articles.length,
+      articlesWithContent: c.articles.filter(a => a.content.length > 10).length
     })));
 
     return chapters;
   };
 
   const renderArticleContent = (content: string) => {
-    if (!content) return null;
+    if (!content) {
+      console.log('No content to render');
+      return <div className="text-gray-500 italic">内容が見つかりません</div>;
+    }
+    
+    console.log('Rendering content:', content.substring(0, 200) + '...');
     
     const lines = content.split('\n');
     const elements: React.ReactNode[] = [];
     
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
-      if (!trimmedLine) return;
       
       // Article headers (第X条)
-      if (trimmedLine.match(/\*\*第\d+条[^*]*\*\*/)) {
+      if (trimmedLine.match(/\*\*第\d+条[^*]*\*\*/) || trimmedLine.match(/^第\d+条/)) {
         const headerText = trimmedLine.replace(/\*\*/g, '');
         elements.push(
           <h1 key={index} className="text-2xl font-bold text-gray-900 mb-4 mt-8 pb-2 border-b border-gray-200">
@@ -249,7 +263,7 @@ export default function RegulationWiki() {
         );
       }
       // Sub headers (（条文名）)
-      else if (trimmedLine.match(/\*\*（.+?）\*\*/)) {
+      else if (trimmedLine.match(/\*\*（.+?）\*\*/) || trimmedLine.match(/^（.+?）$/)) {
         const headerText = trimmedLine.replace(/\*\*/g, '').replace(/[（）]/g, '');
         elements.push(
           <h2 key={index} className="text-xl font-semibold text-gray-800 mb-3 mt-6">
@@ -258,24 +272,39 @@ export default function RegulationWiki() {
         );
       }
       // Numbered items (1. 2. etc.)
-      else if (trimmedLine.match(/^\d+\./)) {
+      else if (trimmedLine.match(/^\d+[\.\)]/)) {
         elements.push(
           <div key={index} className="mb-3 pl-4 border-l-2 border-blue-100">
             <p className="text-gray-900 leading-relaxed">{trimmedLine}</p>
           </div>
         );
       }
-      // Regular paragraphs
-      else if (trimmedLine.length > 0 && !trimmedLine.match(/^\*\*/)) {
+      // Bullet points or special formatting
+      else if (trimmedLine.match(/^[・•\-\*]/)) {
         elements.push(
-          <p key={index} className="text-gray-800 leading-relaxed mb-4">
+          <div key={index} className="mb-2 pl-6">
+            <p className="text-gray-800 leading-relaxed">{trimmedLine}</p>
+          </div>
+        );
+      }
+      // Regular paragraphs (non-empty lines)
+      else if (trimmedLine.length > 0) {
+        elements.push(
+          <p key={index} className="text-gray-800 leading-relaxed mb-3">
             {trimmedLine}
           </p>
         );
       }
+      // Empty lines for spacing
+      else if (line === '' && elements.length > 0) {
+        elements.push(
+          <div key={index} className="mb-2" />
+        );
+      }
     });
     
-    return elements;
+    console.log('Rendered elements:', elements.length);
+    return elements.length > 0 ? elements : <div className="text-gray-500 italic">解析可能な内容が見つかりません</div>;
   };
 
   const handleSearch = () => {
@@ -292,6 +321,8 @@ export default function RegulationWiki() {
   };
 
   const selectArticle = (article: Article) => {
+    console.log('Selected article:', article.number, article.title, 'Content length:', article.content.length);
+    console.log('Article content preview:', article.content.substring(0, 500));
     setSelectedArticle(article);
   };
 
