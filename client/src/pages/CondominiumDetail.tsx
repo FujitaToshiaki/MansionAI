@@ -298,57 +298,32 @@ export default function CondominiumDetail() {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="border-b bg-gray-50">
-                        <th className="text-left p-3 font-medium text-gray-700">開催日</th>
-                        <th className="text-left p-3 font-medium text-gray-700">会議種別</th>
-                        <th className="text-left p-3 font-medium text-gray-700 min-w-[200px]">議題</th>
-                        <th className="text-left p-3 font-medium text-gray-700 min-w-[250px]">決議内容</th>
-                        <th className="text-left p-3 font-medium text-gray-700">結果</th>
-                        <th className="text-left p-3 font-medium text-gray-700">票数</th>
-                        <th className="text-left p-3 font-medium text-gray-700">関連条文</th>
-                        <th className="text-left p-3 font-medium text-gray-700">備考</th>
+                        <th className="text-left p-3 font-medium text-gray-700 w-20">開催日</th>
+                        <th className="text-left p-3 font-medium text-gray-700 w-32">会議種別</th>
+                        <th className="text-left p-3 font-medium text-gray-700 w-24">カテゴリ</th>
+                        <th className="text-left p-3 font-medium text-gray-700 min-w-[250px]">議題</th>
+                        <th className="text-left p-3 font-medium text-gray-700 w-40">関連条文</th>
                       </tr>
                     </thead>
                     <tbody>
                       {decisions.map((decision: any) => (
                         <tr key={decision.id} className="border-b hover:bg-gray-50">
-                          <td className="p-3 text-sm font-medium text-gray-900">
-                            {decision.meetingDate}
+                          <td className="p-3 text-sm text-gray-900 align-top">
+                            <div className="whitespace-nowrap">{decision.meetingDate}</div>
                           </td>
-                          <td className="p-3 text-sm text-gray-600">
-                            {decision.meetingType}
+                          <td className="p-3 text-sm text-gray-600 align-top">
+                            <div className="whitespace-nowrap">{decision.meetingType}</div>
                           </td>
-                          <td className="p-3 text-sm text-gray-900">
-                            {decision.agenda}
-                          </td>
-                          <td className="p-3 text-sm text-gray-700">
-                            {decision.decision}
-                          </td>
-                          <td className="p-3">
-                            <Badge variant={
-                              decision.result === 'approved' ? 'default' :
-                              decision.result === 'rejected' ? 'destructive' : 'secondary'
-                            } className="text-xs">
-                              {decision.result === 'approved' ? '可決' :
-                               decision.result === 'rejected' ? '否決' : 
-                               decision.result === 'postponed' ? '保留' : '未定'}
+                          <td className="p-3 text-sm align-top">
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 whitespace-nowrap">
+                              {decision.category || '-'}
                             </Badge>
                           </td>
-                          <td className="p-3 text-xs text-gray-500">
-                            {decision.votingResults ? (
-                              <div className="space-y-1">
-                                <div>賛成: {decision.votingResults.favor}</div>
-                                <div>反対: {decision.votingResults.against}</div>
-                                <div>棄権: {decision.votingResults.abstain}</div>
-                              </div>
-                            ) : (
-                              <span>-</span>
-                            )}
+                          <td className="p-3 text-sm text-gray-900 align-top">
+                            <div className="leading-relaxed">{decision.agenda}</div>
                           </td>
-                          <td className="p-3 text-xs text-gray-600">
-                            {decision.relatedArticle || '-'}
-                          </td>
-                          <td className="p-3 text-xs text-gray-500">
-                            {decision.notes || '-'}
+                          <td className="p-3 text-xs text-gray-600 align-top">
+                            <div className="leading-relaxed">{decision.relatedArticle || '-'}</div>
                           </td>
                         </tr>
                       ))}
