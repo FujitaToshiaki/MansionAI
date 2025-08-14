@@ -117,20 +117,20 @@ export default function MinuteDetail() {
       
       // Skip completely empty lines but add minimal spacing
       if (!trimmedLine) {
-        return <div key={index} className="h-2" />;
+        return <div key={index} className="h-1" />;
       }
       
       // Headers (### and ##)
       if (trimmedLine.startsWith('### ')) {
         return (
-          <h3 key={index} className="text-xl font-bold text-blue-700 mt-6 mb-3 border-b-2 border-blue-200 pb-2">
+          <h3 key={index} className="text-xl font-bold text-blue-700 mt-4 mb-2 border-b border-blue-200 pb-1">
             {trimmedLine.substring(4)}
           </h3>
         );
       }
       if (trimmedLine.startsWith('## ')) {
         return (
-          <h2 key={index} className="text-2xl font-bold text-blue-800 mt-8 mb-4 border-b-2 border-blue-300 pb-2">
+          <h2 key={index} className="text-2xl font-bold text-blue-800 mt-5 mb-3 border-b-2 border-blue-300 pb-1">
             {trimmedLine.substring(3)}
           </h2>
         );
@@ -200,24 +200,24 @@ export default function MinuteDetail() {
       if (trimmedLine.includes('**')) {
         const parts = trimmedLine.split('**');
         return (
-          <p key={index} className="mb-2 leading-relaxed">
+          <p key={index} className="mb-1 leading-normal">
             {parts.map((part, partIndex) => 
               partIndex % 2 === 1 ? 
                 <strong key={partIndex} className="font-semibold text-gray-900">{part}</strong> : 
-                <span key={partIndex}>{part}</span>
+                <span key={partIndex} className="text-gray-700">{part}</span>
             )}
           </p>
         );
       }
       
-      // Italics (*text*)
+      // Italics (*text*) - but render normally without italic styling
       if (trimmedLine.includes('*') && !trimmedLine.includes('**')) {
         const parts = trimmedLine.split('*');
         return (
-          <p key={index} className="mb-2 leading-relaxed text-gray-700 italic">
+          <p key={index} className="mb-1 leading-normal text-gray-700">
             {parts.map((part, partIndex) => 
               partIndex % 2 === 1 ? 
-                <em key={partIndex} className="italic">{part}</em> : 
+                <span key={partIndex} className="text-gray-600">{part}</span> : 
                 <span key={partIndex}>{part}</span>
             )}
           </p>
@@ -227,7 +227,7 @@ export default function MinuteDetail() {
       // Special handling for dates and key info
       if (trimmedLine.match(/^\d{4}年\d{1,2}月\d{1,2}日/)) {
         return (
-          <div key={index} className="bg-blue-50 px-3 py-2 rounded-md mb-3 border-l-4 border-blue-400">
+          <div key={index} className="bg-blue-50 px-3 py-1 rounded-md mb-2 border-l-4 border-blue-400">
             <p className="text-blue-800 font-medium">{trimmedLine}</p>
           </div>
         );
@@ -244,7 +244,7 @@ export default function MinuteDetail() {
       
       // Regular text with reduced spacing
       return (
-        <p key={index} className="mb-2 leading-relaxed text-gray-700">
+        <p key={index} className="mb-1 leading-normal text-gray-700">
           {trimmedLine}
         </p>
       );
