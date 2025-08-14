@@ -79,7 +79,7 @@ export default function Dashboard() {
 
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -96,7 +96,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -113,7 +113,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -130,7 +130,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -149,7 +149,7 @@ export default function Dashboard() {
       </div>
 
       {/* Condominium List */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>マンション一覧</CardTitle>
           <div className="flex items-center space-x-3">
