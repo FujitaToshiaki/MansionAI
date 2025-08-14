@@ -360,12 +360,14 @@ export default function RegulationWiki() {
               >
                 <Menu size={18} />
               </Button>
-              <Link href={`/condominiums/${id}?tab=regulations`}>
-                <Button variant="ghost" size="sm">
-                  <Home className="mr-2" size={16} />
-                  戻る
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => window.location.href = `/condominiums/${id}?tab=regulations`}
+              >
+                <Home className="mr-2" size={16} />
+                戻る
+              </Button>
               <Separator orientation="vertical" className="h-6" />
               <nav className="flex items-center space-x-2 text-sm">
                 <Link href="/" className="text-blue-600 hover:text-blue-800">ホーム</Link>

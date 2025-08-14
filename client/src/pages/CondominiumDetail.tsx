@@ -28,17 +28,28 @@ import { MinutesTab } from "@/components/MinutesTab";
 export default function CondominiumDetail() {
   console.log("CondominiumDetail component is rendering");
   const { id } = useParams();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("basic");
   
   // Parse URL parameters for tab management
   useEffect(() => {
+    console.log("Current location:", location);
     const searchParams = new URLSearchParams(location.split('?')[1] || '');
     const tabParam = searchParams.get('tab');
-    if (tabParam) {
+    console.log("Tab param from URL:", tabParam);
+    if (tabParam && tabParam !== activeTab) {
+      console.log("Setting active tab to:", tabParam);
       setActiveTab(tabParam);
     }
   }, [location]);
+
+  // Handle tab change and update URL
+  const handleTabChange = (tabValue: string) => {
+    console.log("Tab changed to:", tabValue);
+    setActiveTab(tabValue);
+    // Update URL to reflect current tab
+    setLocation(`/condominiums/${id}?tab=${tabValue}`);
+  };
   
   const { data: condominium, isLoading } = useQuery<any>({
     queryKey: ['/api/condominiums', id],
@@ -207,7 +218,7 @@ export default function CondominiumDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList>
           <TabsTrigger value="basic">基本情報</TabsTrigger>
           <TabsTrigger value="regulations">管理規約</TabsTrigger>

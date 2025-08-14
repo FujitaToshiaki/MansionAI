@@ -40,8 +40,8 @@ export default function DecisionDetail() {
     const searchParams = new URLSearchParams(location.split('?')[1] || '');
     const fromTab = searchParams.get('from') || 'decisions';
     
-    // Return to the specific tab that was previously active
-    setLocation(`/condominiums/${condominiumId}?tab=${fromTab}`);
+    // Return to the specific tab that was previously active using window.location
+    window.location.href = `/condominiums/${condominiumId}?tab=${fromTab}`;
   };
 
   if (isLoading) {
