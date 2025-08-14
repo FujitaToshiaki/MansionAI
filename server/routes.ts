@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { knowledgeService } from "./knowledgeService";
+import { KnowledgeService } from "./knowledgeService";
 import { z } from "zod";
 import { insertKnowledgeDocumentSchema } from "@shared/schema";
 import multer from "multer";
