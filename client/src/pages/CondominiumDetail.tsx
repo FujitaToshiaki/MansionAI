@@ -310,7 +310,7 @@ export default function CondominiumDetail() {
               <div className="flex items-center justify-between">
                 <CardTitle>規約管理</CardTitle>
                 <div className="flex items-center space-x-2">
-                  {knowledgeDocuments && knowledgeDocuments.length > 0 && (
+                  {knowledgeDocuments && knowledgeDocuments.filter((doc: any) => doc.type === 'current_regulation').length > 0 && (
                     <Link href={`/condominiums/${id}/regulations/wiki`}>
                       <Button size="sm">
                         <BookOpen className="mr-2" size={16} />
@@ -328,18 +328,20 @@ export default function CondominiumDetail() {
               </div>
             </CardHeader>
             <CardContent>
-              {knowledgeDocuments && knowledgeDocuments.length > 0 ? (
+              {knowledgeDocuments && knowledgeDocuments.filter((doc: any) => doc.type === 'current_regulation').length > 0 ? (
                 <div className="space-y-4">
                   <div className="text-sm text-gray-600 mb-4">
-                    規約文書: 4件（現行版1件、過去版2件、改正案1件）
+                    規約文書: {knowledgeDocuments.filter((doc: any) => doc.type === 'current_regulation').length}件
                   </div>
-                  {knowledgeDocuments.map((doc: any) => (
+                  {knowledgeDocuments
+                    .filter((doc: any) => doc.type === 'current_regulation')
+                    .map((doc: any) => (
                     <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
                             <FileText className="text-blue-500" size={20} />
-                            <Link href={`/condominiums/${id}/wiki`}>
+                            <Link href={`/condominiums/${id}/regulations/wiki`}>
                               <h4 className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{doc.title}</h4>
                             </Link>
                             <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
