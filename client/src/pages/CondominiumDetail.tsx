@@ -21,6 +21,8 @@ import {
   BookOpen
 } from "lucide-react";
 import { Link } from "wouter";
+import { DecisionsTab } from "@/components/DecisionsTab";
+import { MinutesTab } from "@/components/MinutesTab";
 
 export default function CondominiumDetail() {
   console.log("CondominiumDetail component is rendering");
@@ -241,46 +243,10 @@ export default function CondominiumDetail() {
         <TabsContent value="minutes">
           <Card className="bg-white">
             <CardHeader>
-              <CardTitle>議事録管理</CardTitle>
+              <CardTitle>議事録</CardTitle>
             </CardHeader>
             <CardContent>
-              {documents?.filter((doc: any) => doc.type === 'minutes').length > 0 ? (
-                <div className="space-y-3">
-                  {documents.filter((doc: any) => doc.type === 'minutes').map((doc: any) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="text-blue-500" size={20} />
-                        <div>
-                          <p className="font-medium">{doc.title}</p>
-                          <p className="text-sm text-gray-500">
-                            {doc.fileSize && `${Math.round(doc.fileSize / 1024)}KB`} • 
-                            {new Date(doc.uploadedAt).toLocaleDateString('ja-JP')}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant={
-                        doc.ocrStatus === 'completed' ? 'default' :
-                        doc.ocrStatus === 'processing' ? 'secondary' :
-                        doc.ocrStatus === 'failed' ? 'destructive' : 'outline'
-                      }>
-                        {doc.ocrStatus === 'completed' ? 'OCR完了' :
-                         doc.ocrStatus === 'processing' ? 'OCR処理中' :
-                         doc.ocrStatus === 'failed' ? 'OCR失敗' : 'OCR待機'}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="mx-auto mb-4" size={48} />
-                  <p>議事録がアップロードされていません</p>
-                  <Link href={`/condominiums/${id}/upload`}>
-                    <Button className="mt-4" variant="outline">
-                      議事録をアップロード
-                    </Button>
-                  </Link>
-                </div>
-              )}
+              <MinutesTab condominiumId={id} />
             </CardContent>
           </Card>
         </TabsContent>
