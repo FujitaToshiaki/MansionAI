@@ -2,15 +2,34 @@ import { db } from "./db";
 import { knowledgeDocuments, knowledgeChunks, aiSearchHistory } from "@shared/schema";
 import type { InsertKnowledgeDocument, InsertKnowledgeChunk, KnowledgeDocument, KnowledgeChunk } from "@shared/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
+import { v4 as uuidv4 } from 'uuid';
 
 export class KnowledgeService {
   // Upload and process a knowledge document
   async uploadKnowledgeDocument(data: InsertKnowledgeDocument): Promise<KnowledgeDocument> {
+    console.log("Creating knowledge document with data:", {
+      condominiumId: data.condominiumId,
+      title: data.title,
+      type: data.type,
+      contentLength: data.content.length
+    });
+
+    const documentData = {
+      ...data,
+      id: uuidv4(),
+      uploadedAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    console.log("Inserting document with ID:", documentData.id);
+
     const [document] = await db
       .insert(knowledgeDocuments)
-      .values(data)
+      .values(documentData)
       .returning();
     
+    console.log("Document inserted successfully:", document.id);
+
     // Process the document into chunks
     await this.processDocumentIntoChunks(document);
     
@@ -29,6 +48,7 @@ export class KnowledgeService {
       const chunkContent = content.slice(i, i + chunkSize);
       
       chunks.push({
+        id: uuidv4(),
         documentId: document.id,
         chunkIndex: Math.floor(i / (chunkSize - overlap)),
         content: chunkContent,
@@ -83,46 +103,58 @@ export class KnowledgeService {
     chunks: KnowledgeChunk[],
     documents: KnowledgeDocument[]
   }> {
-    let whereCondition = eq(knowledgeDocuments.condominiumId, condominiumId);
+    console.log("Searching knowledge base:", { condominiumId, query, type });
     
-    if (type) {
-      whereCondition = and(whereCondition, eq(knowledgeDocuments.type, type));
+    try {
+      let whereCondition = eq(knowledgeDocuments.condominiumId, condominiumId);
+      
+      if (type) {
+        whereCondition = and(whereCondition, eq(knowledgeDocuments.type, type));
+      }
+
+      console.log("Getting relevant documents...");
+      // Get relevant documents
+      const documents = await db
+        .select()
+        .from(knowledgeDocuments)
+        .where(
+          and(
+            whereCondition,
+            sql`${knowledgeDocuments.content} ILIKE ${'%' + query + '%'}`
+          )
+        )
+        .limit(10);
+
+      console.log("Found documents:", documents.length);
+
+      console.log("Getting relevant chunks...");
+      // Get relevant chunks
+      const chunks = await db
+        .select({
+          id: knowledgeChunks.id,
+          documentId: knowledgeChunks.documentId,
+          chunkIndex: knowledgeChunks.chunkIndex,
+          content: knowledgeChunks.content,
+          embedding: knowledgeChunks.embedding,
+          metadata: knowledgeChunks.metadata,
+          createdAt: knowledgeChunks.createdAt,
+        })
+        .from(knowledgeChunks)
+        .innerJoin(knowledgeDocuments, eq(knowledgeChunks.documentId, knowledgeDocuments.id))
+        .where(
+          and(
+            whereCondition,
+            sql`${knowledgeChunks.content} ILIKE ${'%' + query + '%'}`
+          )
+        )
+        .limit(20);
+
+      console.log("Found chunks:", chunks.length);
+      return { chunks, documents };
+    } catch (error) {
+      console.error("Error in searchKnowledge:", error);
+      throw error;
     }
-
-    // Get relevant documents
-    const documents = await db
-      .select()
-      .from(knowledgeDocuments)
-      .where(
-        and(
-          whereCondition,
-          sql`${knowledgeDocuments.content} ILIKE ${'%' + query + '%'}`
-        )
-      )
-      .limit(10);
-
-    // Get relevant chunks
-    const chunks = await db
-      .select({
-        id: knowledgeChunks.id,
-        documentId: knowledgeChunks.documentId,
-        chunkIndex: knowledgeChunks.chunkIndex,
-        content: knowledgeChunks.content,
-        embedding: knowledgeChunks.embedding,
-        metadata: knowledgeChunks.metadata,
-        createdAt: knowledgeChunks.createdAt,
-      })
-      .from(knowledgeChunks)
-      .innerJoin(knowledgeDocuments, eq(knowledgeChunks.documentId, knowledgeDocuments.id))
-      .where(
-        and(
-          whereCondition,
-          sql`${knowledgeChunks.content} ILIKE ${'%' + query + '%'}`
-        )
-      )
-      .limit(20);
-
-    return { chunks, documents };
   }
 
   // Update document content
@@ -152,13 +184,20 @@ export class KnowledgeService {
 
   // Save search history
   async saveSearchHistory(condominiumId: string, query: string, results: any, context: string, userId?: string): Promise<void> {
-    await db.insert(aiSearchHistory).values({
-      condominiumId,
-      query,
-      results,
-      context,
-      userId
-    });
+    try {
+      await db.insert(aiSearchHistory).values({
+        id: uuidv4(),
+        condominiumId,
+        query,
+        results,
+        context,
+        userId: null, // Set to null for now, will be implemented when user auth is added
+        createdAt: new Date()
+      });
+    } catch (error) {
+      console.error("Failed to save search history:", error);
+      // Don't throw error to prevent search from failing
+    }
   }
 
   // Get search history

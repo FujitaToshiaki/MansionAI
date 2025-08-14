@@ -351,12 +351,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/condominiums/:id/knowledge/upload", upload.single('file'), async (req, res) => {
     try {
+      console.log("Upload request received:", {
+        params: req.params,
+        body: req.body,
+        file: req.file ? { name: req.file.originalname, size: req.file.size } : null
+      });
+
       if (!req.file) {
+        console.error("No file uploaded");
         return res.status(400).json({ error: "No file uploaded" });
       }
 
       const { type, title } = req.body;
       if (!type || !title) {
+        console.error("Missing type or title:", { type, title });
         return res.status(400).json({ error: "Type and title are required" });
       }
 
@@ -364,15 +372,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let content: string;
       try {
         content = req.file.buffer.toString('utf-8');
+        console.log("File content length:", content.length);
       } catch (error) {
+        console.error("UTF-8 decode failed, trying shift_jis:", error);
         // Try other encodings if UTF-8 fails
         try {
           content = req.file.buffer.toString('shift_jis');
         } catch (error) {
+          console.error("All encoding attempts failed:", error);
           return res.status(400).json({ error: "Unable to decode file. Please ensure it's a text file." });
         }
       }
 
+      console.log("Calling knowledgeService.uploadKnowledgeDocument...");
       const document = await knowledgeService.uploadKnowledgeDocument({
         condominiumId: req.params.id,
         title,
@@ -386,6 +398,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
+      console.log("Document uploaded successfully:", document.id);
+
       // Create activity record
       await storage.createActivity({
         condominiumId: req.params.id,
@@ -398,25 +412,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(document);
     } catch (error) {
-      res.status(500).json({ error: "Failed to upload knowledge document" });
+      console.error("Upload error:", error);
+      res.status(500).json({ error: "Failed to upload knowledge document", details: error.message });
     }
   });
 
   app.post("/api/condominiums/:id/knowledge/search", async (req, res) => {
     try {
       const { query, type } = req.body;
+      console.log("Search request:", { condominiumId: req.params.id, query, type });
+
       if (!query) {
         return res.status(400).json({ error: "Query is required" });
       }
 
       const results = await knowledgeService.searchKnowledge(req.params.id, query, type);
+      console.log("Search results:", { chunks: results.chunks?.length, documents: results.documents?.length });
       
-      // Save search history
-      await knowledgeService.saveSearchHistory(req.params.id, query, results, "AI search context", "mock-user-id");
+      // Save search history (temporarily disabled due to foreign key constraints)
+      // await knowledgeService.saveSearchHistory(req.params.id, query, results, "AI search context", "mock-user-id");
 
       res.json(results);
     } catch (error) {
-      res.status(500).json({ error: "Failed to search knowledge base" });
+      console.error("Search error:", error);
+      res.status(500).json({ error: "Failed to search knowledge base", details: error.message });
     }
   });
 
