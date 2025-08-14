@@ -42,6 +42,7 @@ interface RegulationChunk {
 interface TableOfContent {
   id: string;
   title: string;
+  subtitle?: string;
   level: number;
   startPosition: number;
   content?: string;
@@ -93,38 +94,57 @@ export default function RegulationWiki() {
     const lines = content.split('\n');
     const toc: TableOfContent[] = [];
     let currentId = 0;
-    let currentSection: TableOfContent | null = null;
+    let currentChapter: TableOfContent | null = null;
 
     lines.forEach((line, index) => {
-      // Match main headers like **第X条** 
-      const mainHeaderMatch = line.match(/\*\*第(\d+)条[^*]*\*\*/);
-      // Match sub headers like **（条文名）**
-      const subHeaderMatch = line.match(/\*\*（(.+?)）\*\*/);
+      // Match chapter headers like **第X章**
+      const chapterMatch = line.match(/\*\*第(\d+)章\s*(.+?)\*\*/);
+      // Match article headers like **第X条**
+      const articleMatch = line.match(/\*\*第(\d+)条[^*]*\*\*/);
+      // Match article subtitles like **（条文名）**
+      const subtitleMatch = line.match(/\*\*（(.+?)）\*\*/);
       
-      if (mainHeaderMatch) {
-        // Extract content for this section
-        const sectionContent = extractSectionContent(content, index);
-        currentSection = {
-          id: `section-${currentId++}`,
-          title: `第${mainHeaderMatch[1]}条`,
+      if (chapterMatch) {
+        // Create new chapter
+        currentChapter = {
+          id: `chapter-${currentId++}`,
+          title: `第${chapterMatch[1]}章`,
+          subtitle: chapterMatch[2].trim(),
           level: 1,
           startPosition: index,
-          content: sectionContent,
           children: [],
           expanded: false
         };
-        toc.push(currentSection);
-      } else if (subHeaderMatch && currentSection) {
-        const subsectionContent = extractSubsectionContent(content, index);
-        currentSection.children?.push({
-          id: `subsection-${currentId++}`,
-          title: subHeaderMatch[1].trim(),
+        toc.push(currentChapter);
+      } else if (articleMatch) {
+        // Extract content for this article
+        const articleContent = extractSectionContent(content, index);
+        const nextLine = lines[index + 1];
+        let articleSubtitle = '';
+        
+        // Check if next line contains subtitle
+        if (nextLine && nextLine.match(/\*\*（(.+?)）\*\*/)) {
+          const match = nextLine.match(/\*\*（(.+?)）\*\*/);
+          if (match) articleSubtitle = match[1].trim();
+        }
+        
+        const article: TableOfContent = {
+          id: `article-${currentId++}`,
+          title: `第${articleMatch[1]}条`,
+          subtitle: articleSubtitle,
           level: 2,
           startPosition: index,
-          content: subsectionContent,
+          content: articleContent,
           children: [],
           expanded: false
-        });
+        };
+        
+        if (currentChapter) {
+          currentChapter.children?.push(article);
+        } else {
+          // If no chapter, add as top level
+          toc.push(article);
+        }
       }
     });
 
@@ -318,49 +338,56 @@ export default function RegulationWiki() {
             {/* Table of Contents */}
             <ScrollArea className="h-[calc(100vh-200px)]">
               <nav className="space-y-1">
-                {tableOfContents.map((section) => (
-                  <div key={section.id}>
-                    {/* Main Section */}
+                {tableOfContents.map((chapter) => (
+                  <div key={chapter.id}>
+                    {/* Chapter Header */}
                     <div className="flex">
                       <button
-                        onClick={() => toggleSection(section.id)}
+                        onClick={() => toggleSection(chapter.id)}
                         className="p-2 hover:bg-gray-100 transition-colors"
                       >
-                        {section.children && section.children.length > 0 ? (
-                          section.expanded ? 
+                        {chapter.children && chapter.children.length > 0 ? (
+                          chapter.expanded ? 
                             <ChevronDown size={14} className="text-gray-400" /> : 
                             <ChevronRight size={14} className="text-gray-400" />
                         ) : (
                           <div className="w-3.5 h-3.5" />
                         )}
                       </button>
-                      <button
-                        onClick={() => selectSection(section)}
-                        className={`flex-1 text-left p-2 rounded-md text-sm hover:bg-gray-100 transition-colors ${
-                          activeSection === section.id ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-gray-700'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Hash size={12} className="text-gray-400" />
-                          <span className="truncate font-medium">{section.title}</span>
+                      <div className={`flex-1 p-2 rounded-md text-sm cursor-pointer hover:bg-gray-100 transition-colors ${
+                        activeSection === chapter.id ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-gray-700'
+                      }`}>
+                        <div className="flex flex-col">
+                          <div className="flex items-center space-x-2">
+                            <BookOpen size={12} className="text-gray-400" />
+                            <span className="font-semibold text-sm">{chapter.title}</span>
+                          </div>
+                          {chapter.subtitle && (
+                            <span className="text-xs text-gray-500 ml-5 mt-1">{chapter.subtitle}</span>
+                          )}
                         </div>
-                      </button>
+                      </div>
                     </div>
                     
-                    {/* Subsections */}
-                    {section.expanded && section.children && (
+                    {/* Articles under Chapter */}
+                    {chapter.expanded && chapter.children && (
                       <div className="ml-6 space-y-1">
-                        {section.children.map((subsection) => (
+                        {chapter.children.map((article) => (
                           <button
-                            key={subsection.id}
-                            onClick={() => selectSection(subsection)}
+                            key={article.id}
+                            onClick={() => selectSection(article)}
                             className={`w-full text-left p-2 rounded-md text-sm hover:bg-gray-100 transition-colors ${
-                              activeSection === subsection.id ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-600' : 'text-gray-600'
+                              activeSection === article.id ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-600' : 'text-gray-600'
                             }`}
                           >
-                            <div className="flex items-center space-x-2">
-                              <div className="w-2 h-2 bg-gray-300 rounded-full" />
-                              <span className="truncate text-xs">{subsection.title}</span>
+                            <div className="flex flex-col">
+                              <div className="flex items-center space-x-2">
+                                <Hash size={10} className="text-gray-400" />
+                                <span className="font-medium text-xs">{article.title}</span>
+                              </div>
+                              {article.subtitle && (
+                                <span className="text-xs text-gray-500 ml-4 mt-0.5">（{article.subtitle}）</span>
+                              )}
                             </div>
                           </button>
                         ))}
