@@ -104,69 +104,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>最近の活動</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {activities?.map((activity: any, index: number) => (
-                <div key={activity.id || index} className="flex items-start space-x-3">
-                  <div className={`w-2 h-2 rounded-full mt-2 ${
-                    activity.status === 'success' ? 'bg-green-500' : 
-                    activity.status === 'in_progress' ? 'bg-blue-500' : 
-                    activity.status === 'error' ? 'bg-red-500' : 'bg-gray-400'
-                  }`} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                    <p className="text-xs text-gray-500">{activity.timeAgo}</p>
-                  </div>
-                </div>
-              )) || (
-                <div className="text-center py-8 text-gray-500">
-                  <p>アクティビティがありません</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Progress Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>法改正対応進捗</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <img 
-              src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&w=400&h=200&fit=crop" 
-              alt="Progress Chart" 
-              className="w-full h-48 object-cover rounded-lg mb-4"
-            />
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">完了</span>
-                <span className="text-sm font-semibold text-green-600">{stats?.completionRate || 0}%</span>
-              </div>
-              <Progress value={stats?.completionRate || 0} className="h-2" />
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">進行中</span>
-                <span className="text-sm font-semibold text-orange-600">{stats?.progressRate || 0}%</span>
-              </div>
-              <Progress value={stats?.progressRate || 0} className="h-2" />
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">未着手</span>
-                <span className="text-sm font-semibold text-red-600">{stats?.pendingRate || 0}%</span>
-              </div>
-              <Progress value={stats?.pendingRate || 0} className="h-2" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Condominium List */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -351,6 +288,70 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Recent Activity and Progress at Bottom */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle>最近の活動</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {activities?.map((activity: any, index: number) => (
+                <div key={activity.id || index} className="flex items-start space-x-3">
+                  <div className={`w-2 h-2 rounded-full mt-2 ${
+                    activity.status === 'success' ? 'bg-green-500' : 
+                    activity.status === 'in_progress' ? 'bg-blue-500' : 
+                    activity.status === 'error' ? 'bg-red-500' : 'bg-gray-400'
+                  }`} />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">{activity.description}</p>
+                    <p className="text-xs text-gray-500">{activity.timeAgo}</p>
+                  </div>
+                </div>
+              )) || (
+                <div className="text-center py-8 text-gray-500">
+                  <p>アクティビティがありません</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Progress Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>法改正対応進捗</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <img 
+              src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&w=400&h=200&fit=crop" 
+              alt="Progress Chart" 
+              className="w-full h-48 object-cover rounded-lg mb-4"
+            />
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">完了</span>
+                <span className="text-sm font-semibold text-green-600">{stats?.completionRate || 0}%</span>
+              </div>
+              <Progress value={stats?.completionRate || 0} className="h-2" />
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">進行中</span>
+                <span className="text-sm font-semibold text-orange-600">{stats?.progressRate || 0}%</span>
+              </div>
+              <Progress value={stats?.progressRate || 0} className="h-2" />
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">未着手</span>
+                <span className="text-sm font-semibold text-red-600">{stats?.pendingRate || 0}%</span>
+              </div>
+              <Progress value={stats?.pendingRate || 0} className="h-2" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
