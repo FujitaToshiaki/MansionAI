@@ -409,9 +409,9 @@ export default function RegulationWiki() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex">
+      <div className="flex">
         {/* Sidebar - Table of Contents */}
-        <aside className={`${sidebarCollapsed ? 'w-0' : 'w-80'} transition-all duration-300 overflow-hidden bg-white border-r border-gray-200 relative z-10`}>
+        <aside className={`${sidebarCollapsed ? 'w-0' : 'w-80'} transition-all duration-300 overflow-hidden bg-white border-r border-gray-200 sticky top-0 h-screen`}>
           <div className="p-6">
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">コンテンツ</h2>
@@ -423,35 +423,33 @@ export default function RegulationWiki() {
             
             {/* Table of Contents */}
             <ScrollArea className="h-[calc(100vh-200px)]">
-              <nav className="space-y-1">
+              <nav className="space-y-2">
                 {chapters.map((chapter) => (
                   <div key={chapter.id}>
                     {/* Chapter Header */}
-                    <div className="flex">
-                      <button
-                        onClick={() => toggleChapter(chapter.id)}
-                        className={`flex items-center w-full p-3 rounded-md text-base cursor-pointer hover:bg-gray-100 transition-all duration-200 ${
-                          activeChapter === chapter.id ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
-                        }`}
-                      >
-                        <div className="mr-2">
-                          {chapter.articles.length > 0 ? (
-                            chapter.expanded ? 
-                              <ChevronDown size={14} className="text-gray-400 transition-transform duration-200" /> : 
-                              <ChevronRight size={14} className="text-gray-400 transition-transform duration-200" />
-                          ) : (
-                            <div className="w-3.5 h-3.5" />
-                          )}
+                    <button
+                      onClick={() => toggleChapter(chapter.id)}
+                      className={`flex items-center w-full p-3 rounded-md text-base cursor-pointer hover:bg-gray-100 transition-all duration-200 ${
+                        activeChapter === chapter.id ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                      }`}
+                    >
+                      <div className="mr-3 flex-shrink-0">
+                        {chapter.articles.length > 0 ? (
+                          chapter.expanded ? 
+                            <ChevronDown size={14} className="text-gray-400 transition-transform duration-200" /> : 
+                            <ChevronRight size={14} className="text-gray-400 transition-transform duration-200" />
+                        ) : (
+                          <div className="w-3.5 h-3.5" />
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-3 flex-1">
+                        <BookOpen size={14} className="text-gray-400 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="font-semibold text-base">第{chapter.number}章</div>
+                          <div className="text-sm text-gray-500 mt-0.5">{chapter.title}</div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <BookOpen size={12} className="text-gray-400" />
-                          <div>
-                            <div className="font-semibold text-base">第{chapter.number}章</div>
-                            <div className="text-sm text-gray-500 mt-0.5">{chapter.title}</div>
-                          </div>
-                        </div>
-                      </button>
-                    </div>
+                      </div>
+                    </button>
                     
                     {/* Articles under Chapter */}
                     <div className={`overflow-hidden transition-all duration-500 ease-in-out ${
@@ -535,7 +533,7 @@ export default function RegulationWiki() {
         </aside>
 
         {/* Main Content Area */}
-        <main className={`flex-1 bg-white ${sidebarCollapsed ? 'ml-0' : 'ml-6'} transition-all duration-300`}>
+        <main className={`flex-1 bg-white max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`}>
           {selectedArticle ? (
             <div className="p-8">
               {/* Article Header */}
