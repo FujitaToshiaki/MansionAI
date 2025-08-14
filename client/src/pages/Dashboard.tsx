@@ -33,6 +33,45 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Header Section with Image, Name and Buttons */}
+      <div className="flex items-center justify-between bg-white rounded-lg p-6 shadow-sm border">
+        <div className="flex items-center space-x-6">
+          {/* Condominium Image */}
+          <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
+            <img 
+              src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&w=80&h=80&fit=crop" 
+              alt="パークヒルズ" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
+          {/* Condominium Info */}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">パークヒルズ</h1>
+            <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <span>東京都・・・区×××丁目</span>
+              <span>総戸数 / 103戸 / 管理開始日：2020/4/1</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Right-aligned Button Group */}
+        <div className="flex items-center space-x-3">
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4 mr-2" />
+            議事録アップロード
+          </Button>
+          <Button variant="outline" size="sm">
+            <FileText className="w-4 h-4 mr-2" />
+            規約改訂履歴
+          </Button>
+          <Button variant="outline" size="sm">
+            <Search className="w-4 h-4 mr-2" />
+            決議取り扱い
+          </Button>
+        </div>
+      </div>
+
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
