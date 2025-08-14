@@ -73,7 +73,7 @@ export class MemStorage implements IStorage {
     const mockCondominiums: Condominium[] = [
       {
         id: randomUUID(),
-        name: "パークヒルズA",
+        name: "メゾンドオプテージ",
         address: "東京都○○区××1-2-3",
         units: 120,
         buildYear: 1999,
@@ -136,7 +136,7 @@ export class MemStorage implements IStorage {
         id: randomUUID(),
         condominiumId: firstCondoId,
         type: "regulation_revision",
-        description: "パークヒルズAの規約改訂が完了しました",
+        description: "メゾンドオプテージの規約改訂が完了しました",
         status: "success",
         userId: "mock-user",
         metadata: {},
