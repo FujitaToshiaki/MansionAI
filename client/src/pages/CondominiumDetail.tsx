@@ -159,11 +159,11 @@ export default function CondominiumDetail() {
         </TabsList>
 
         <TabsContent value="basic">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <CardTitle>基本情報</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 bg-white">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-600">マンション名</label>
@@ -195,11 +195,11 @@ export default function CondominiumDetail() {
         </TabsContent>
 
         <TabsContent value="minutes">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <CardTitle>議事録管理</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-white">
               {documents?.filter((doc: any) => doc.type === 'minutes').length > 0 ? (
                 <div className="space-y-3">
                   {documents.filter((doc: any) => doc.type === 'minutes').map((doc: any) => (
@@ -242,11 +242,11 @@ export default function CondominiumDetail() {
         </TabsContent>
 
         <TabsContent value="decisions">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <CardTitle>決議履歴</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-white">
               {decisions?.length > 0 ? (
                 <div className="space-y-4">
                   {decisions.map((decision: any) => (
@@ -292,11 +292,11 @@ export default function CondominiumDetail() {
         </TabsContent>
 
         <TabsContent value="regulations">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <CardTitle>規約管理</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-white">
               <div className="text-center py-8 text-gray-500">
                 <FileText className="mx-auto mb-4" size={48} />
                 <p>規約データが準備中です</p>
@@ -306,11 +306,11 @@ export default function CondominiumDetail() {
         </TabsContent>
 
         <TabsContent value="files">
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <CardTitle>ファイル管理</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-white">
               {documents?.length > 0 ? (
                 <div className="space-y-3">
                   {documents.map((doc: any) => (
