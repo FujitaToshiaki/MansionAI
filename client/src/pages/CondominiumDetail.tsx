@@ -198,7 +198,11 @@ export default function CondominiumDetail() {
       <Tabs defaultValue="basic" className="space-y-4">
         <TabsList>
           <TabsTrigger value="basic">基本情報</TabsTrigger>
-          <TabsTrigger value="regulations">管理規約</TabsTrigger>
+          <Link href={`/condominiums/${id}/wiki`}>
+            <Button variant="ghost" className="h-9 px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow hover:bg-accent hover:text-accent-foreground">
+              管理規約
+            </Button>
+          </Link>
           <TabsTrigger value="decisions">決議履歴</TabsTrigger>
           <TabsTrigger value="minutes">議事録</TabsTrigger>
           <TabsTrigger value="files">その他ファイル</TabsTrigger>
