@@ -121,13 +121,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Decisions endpoints
+  // Decisions endpoints (extracted from decision history documents)
   app.get("/api/condominiums/:id/decisions", async (req, res) => {
+    const { id } = req.params;
+    
     try {
-      const decisions = await storage.getDecisionsByCondominiumId(req.params.id);
-      res.json(decisions);
+      const knowledgeService = new KnowledgeService();
+      
+      // Get decision history documents
+      const knowledgeDocuments = await knowledgeService.getKnowledgeDocuments(id);
+      const decisionHistoryDocs = knowledgeDocuments.filter((doc: any) => doc.type === 'decision_history');
+      
+      let allDecisions = [];
+      
+      // Extract decisions from decision history documents
+      for (const doc of decisionHistoryDocs) {
+        const decisions = await knowledgeService.extractMeetingDecisions(doc.content);
+        allDecisions.push(...decisions);
+      }
+      
+      // If no decision history documents, return sample data for demonstration
+      if (allDecisions.length === 0) {
+        allDecisions = await knowledgeService.extractMeetingDecisions('');
+      }
+      
+      res.json(allDecisions);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch decisions" });
+      console.error("Error fetching decisions:", error);
+      res.status(500).json({ message: "Failed to fetch decisions" });
     }
   });
 

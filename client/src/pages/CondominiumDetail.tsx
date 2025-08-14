@@ -294,38 +294,66 @@ export default function CondominiumDetail() {
             </CardHeader>
             <CardContent>
               {decisions?.length > 0 ? (
-                <div className="space-y-4">
-                  {decisions.map((decision: any) => (
-                    <div key={decision.id} className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{decision.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{decision.description}</p>
-                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                            <span>開催日: {new Date(decision.meetingDate).toLocaleDateString('ja-JP')}</span>
-                            <span>カテゴリ: {decision.category}</span>
-                            {decision.relatedRegulationArticle && (
-                              <span>関連条文: {decision.relatedRegulationArticle}</span>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b bg-gray-50">
+                        <th className="text-left p-3 font-medium text-gray-700">開催日</th>
+                        <th className="text-left p-3 font-medium text-gray-700">会議種別</th>
+                        <th className="text-left p-3 font-medium text-gray-700 min-w-[200px]">議題</th>
+                        <th className="text-left p-3 font-medium text-gray-700 min-w-[250px]">決議内容</th>
+                        <th className="text-left p-3 font-medium text-gray-700">結果</th>
+                        <th className="text-left p-3 font-medium text-gray-700">票数</th>
+                        <th className="text-left p-3 font-medium text-gray-700">関連条文</th>
+                        <th className="text-left p-3 font-medium text-gray-700">備考</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {decisions.map((decision: any) => (
+                        <tr key={decision.id} className="border-b hover:bg-gray-50">
+                          <td className="p-3 text-sm font-medium text-gray-900">
+                            {decision.meetingDate}
+                          </td>
+                          <td className="p-3 text-sm text-gray-600">
+                            {decision.meetingType}
+                          </td>
+                          <td className="p-3 text-sm text-gray-900">
+                            {decision.agenda}
+                          </td>
+                          <td className="p-3 text-sm text-gray-700">
+                            {decision.decision}
+                          </td>
+                          <td className="p-3">
+                            <Badge variant={
+                              decision.result === 'approved' ? 'default' :
+                              decision.result === 'rejected' ? 'destructive' : 'secondary'
+                            } className="text-xs">
+                              {decision.result === 'approved' ? '可決' :
+                               decision.result === 'rejected' ? '否決' : 
+                               decision.result === 'postponed' ? '保留' : '未定'}
+                            </Badge>
+                          </td>
+                          <td className="p-3 text-xs text-gray-500">
+                            {decision.votingResults ? (
+                              <div className="space-y-1">
+                                <div>賛成: {decision.votingResults.favor}</div>
+                                <div>反対: {decision.votingResults.against}</div>
+                                <div>棄権: {decision.votingResults.abstain}</div>
+                              </div>
+                            ) : (
+                              <span>-</span>
                             )}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={
-                            decision.result === 'approved' ? 'default' :
-                            decision.result === 'rejected' ? 'destructive' : 'secondary'
-                          }>
-                            {decision.result === 'approved' ? '可決' :
-                             decision.result === 'rejected' ? '否決' : '保留'}
-                          </Badge>
-                          {decision.votingResults && (
-                            <div className="text-xs text-gray-500 mt-1">
-                              賛成{decision.votingResults.favor} 反対{decision.votingResults.against} 棄権{decision.votingResults.abstain}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                          </td>
+                          <td className="p-3 text-xs text-gray-600">
+                            {decision.relatedArticle || '-'}
+                          </td>
+                          <td className="p-3 text-xs text-gray-500">
+                            {decision.notes || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
