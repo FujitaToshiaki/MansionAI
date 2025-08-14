@@ -102,12 +102,22 @@ export default function MinuteDetail() {
 
   // Helper function to render markdown-like content with proper styling
   const renderMarkdownContent = (content: string) => {
-    return content.split('\n').map((line, index) => {
+    if (!content) return null;
+    
+    // First, clean up the content by removing excessive line breaks and carriage returns
+    const cleanedContent = content
+      .replace(/\r\n/g, '\n')  // Normalize line breaks
+      .replace(/\r/g, '\n')    // Convert remaining carriage returns
+      .replace(/<br>/g, '\n')  // Replace HTML <br> tags with line breaks
+      .replace(/<br\/>/g, '\n') // Replace self-closing <br/> tags
+      .replace(/\n\s*\n\s*\n/g, '\n\n'); // Remove excessive empty lines (3+ becomes 2)
+    
+    return cleanedContent.split('\n').map((line, index) => {
       const trimmedLine = line.trim();
       
-      // Skip empty lines
+      // Skip completely empty lines but add minimal spacing
       if (!trimmedLine) {
-        return <br key={index} />;
+        return <div key={index} className="h-2" />;
       }
       
       // Headers (### and ##)
@@ -126,11 +136,71 @@ export default function MinuteDetail() {
         );
       }
       
+      // Table rows (|---|---|) - Process before bold text to avoid conflicts
+      if (trimmedLine.includes('|')) {
+        const cells = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
+        
+        // Skip header separator rows (|:---|:---|)
+        if (cells.every(cell => cell.includes('---') || cell.includes(':'))) {
+          return null;
+        }
+        
+        if (cells.length > 1) {
+          return (
+            <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-3">
+              <div className={`grid ${cells.length === 2 ? 'grid-cols-2' : cells.length === 3 ? 'grid-cols-3' : 'grid-cols-1'}`}>
+                {cells.map((cell, cellIndex) => {
+                  // Process bold/italic text within cells
+                  const processedCell = cell.replace(/<br>/g, '\n').replace(/<br\/>/g, '\n');
+                  
+                  const isHeader = cellIndex === 0;
+                  const cellClass = isHeader 
+                    ? "bg-blue-50 font-semibold text-gray-900 p-3 border-r border-gray-200" 
+                    : "text-gray-700 p-3";
+                  
+                  if (processedCell.includes('**')) {
+                    const parts = processedCell.split('**');
+                    return (
+                      <div key={cellIndex} className={cellClass}>
+                        {parts.map((part, partIndex) => 
+                          partIndex % 2 === 1 ? 
+                            <strong key={partIndex}>{part}</strong> : 
+                            <span key={partIndex}>{part}</span>
+                        )}
+                      </div>
+                    );
+                  }
+                  
+                  // Handle multi-line content in cells
+                  const lines = processedCell.split('\n');
+                  
+                  return (
+                    <div key={cellIndex} className={cellClass}>
+                      {lines.length > 1 ? (
+                        <div className="space-y-1">
+                          {lines.map((line, lineIndex) => (
+                            <div key={lineIndex} className={line.trim().length > 0 ? '' : 'h-1'}>
+                              {line.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span>{processedCell}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+      }
+      
       // Bold text (**text**)
       if (trimmedLine.includes('**')) {
         const parts = trimmedLine.split('**');
         return (
-          <p key={index} className="mb-3 leading-relaxed">
+          <p key={index} className="mb-2 leading-relaxed">
             {parts.map((part, partIndex) => 
               partIndex % 2 === 1 ? 
                 <strong key={partIndex} className="font-semibold text-gray-900">{part}</strong> : 
@@ -144,7 +214,7 @@ export default function MinuteDetail() {
       if (trimmedLine.includes('*') && !trimmedLine.includes('**')) {
         const parts = trimmedLine.split('*');
         return (
-          <p key={index} className="mb-3 leading-relaxed text-gray-700 italic">
+          <p key={index} className="mb-2 leading-relaxed text-gray-700 italic">
             {parts.map((part, partIndex) => 
               partIndex % 2 === 1 ? 
                 <em key={partIndex} className="italic">{part}</em> : 
@@ -154,37 +224,31 @@ export default function MinuteDetail() {
         );
       }
       
-      // Table rows (|---|---|)
-      if (trimmedLine.includes('|')) {
-        const cells = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
-        
-        // Skip header separator rows (|:---|:---|)
-        if (cells.every(cell => cell.includes('---'))) {
-          return null;
-        }
-        
-        if (cells.length > 1) {
-          return (
-            <div key={index} className="bg-gray-50 rounded-lg p-4 mb-3">
-              <div className={`grid gap-4 ${cells.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                {cells.map((cell, cellIndex) => (
-                  <div key={cellIndex} className={cellIndex === 0 ? "font-semibold text-gray-900" : "text-gray-700"}>
-                    {cell.replace(/\*\*/g, '').replace(/\*/g, '')}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
+      // Special handling for dates and key info
+      if (trimmedLine.match(/^\d{4}年\d{1,2}月\d{1,2}日/)) {
+        return (
+          <div key={index} className="bg-blue-50 px-3 py-2 rounded-md mb-3 border-l-4 border-blue-400">
+            <p className="text-blue-800 font-medium">{trimmedLine}</p>
+          </div>
+        );
       }
       
-      // Regular text
+      // Organization names
+      if (trimmedLine.includes('管理組合') && trimmedLine.length < 50) {
+        return (
+          <div key={index} className="text-center mb-3">
+            <p className="text-lg font-semibold text-blue-700">{trimmedLine}</p>
+          </div>
+        );
+      }
+      
+      // Regular text with reduced spacing
       return (
-        <p key={index} className="mb-3 leading-relaxed text-gray-700">
+        <p key={index} className="mb-2 leading-relaxed text-gray-700">
           {trimmedLine}
         </p>
       );
-    });
+    }).filter(Boolean); // Remove null/undefined elements
   };
 
   return (
