@@ -19,6 +19,7 @@ import {
 import { Link } from "wouter";
 
 export default function CondominiumDetail() {
+  console.log("CondominiumDetail component is rendering");
   const { id } = useParams();
   
   const { data: condominium, isLoading } = useQuery({
