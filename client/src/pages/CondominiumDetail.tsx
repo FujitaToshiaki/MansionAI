@@ -21,26 +21,26 @@ import {
   BookOpen
 } from "lucide-react";
 import { Link } from "wouter";
-import { DecisionsTab } from "@/components/DecisionsTab";
+
 import { MinutesTab } from "@/components/MinutesTab";
 
 export default function CondominiumDetail() {
   console.log("CondominiumDetail component is rendering");
   const { id } = useParams();
   
-  const { data: condominium, isLoading } = useQuery({
+  const { data: condominium, isLoading } = useQuery<any>({
     queryKey: ['/api/condominiums', id],
   });
 
-  const { data: documents } = useQuery({
+  const { data: documents } = useQuery<any[]>({
     queryKey: ['/api/condominiums', id, 'documents'],
   });
 
-  const { data: decisions } = useQuery({
+  const { data: decisions } = useQuery<any[]>({
     queryKey: ['/api/condominiums', id, 'decisions'],
   });
 
-  const { data: knowledgeDocuments } = useQuery({
+  const { data: knowledgeDocuments } = useQuery<any[]>({
     queryKey: ['/api/condominiums', id, 'knowledge'],
   });
 
@@ -246,7 +246,7 @@ export default function CondominiumDetail() {
               <CardTitle>議事録</CardTitle>
             </CardHeader>
             <CardContent>
-              <MinutesTab condominiumId={id} />
+              <MinutesTab condominiumId={id || ''} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -257,7 +257,7 @@ export default function CondominiumDetail() {
               <CardTitle>決議履歴</CardTitle>
             </CardHeader>
             <CardContent>
-              {decisions?.length > 0 ? (
+              {decisions && decisions.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
@@ -492,7 +492,7 @@ export default function CondominiumDetail() {
               <CardTitle>ファイル管理</CardTitle>
             </CardHeader>
             <CardContent>
-              {documents?.length > 0 ? (
+              {documents && documents.length > 0 ? (
                 <div className="space-y-3">
                   {documents.map((doc: any) => (
                     <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
