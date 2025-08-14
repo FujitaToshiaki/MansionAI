@@ -14,7 +14,10 @@ import {
   Bot, 
   CheckCircle,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  FileOutput,
+  Search,
+  BarChart3
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -92,10 +95,28 @@ export default function CondominiumDetail() {
                 規約改訂履歴
               </Button>
             </Link>
+            <Link href={`/condominiums/${id}/report`}>
+              <Button variant="outline" size="sm">
+                <FileOutput className="w-4 h-4 mr-2" />
+                レポート出力
+              </Button>
+            </Link>
             <Link href={`/condominiums/${id}/decisions`}>
               <Button variant="outline" size="sm">
-                <Bot className="w-4 h-4 mr-2" />
-                決議取り扱い
+                <Search className="w-4 h-4 mr-2" />
+                決議議題表示
+              </Button>
+            </Link>
+            <Link href={`/condominiums/${id}/evaluation`}>
+              <Button variant="outline" size="sm">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                議事録解析評価
+              </Button>
+            </Link>
+            <Link href={`/condominiums/${id}/issues`}>
+              <Button variant="outline" size="sm">
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                課題要解決案件
               </Button>
             </Link>
           </div>
