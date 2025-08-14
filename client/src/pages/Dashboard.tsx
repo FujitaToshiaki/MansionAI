@@ -336,7 +336,7 @@ export default function Dashboard() {
       {/* Recent Activity and Progress at Bottom */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recent Activity */}
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <CardTitle>最近の活動</CardTitle>
           </CardHeader>
@@ -364,7 +364,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Progress Chart */}
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <CardTitle>法改正対応進捗</CardTitle>
           </CardHeader>
