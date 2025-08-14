@@ -409,9 +409,9 @@ export default function RegulationWiki() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto flex">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex">
         {/* Sidebar - Table of Contents */}
-        <aside className={`${sidebarCollapsed ? 'w-0' : 'w-80'} transition-all duration-300 overflow-hidden bg-white border-r border-gray-200`}>
+        <aside className={`${sidebarCollapsed ? 'w-0' : 'w-80'} transition-all duration-300 overflow-hidden bg-white border-r border-gray-200 relative z-10`}>
           <div className="p-6">
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">コンテンツ</h2>
@@ -430,7 +430,7 @@ export default function RegulationWiki() {
                     <div className="flex">
                       <button
                         onClick={() => toggleChapter(chapter.id)}
-                        className={`flex items-center w-full p-2 rounded-md text-sm cursor-pointer hover:bg-gray-100 transition-all duration-200 ${
+                        className={`flex items-center w-full p-3 rounded-md text-base cursor-pointer hover:bg-gray-100 transition-all duration-200 ${
                           activeChapter === chapter.id ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
                         }`}
                       >
@@ -446,15 +446,15 @@ export default function RegulationWiki() {
                         <div className="flex items-center space-x-2">
                           <BookOpen size={12} className="text-gray-400" />
                           <div>
-                            <div className="font-semibold">第{chapter.number}章</div>
-                            <div className="text-xs text-gray-500 mt-0.5">{chapter.title}</div>
+                            <div className="font-semibold text-base">第{chapter.number}章</div>
+                            <div className="text-sm text-gray-500 mt-0.5">{chapter.title}</div>
                           </div>
                         </div>
                       </button>
                     </div>
                     
                     {/* Articles under Chapter */}
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    <div className={`overflow-hidden transition-all duration-500 ease-in-out ${
                       chapter.expanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
                     }`}>
                       <div className="ml-6 space-y-1 pb-2">
@@ -467,7 +467,7 @@ export default function RegulationWiki() {
                             }`}
                           >
                             <div className="flex items-center space-x-2">
-                              <Hash size={10} className="text-gray-400" />
+                              <span className="text-gray-400 text-xs">●</span>
                               <div>
                                 <div className="text-sm">（{article.title}）</div>
                               </div>
@@ -517,7 +517,7 @@ export default function RegulationWiki() {
                     <button 
                       key={chunk.id}
                       className="w-full p-2 text-left border rounded cursor-pointer hover:bg-blue-50 text-xs"
-                      onClick={() => setSelectedChunk(chunk)}
+                      onClick={() => {}}
                     >
                       <div className="flex items-center space-x-1 mb-1">
                         <Hash size={10} />
@@ -535,7 +535,7 @@ export default function RegulationWiki() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 bg-white">
+        <main className={`flex-1 bg-white ${sidebarCollapsed ? 'ml-0' : 'ml-6'} transition-all duration-300`}>
           {selectedArticle ? (
             <div className="p-8">
               {/* Article Header */}
