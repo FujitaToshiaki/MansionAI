@@ -390,6 +390,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         foundMinute = enhancedMinutes.find(m => m.id === minuteId);
         if (foundMinute) {
           console.log(`Found minute in document: ${doc.title}`);
+          console.log(`Minute content length: ${foundMinute.content?.length || 0}`);
+          console.log(`Minute content preview: ${foundMinute.content?.substring(0, 200) || 'No content'}`);
+          console.log(`All minute fields:`, Object.keys(foundMinute));
           break;
         }
         
@@ -417,12 +420,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalUnits: foundMinute.totalUnits || 68,
           attendanceRate: foundMinute.attendanceRate || 66.2,
           quorum: true,
+          content: foundMinute.content || foundMinute.rawContent || foundMinute.originalContent, // Add the actual content
+          summary: foundMinute.summary || foundMinute.content?.slice(0, 200) + '...' || '議事録の概要',
+          sourceDocument: foundMinute.sourceDocument,
+          status: foundMinute.status || 'completed',
+          createdAt: foundMinute.createdAt,
           agenda: [
             {
               number: 1,
               title: 'メゾンドオプテージマンション管理規約変更の件',
               presenter: '田中一郎理事長',
-              content: foundMinute.originalContent?.slice(0, 300) + '...' || '実際の議事録内容から抽出された議題の詳細',
+              content: foundMinute.content?.slice(0, 300) + '...' || '実際の議事録内容から抽出された議題の詳細',
               result: '可決',
               votingResults: { favor: 42, against: 1, abstain: 2 }
             }
