@@ -27,7 +27,7 @@ export default function Sidebar() {
   const [location] = useLocation();
 
   return (
-    <div className="sidebar-gradient text-white flex flex-col" style={{ width: "200px" }}>
+    <div className="sidebar-gradient text-white flex flex-col" style={{ width: "280px" }}>
       {/* Logo Area */}
       <div className="flex items-center px-5" style={{ height: "100px" }}>
         <Cog className="text-white text-xl mr-3" size={20} />
