@@ -371,18 +371,19 @@ export default function CondominiumDetail() {
                     アップロード済み規約文書: {knowledgeDocuments.length}件
                   </div>
                   {knowledgeDocuments.map((doc: any) => (
-                    <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <FileText className="text-blue-500" size={20} />
-                            <h4 className="font-medium text-gray-900">{doc.title}</h4>
-                            <Badge variant="outline" className="text-xs">
-                              {doc.type === 'current_regulation' ? '現行規約' : 
-                               doc.type === 'standard_regulation' ? '標準規約' : 
-                               doc.type === 'decision_history' ? '決議履歴' : '文書'}
-                            </Badge>
-                          </div>
+                    <Link key={doc.id} href={`/condominiums/${id}/wiki`}>
+                      <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <FileText className="text-blue-500" size={20} />
+                              <h4 className="font-medium text-gray-900">{doc.title}</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {doc.type === 'current_regulation' ? '現行規約' : 
+                                 doc.type === 'standard_regulation' ? '標準規約' : 
+                                 doc.type === 'decision_history' ? '決議履歴' : '文書'}
+                              </Badge>
+                            </div>
                           <p className="text-sm text-gray-600 mb-2">{doc.description}</p>
                           <div className="flex items-center space-x-4 text-xs text-gray-500">
                             <span>アップロード: {new Date(doc.uploadedAt).toLocaleDateString('ja-JP')}</span>
@@ -398,13 +399,14 @@ export default function CondominiumDetail() {
                             検索可能
                           </div>
                         </div>
-                      </div>
-                      {doc.originalFileName && (
-                        <div className="mt-2 text-xs text-gray-500">
-                          元ファイル: {doc.originalFileName}
                         </div>
-                      )}
-                    </div>
+                        {doc.originalFileName && (
+                          <div className="mt-2 text-xs text-gray-500">
+                            元ファイル: {doc.originalFileName}
+                          </div>
+                        )}
+                      </div>
+                    </Link>
                   ))}
                   <div className="border-t pt-4 space-y-2">
                     <Link href={`/condominiums/${id}/regulations/wiki`}>
