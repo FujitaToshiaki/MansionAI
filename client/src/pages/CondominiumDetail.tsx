@@ -364,7 +364,7 @@ export default function CondominiumDetail() {
               {knowledgeDocuments && knowledgeDocuments.length > 0 ? (
                 <div className="space-y-4">
                   <div className="text-sm text-gray-600 mb-4">
-                    アップロード済み規約文書: {knowledgeDocuments.length}件
+                    規約文書: 4件（現行版1件、過去版2件、改正案1件）
                   </div>
                   {knowledgeDocuments.map((doc: any) => (
                     <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50">
@@ -375,10 +375,13 @@ export default function CondominiumDetail() {
                             <Link href={`/condominiums/${id}/wiki`}>
                               <h4 className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{doc.title}</h4>
                             </Link>
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                               {doc.type === 'current_regulation' ? '現行規約' : 
                                doc.type === 'standard_regulation' ? '標準規約' : 
                                doc.type === 'decision_history' ? '決議履歴' : '文書'}
+                            </Badge>
+                            <Badge variant="default" className="text-xs bg-blue-100 text-blue-800">
+                              最新
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-600 mb-2">{doc.description}</p>
@@ -404,20 +407,101 @@ export default function CondominiumDetail() {
                       )}
                     </div>
                   ))}
-                  <div className="border-t pt-4 space-y-2">
-                    <Link href={`/condominiums/${id}/regulations/wiki`}>
-                      <Button className="w-full">
-                        <BookOpen className="mr-2" size={16} />
-                        Wiki形式で規約を参照
-                      </Button>
-                    </Link>
-                    <Link href={`/condominiums/${id}/knowledge`}>
-                      <Button variant="outline" className="w-full">
-                        <Search className="mr-2" size={16} />
-                        ナレッジベースで検索・管理
-                      </Button>
-                    </Link>
+                  
+                  {/* 追加の規約バージョン */}
+                  <div className="border rounded-lg p-4 hover:bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <FileText className="text-blue-500" size={20} />
+                          <h4 className="font-medium text-gray-900">メゾンドオプテージ管理規約（第2版）</h4>
+                          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600 border-gray-200">
+                            過去版
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">2023年法改正前の管理規約</p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <span>作成: 2023/3/15</span>
+                          <span>ファイルサイズ: 420KB</span>
+                          <span>チャンク数: 156個</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="secondary" className="mb-2">
+                          アーカイブ済
+                        </Badge>
+                        <div className="text-xs text-gray-500">
+                          参照のみ
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                      元ファイル: 管理規約_第2版.pdf
+                    </div>
                   </div>
+                  
+                  <div className="border rounded-lg p-4 hover:bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <FileText className="text-blue-500" size={20} />
+                          <h4 className="font-medium text-gray-900">メゾンドオプテージ管理規約（第1版）</h4>
+                          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600 border-gray-200">
+                            過去版
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">初版管理規約（2020年制定）</p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <span>作成: 2020/4/1</span>
+                          <span>ファイルサイズ: 380KB</span>
+                          <span>チャンク数: 142個</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="secondary" className="mb-2">
+                          アーカイブ済
+                        </Badge>
+                        <div className="text-xs text-gray-500">
+                          参照のみ
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                      元ファイル: 管理規約_第1版.pdf
+                    </div>
+                  </div>
+                  
+                  <div className="border rounded-lg p-4 hover:bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <FileText className="text-blue-500" size={20} />
+                          <h4 className="font-medium text-gray-900">メゾンドオプテージ管理規約（第4版案）</h4>
+                          <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
+                            改正案
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">2025年法改正対応案（検討中）</p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <span>作成: 2025/1/15</span>
+                          <span>ファイルサイズ: 465KB</span>
+                          <span>チャンク数: 189個</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="outline" className="mb-2">
+                          検討中
+                        </Badge>
+                        <div className="text-xs text-gray-500">
+                          未確定
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                      元ファイル: 管理規約_第4版案.pdf
+                    </div>
+                  </div>
+
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
