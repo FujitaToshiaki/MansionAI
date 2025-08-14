@@ -42,7 +42,8 @@ Preferred communication style: Simple, everyday language.
 2. **Decision Extraction**: AI-powered analysis to identify and classify meeting decisions from OCR text
 3. **Regulation Analysis**: Comparison of current regulations against standard templates and legal requirements
 4. **AI Revision Generation**: Automated generation of regulation amendment proposals based on extracted decisions
-5. **Dashboard Analytics**: Real-time statistics and activity monitoring for management oversight
+5. **Meeting Minutes Management**: RAG-integrated meeting minutes with tabular display, individual detail pages, and hierarchical navigation
+6. **Dashboard Analytics**: Real-time statistics and activity monitoring for management oversight
 
 ## External Dependencies
 
