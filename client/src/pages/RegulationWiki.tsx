@@ -44,7 +44,9 @@ interface TableOfContent {
   title: string;
   level: number;
   startPosition: number;
+  content?: string;
   children?: TableOfContent[];
+  expanded?: boolean;
 }
 
 export default function RegulationWiki() {
@@ -54,6 +56,7 @@ export default function RegulationWiki() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [tableOfContents, setTableOfContents] = useState<TableOfContent[]>([]);
   const [activeSection, setActiveSection] = useState<string>("");
+  const [selectedSection, setSelectedSection] = useState<TableOfContent | null>(null);
 
   const { data: condominium } = useQuery({
     queryKey: ['/api/condominiums', id],
@@ -90,34 +93,89 @@ export default function RegulationWiki() {
     const lines = content.split('\n');
     const toc: TableOfContent[] = [];
     let currentId = 0;
+    let currentSection: TableOfContent | null = null;
 
     lines.forEach((line, index) => {
-      // Match headers like **（条文名）** or **第X条**
-      const headerMatch = line.match(/\*\*（(.+?)）\*\*|\*\*第(\d+)条\*\*|\*\*([^*]+)\*\*/);
-      if (headerMatch) {
-        const title = headerMatch[1] || headerMatch[2] || headerMatch[3];
-        if (title && title.trim()) {
-          toc.push({
-            id: `section-${currentId++}`,
-            title: title.trim(),
-            level: headerMatch[2] ? 1 : 2, // 第X条は level 1, その他は level 2
-            startPosition: index,
-            children: []
-          });
-        }
+      // Match main headers like **第X条** 
+      const mainHeaderMatch = line.match(/\*\*第(\d+)条[^*]*\*\*/);
+      // Match sub headers like **（条文名）**
+      const subHeaderMatch = line.match(/\*\*（(.+?)）\*\*/);
+      
+      if (mainHeaderMatch) {
+        // Extract content for this section
+        const sectionContent = extractSectionContent(content, index);
+        currentSection = {
+          id: `section-${currentId++}`,
+          title: `第${mainHeaderMatch[1]}条`,
+          level: 1,
+          startPosition: index,
+          content: sectionContent,
+          children: [],
+          expanded: false
+        };
+        toc.push(currentSection);
+      } else if (subHeaderMatch && currentSection) {
+        const subsectionContent = extractSubsectionContent(content, index);
+        currentSection.children?.push({
+          id: `subsection-${currentId++}`,
+          title: subHeaderMatch[1].trim(),
+          level: 2,
+          startPosition: index,
+          content: subsectionContent,
+          children: [],
+          expanded: false
+        });
       }
     });
 
     return toc;
   };
 
+  const extractSectionContent = (content: string, startIndex: number): string => {
+    const lines = content.split('\n');
+    let endIndex = lines.length;
+    
+    // Find the next main section
+    for (let i = startIndex + 1; i < lines.length; i++) {
+      if (lines[i].match(/\*\*第\d+条[^*]*\*\*/)) {
+        endIndex = i;
+        break;
+      }
+    }
+    
+    return lines.slice(startIndex, endIndex).join('\n').trim();
+  };
+
+  const extractSubsectionContent = (content: string, startIndex: number): string => {
+    const lines = content.split('\n');
+    let endIndex = lines.length;
+    
+    // Find the next subsection or main section
+    for (let i = startIndex + 1; i < lines.length; i++) {
+      if (lines[i].match(/\*\*（.+?）\*\*/) || lines[i].match(/\*\*第\d+条[^*]*\*\*/)) {
+        endIndex = i;
+        break;
+      }
+    }
+    
+    return lines.slice(startIndex, endIndex).join('\n').trim();
+  };
+
   const handleSearch = () => {
     // Trigger search by updating the query key
   };
 
-  const scrollToSection = (sectionId: string, startPosition: number) => {
-    setActiveSection(sectionId);
-    // In a real implementation, you would scroll to the content position
+  const toggleSection = (sectionId: string) => {
+    setTableOfContents(prev => prev.map(section => 
+      section.id === sectionId 
+        ? { ...section, expanded: !section.expanded }
+        : section
+    ));
+  };
+
+  const selectSection = (section: TableOfContent) => {
+    setSelectedSection(section);
+    setActiveSection(section.id);
   };
 
   if (isLoading) {
@@ -129,6 +187,55 @@ export default function RegulationWiki() {
   }
 
   const currentDocument = knowledgeDocuments?.[0];
+
+  const renderRegulationContent = (content: string) => {
+    if (!content) return null;
+    
+    const lines = content.split('\n');
+    const elements: React.ReactNode[] = [];
+    
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) return;
+      
+      // Main headers (第X条)
+      if (trimmedLine.match(/\*\*第\d+条[^*]*\*\*/)) {
+        const headerText = trimmedLine.replace(/\*\*/g, '');
+        elements.push(
+          <h1 key={index} className="text-2xl font-bold text-gray-900 mb-4 mt-8 pb-2 border-b border-gray-200">
+            {headerText}
+          </h1>
+        );
+      }
+      // Sub headers (（条文名）)
+      else if (trimmedLine.match(/\*\*（.+?）\*\*/)) {
+        const headerText = trimmedLine.replace(/\*\*/g, '').replace(/[（）]/g, '');
+        elements.push(
+          <h2 key={index} className="text-xl font-semibold text-gray-800 mb-3 mt-6">
+            {headerText}
+          </h2>
+        );
+      }
+      // Numbered items (1. 2. etc.)
+      else if (trimmedLine.match(/^\d+\./)) {
+        elements.push(
+          <div key={index} className="mb-3 pl-4">
+            <p className="text-gray-900 leading-relaxed">{trimmedLine}</p>
+          </div>
+        );
+      }
+      // Regular paragraphs
+      else if (trimmedLine.length > 0) {
+        elements.push(
+          <p key={index} className="text-gray-800 leading-relaxed mb-4">
+            {trimmedLine}
+          </p>
+        );
+      }
+    });
+    
+    return elements;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -213,18 +320,52 @@ export default function RegulationWiki() {
               <nav className="space-y-1">
                 {tableOfContents.map((section) => (
                   <div key={section.id}>
-                    <button
-                      onClick={() => scrollToSection(section.id, section.startPosition)}
-                      className={`w-full text-left p-2 rounded-md text-sm hover:bg-gray-100 transition-colors ${
-                        activeSection === section.id ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-gray-700'
-                      }`}
-                      style={{ paddingLeft: `${(section.level - 1) * 16 + 8}px` }}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <Hash size={12} className="text-gray-400" />
-                        <span className="truncate">{section.title}</span>
+                    {/* Main Section */}
+                    <div className="flex">
+                      <button
+                        onClick={() => toggleSection(section.id)}
+                        className="p-2 hover:bg-gray-100 transition-colors"
+                      >
+                        {section.children && section.children.length > 0 ? (
+                          section.expanded ? 
+                            <ChevronDown size={14} className="text-gray-400" /> : 
+                            <ChevronRight size={14} className="text-gray-400" />
+                        ) : (
+                          <div className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => selectSection(section)}
+                        className={`flex-1 text-left p-2 rounded-md text-sm hover:bg-gray-100 transition-colors ${
+                          activeSection === section.id ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-gray-700'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Hash size={12} className="text-gray-400" />
+                          <span className="truncate font-medium">{section.title}</span>
+                        </div>
+                      </button>
+                    </div>
+                    
+                    {/* Subsections */}
+                    {section.expanded && section.children && (
+                      <div className="ml-6 space-y-1">
+                        {section.children.map((subsection) => (
+                          <button
+                            key={subsection.id}
+                            onClick={() => selectSection(subsection)}
+                            className={`w-full text-left p-2 rounded-md text-sm hover:bg-gray-100 transition-colors ${
+                              activeSection === subsection.id ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-600' : 'text-gray-600'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <div className="w-2 h-2 bg-gray-300 rounded-full" />
+                              <span className="truncate text-xs">{subsection.title}</span>
+                            </div>
+                          </button>
+                        ))}
                       </div>
-                    </button>
+                    )}
                   </div>
                 ))}
               </nav>
@@ -281,118 +422,111 @@ export default function RegulationWiki() {
 
         {/* Main Content Area */}
         <main className="flex-1 bg-white">
-          {knowledgeDocuments?.[0] ? (
+          {selectedSection ? (
             <div className="p-8">
-              {/* Document Header */}
+              {/* Section Header */}
               <div className="mb-8">
-                {selectedChunk ? (
+                <div className="flex items-center justify-between mb-6">
                   <div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setSelectedChunk(null)}
-                      className="mb-4"
-                    >
-                      <ArrowLeft className="mr-2" size={16} />
-                      文書全体に戻る
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                      {selectedSection.title}
+                    </h1>
+                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                      <span>{condominium?.name} 管理規約</span>
+                      <span>•</span>
+                      <span>レベル {selectedSection.level}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm">
+                      <Copy className="mr-2" size={14} />
+                      コピー
                     </Button>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                      <div className="flex items-center justify-between">
-                        <h1 className="text-lg font-semibold text-blue-900">
-                          第{selectedChunk.chunkIndex + 1}節
-                        </h1>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline" className="text-xs">
-                            文字位置: {selectedChunk.metadata.startChar} - {selectedChunk.metadata.endChar}
-                          </Badge>
-                          <Button variant="outline" size="sm">
-                            <Copy className="mr-1" size={14} />
-                            コピー
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                    <Button variant="outline" size="sm">
+                      <Share2 className="mr-2" size={14} />
+                      共有
+                    </Button>
                   </div>
-                ) : (
-                  <div className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <h1 className="text-3xl font-bold text-gray-900">
-                        {knowledgeDocuments[0].title}
-                      </h1>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          {knowledgeDocuments[0].type === 'current_regulation' ? '現行規約' : 
-                           knowledgeDocuments[0].type === 'standard_regulation' ? '標準規約' : '文書'}
-                        </Badge>
-                        <Badge variant="outline">
-                          バージョン: {knowledgeDocuments[0].version || '1.0'}
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="text-sm text-gray-600 mb-4">
-                      最終更新: {new Date(knowledgeDocuments[0].uploadedAt).toLocaleDateString('ja-JP')} | 
-                      全{knowledgeDocuments[0].chunkCount}章節 | 
-                      {Math.round(knowledgeDocuments[0].metadata?.fileSize / 1024 || 0)}KB
-                    </div>
-
-                    <p className="text-gray-700 leading-relaxed">
-                      この文書は{condominium?.name}の管理規約文書です。左側の目次から特定の条文に移動するか、上部の検索機能を使用して内容を検索できます。
-                    </p>
-                  </div>
-                )}
+                </div>
               </div>
 
-              {/* Document Content */}
+              {/* Section Content */}
               <div className="prose max-w-none">
-                <div className="bg-white border rounded-lg p-6">
-                  {selectedChunk ? (
-                    <div className="whitespace-pre-wrap text-gray-900 leading-relaxed text-base">
-                      {selectedChunk.content}
-                    </div>
-                  ) : (
-                    <div className="whitespace-pre-wrap text-gray-900 leading-relaxed text-base">
-                      {knowledgeDocuments[0].content?.substring(0, 8000)}
-                      {knowledgeDocuments[0].content?.length > 8000 && (
-                        <div className="mt-8 p-6 bg-gray-50 border rounded-lg text-center">
-                          <div className="text-gray-600 mb-4">
-                            <BookOpen className="mx-auto mb-2" size={24} />
-                            <p className="font-medium">文書が長いため、一部のみ表示しています</p>
-                            <p className="text-sm mt-1">
-                              左側の目次から特定の条文に移動するか、検索機能をご利用ください
-                            </p>
-                          </div>
-                          <div className="flex justify-center space-x-3">
-                            <Button variant="outline" size="sm">
-                              <Search className="mr-2" size={16} />
-                              検索して探す
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Download className="mr-2" size={16} />
-                              全文ダウンロード
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <article className="regulation-content">
+                  {renderRegulationContent(selectedSection.content || '')}
+                </article>
               </div>
 
-              {/* Quick Actions */}
+              {/* Navigation */}
               <div className="mt-8 flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="text-sm text-gray-600">
-                  この文書についてご質問がありますか？
-                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedSection(null)}
+                >
+                  <ArrowLeft className="mr-2" size={14} />
+                  目次に戻る
+                </Button>
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm">
                     <Search className="mr-2" size={14} />
-                    AI検索
+                    この条文で検索
                   </Button>
-                  <Button variant="outline" size="sm">
-                    <Share2 className="mr-2" size={14} />
-                    共有
-                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : knowledgeDocuments?.[0] ? (
+            <div className="p-8">
+              {/* Welcome Header */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {knowledgeDocuments[0].title}
+                  </h1>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      {knowledgeDocuments[0].type === 'current_regulation' ? '現行規約' : 
+                       knowledgeDocuments[0].type === 'standard_regulation' ? '標準規約' : '文書'}
+                    </Badge>
+                    <Badge variant="outline">
+                      バージョン: {knowledgeDocuments[0].version || '1.0'}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="text-sm text-gray-600 mb-4">
+                  最終更新: {new Date(knowledgeDocuments[0].uploadedAt).toLocaleDateString('ja-JP')} | 
+                  全{knowledgeDocuments[0].chunkCount}章節 | 
+                  {Math.round(knowledgeDocuments[0].metadata?.fileSize / 1024 || 0)}KB
+                </div>
+
+                <p className="text-gray-700 leading-relaxed">
+                  この文書は{condominium?.name}の管理規約文書です。左側の目次から特定の条文を選択してください。
+                </p>
+              </div>
+
+              {/* Getting Started */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-blue-900 mb-3">はじめに</h2>
+                <p className="text-blue-800 mb-4">
+                  左側の目次から閲覧したい条文を選択してください。各条文は構造化されて表示され、読みやすくフォーマットされています。
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-white rounded-lg">
+                    <Hash className="mx-auto mb-2 text-blue-600" size={24} />
+                    <h3 className="font-medium text-gray-900 mb-1">条文を選択</h3>
+                    <p className="text-sm text-gray-600">左メニューから条文をクリック</p>
+                  </div>
+                  <div className="text-center p-4 bg-white rounded-lg">
+                    <Search className="mx-auto mb-2 text-blue-600" size={24} />
+                    <h3 className="font-medium text-gray-900 mb-1">検索機能</h3>
+                    <p className="text-sm text-gray-600">上部の検索バーで内容を検索</p>
+                  </div>
+                  <div className="text-center p-4 bg-white rounded-lg">
+                    <Share2 className="mx-auto mb-2 text-blue-600" size={24} />
+                    <h3 className="font-medium text-gray-900 mb-1">共有・コピー</h3>
+                    <p className="text-sm text-gray-600">条文を共有やコピー</p>
+                  </div>
                 </div>
               </div>
             </div>
