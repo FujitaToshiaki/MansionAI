@@ -137,40 +137,78 @@ export class KnowledgeService {
 
   // Extract meeting minutes from uploaded meeting minutes documents
   async extractMeetingMinutes(content: string): Promise<any[]> {
+    console.log('Starting meeting minutes extraction...');
     if (!content || content.trim() === '') {
+      console.log('Empty content provided');
       return [];
     }
 
+    console.log(`Content length: ${content.length} characters`);
     const minutes = [];
     const lines = content.split('\n');
+    console.log(`Total lines: ${lines.length}`);
+    
+    // More flexible pattern matching for Japanese meeting minutes
+    const meetingPatterns = [
+      /第\d+期.*?総会/,
+      /第\d+回.*?理事会/,
+      /第\d+期.*?理事会/,
+      /総会.*?議事録/,
+      /理事会.*?議事録/,
+      /議事録/  // Fallback pattern
+    ];
+    
     let currentMinute: any = null;
     let sectionContent = '';
+    let meetingCount = 0;
     
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       const trimmedLine = line.trim();
       
-      // Detect meeting headers containing 第...期...総会 or 第...回...理事会
-      if (trimmedLine.includes('第') && 
-          ((trimmedLine.includes('期') && trimmedLine.includes('総会')) ||
-           (trimmedLine.includes('回') && trimmedLine.includes('理事会')))) {
+      if (!trimmedLine) continue;
+      
+      // Check if this line contains a meeting header
+      const isHeader = meetingPatterns.some(pattern => pattern.test(trimmedLine));
+      
+      if (isHeader || trimmedLine.includes('議事録')) {
+        console.log(`Found potential meeting header: "${trimmedLine}"`);
         
         // Save previous minute if exists
         if (currentMinute) {
           currentMinute.content = sectionContent.trim();
           minutes.push(currentMinute);
+          console.log(`Saved meeting: ${currentMinute.title}`);
         }
         
         // Start new minute
+        meetingCount++;
         currentMinute = {
-          id: `minute-${minutes.length + 1}`,
+          id: `minute-${meetingCount}`,
           title: trimmedLine,
           content: '',
-          date: this.extractDateFromContent(trimmedLine, lines),
+          date: this.extractDateFromContent(trimmedLine, lines.slice(Math.max(0, i-5), i+10)),
           meetingType: this.extractMeetingType(trimmedLine),
           rawContent: trimmedLine
         };
         sectionContent = '';
+        
+        console.log(`Started new meeting: ${currentMinute.title} (${currentMinute.meetingType})`);
       } else if (currentMinute) {
+        sectionContent += line + '\n';
+      } else if (trimmedLine.length > 10) {
+        // If no header found yet but we have substantial content, create a general minute
+        if (!currentMinute) {
+          console.log('Creating fallback meeting minute from content');
+          currentMinute = {
+            id: 'minute-general',
+            title: '議事録データ',
+            content: '',
+            date: this.extractDateFromContent('', lines.slice(0, 20)),
+            meetingType: '総会',
+            rawContent: '議事録データ'
+          };
+        }
         sectionContent += line + '\n';
       }
     }
@@ -179,9 +217,10 @@ export class KnowledgeService {
     if (currentMinute) {
       currentMinute.content = sectionContent.trim();
       minutes.push(currentMinute);
+      console.log(`Saved final meeting: ${currentMinute.title}`);
     }
     
-    console.log(`Extracted ${minutes.length} meeting minutes from content`);
+    console.log(`Final result: Extracted ${minutes.length} meeting minutes from content`);
     return minutes;
   }
 
