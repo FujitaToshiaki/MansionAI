@@ -83,6 +83,39 @@ export const activities = pgTable("activities", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
+// RAG Knowledge Base Tables
+export const knowledgeDocuments = pgTable("knowledge_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  title: text("title").notNull(),
+  type: text("type").notNull(), // current_regulation, meeting_minutes, standard_regulation
+  content: text("content").notNull(),
+  metadata: jsonb("metadata"), // {source: string, version: string, date: string, etc}
+  originalFileName: text("original_file_name"),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+export const knowledgeChunks = pgTable("knowledge_chunks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  documentId: varchar("document_id").references(() => knowledgeDocuments.id).notNull(),
+  chunkIndex: integer("chunk_index").notNull(),
+  content: text("content").notNull(),
+  embedding: text("embedding"), // Store embedding as JSON string for now
+  metadata: jsonb("metadata"), // {page: number, section: string, etc}
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export const aiSearchHistory = pgTable("ai_search_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  query: text("query").notNull(),
+  results: jsonb("results"), // Relevant chunks and scores
+  context: text("context"), // Generated context from search
+  userId: varchar("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -116,6 +149,22 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
   createdAt: true
 });
 
+export const insertKnowledgeDocumentSchema = createInsertSchema(knowledgeDocuments).omit({
+  id: true,
+  uploadedAt: true,
+  updatedAt: true
+});
+
+export const insertKnowledgeChunkSchema = createInsertSchema(knowledgeChunks).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertAiSearchHistorySchema = createInsertSchema(aiSearchHistory).omit({
+  id: true,
+  createdAt: true
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -134,3 +183,12 @@ export type InsertRegulation = z.infer<typeof insertRegulationSchema>;
 
 export type Activity = typeof activities.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
+
+export type KnowledgeDocument = typeof knowledgeDocuments.$inferSelect;
+export type InsertKnowledgeDocument = z.infer<typeof insertKnowledgeDocumentSchema>;
+
+export type KnowledgeChunk = typeof knowledgeChunks.$inferSelect;
+export type InsertKnowledgeChunk = z.infer<typeof insertKnowledgeChunkSchema>;
+
+export type AiSearchHistory = typeof aiSearchHistory.$inferSelect;
+export type InsertAiSearchHistory = z.infer<typeof insertAiSearchHistorySchema>;

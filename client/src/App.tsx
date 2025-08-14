@@ -12,6 +12,7 @@ import OCRProcessing from "@/pages/OCRProcessing";
 import DecisionExtraction from "@/pages/DecisionExtraction";
 import RegulationAnalysis from "@/pages/RegulationAnalysis";
 import AIRevisionGeneration from "@/pages/AIRevisionGeneration";
+import KnowledgeBaseStandalone from "@/pages/KnowledgeBaseStandalone";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
         <Route path="/condominiums/:id/decisions" component={DecisionExtraction} />
         <Route path="/condominiums/:id/analysis" component={RegulationAnalysis} />
         <Route path="/condominiums/:id/ai-revision" component={AIRevisionGeneration} />
+        <Route path="/condominiums/:id/knowledge" component={KnowledgeBaseStandalone} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

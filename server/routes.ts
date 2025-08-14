@@ -1,7 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { knowledgeService } from "./knowledgeService";
 import { z } from "zod";
+import { insertKnowledgeDocumentSchema } from "@shared/schema";
+import multer from "multer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard stats endpoint
@@ -316,6 +319,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch OCR data" });
+    }
+  });
+
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024 // 10MB limit
+    }
+  });
+
+  // Knowledge Base APIs
+  app.get("/api/condominiums/:id/knowledge", async (req, res) => {
+    try {
+      const documents = await knowledgeService.getKnowledgeDocuments(req.params.id);
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch knowledge documents" });
+    }
+  });
+
+  app.get("/api/condominiums/:id/knowledge/:type", async (req, res) => {
+    try {
+      const documents = await knowledgeService.getKnowledgeDocumentsByType(req.params.id, req.params.type);
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch knowledge documents by type" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/knowledge/upload", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const { type, title } = req.body;
+      if (!type || !title) {
+        return res.status(400).json({ error: "Type and title are required" });
+      }
+
+      // Convert buffer to text (assuming text files for now)
+      let content: string;
+      try {
+        content = req.file.buffer.toString('utf-8');
+      } catch (error) {
+        // Try other encodings if UTF-8 fails
+        try {
+          content = req.file.buffer.toString('shift_jis');
+        } catch (error) {
+          return res.status(400).json({ error: "Unable to decode file. Please ensure it's a text file." });
+        }
+      }
+
+      const document = await knowledgeService.uploadKnowledgeDocument({
+        condominiumId: req.params.id,
+        title,
+        type,
+        content,
+        originalFileName: req.file.originalname,
+        metadata: {
+          fileSize: req.file.size,
+          mimeType: req.file.mimetype,
+          uploadDate: new Date().toISOString()
+        }
+      });
+
+      // Create activity record
+      await storage.createActivity({
+        condominiumId: req.params.id,
+        type: "document_upload",
+        description: `ナレッジドキュメント「${title}」をアップロードしました`,
+        status: "success",
+        userId: "mock-user-id",
+        metadata: { documentId: document.id, type }
+      });
+
+      res.json(document);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to upload knowledge document" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/knowledge/search", async (req, res) => {
+    try {
+      const { query, type } = req.body;
+      if (!query) {
+        return res.status(400).json({ error: "Query is required" });
+      }
+
+      const results = await knowledgeService.searchKnowledge(req.params.id, query, type);
+      
+      // Save search history
+      await knowledgeService.saveSearchHistory(req.params.id, query, results, "AI search context", "mock-user-id");
+
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to search knowledge base" });
+    }
+  });
+
+  app.get("/api/condominiums/:id/knowledge/search-history", async (req, res) => {
+    try {
+      const history = await knowledgeService.getSearchHistory(req.params.id, 20);
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch search history" });
+    }
+  });
+
+  app.delete("/api/knowledge/:documentId", async (req, res) => {
+    try {
+      await knowledgeService.deleteKnowledgeDocument(req.params.documentId);
+      res.json({ message: "Document deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete document" });
     }
   });
 
