@@ -360,10 +360,10 @@ export default function RegulationWiki() {
               >
                 <Menu size={18} />
               </Button>
-              <Link href={`/condominiums/${id}`}>
+              <Link href={`/condominiums/${id}?tab=regulations`}>
                 <Button variant="ghost" size="sm">
                   <Home className="mr-2" size={16} />
-                  ホーム
+                  戻る
                 </Button>
               </Link>
               <Separator orientation="vertical" className="h-6" />

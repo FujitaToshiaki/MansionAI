@@ -1,5 +1,6 @@
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,17 @@ import { MinutesTab } from "@/components/MinutesTab";
 export default function CondominiumDetail() {
   console.log("CondominiumDetail component is rendering");
   const { id } = useParams();
+  const [location] = useLocation();
+  const [activeTab, setActiveTab] = useState("basic");
+  
+  // Parse URL parameters for tab management
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.split('?')[1] || '');
+    const tabParam = searchParams.get('tab');
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [location]);
   
   const { data: condominium, isLoading } = useQuery<any>({
     queryKey: ['/api/condominiums', id],
@@ -195,7 +207,7 @@ export default function CondominiumDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="basic" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="basic">基本情報</TabsTrigger>
           <TabsTrigger value="regulations">管理規約</TabsTrigger>
@@ -271,7 +283,11 @@ export default function CondominiumDetail() {
                     </thead>
                     <tbody>
                       {decisions.map((decision: any) => (
-                        <tr key={decision.id} className="border-b hover:bg-gray-50">
+                        <tr 
+                          key={decision.id} 
+                          className="border-b hover:bg-gray-50 cursor-pointer"
+                          onClick={() => window.location.href = `/condominiums/${id}/decisions/${decision.id}?from=decisions`}
+                        >
                           <td className="p-3 text-sm text-gray-900 align-top">
                             <div className="whitespace-nowrap">{decision.meetingDate}</div>
                           </td>

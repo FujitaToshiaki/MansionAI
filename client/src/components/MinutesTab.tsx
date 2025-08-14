@@ -31,7 +31,7 @@ export function MinutesTab({ condominiumId }: MinutesTabProps) {
   });
 
   const handleMinuteClick = (minuteId: string) => {
-    setLocation(`/condominiums/${condominiumId}/minutes/${minuteId}`);
+    setLocation(`/condominiums/${condominiumId}/minutes/${minuteId}?from=minutes`);
   };
 
   if (isLoading) {
