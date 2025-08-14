@@ -175,10 +175,10 @@ export default function CondominiumDetail() {
       <Tabs defaultValue="basic" className="space-y-4">
         <TabsList>
           <TabsTrigger value="basic">基本情報</TabsTrigger>
-          <TabsTrigger value="minutes">議事録管理</TabsTrigger>
-          <TabsTrigger value="regulations">規約管理</TabsTrigger>
+          <TabsTrigger value="regulations">管理規約</TabsTrigger>
           <TabsTrigger value="decisions">決議履歴</TabsTrigger>
-          <TabsTrigger value="files">ファイル管理</TabsTrigger>
+          <TabsTrigger value="minutes">議事録</TabsTrigger>
+          <TabsTrigger value="files">その他ファイル</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic">
