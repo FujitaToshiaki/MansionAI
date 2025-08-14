@@ -314,59 +314,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const condominiumId = req.params.id;
       
-      // Sample meeting minutes data based on uploaded files
-      const sampleMinutes = [
-        {
-          id: 'minute-1',
-          title: '第40期通常総会議事録',
-          date: '2024年10月26日',
-          meetingType: '通常総会',
+      const knowledgeService = new KnowledgeService();
+      
+      // Get meeting minutes documents from knowledge base
+      const knowledgeDocuments = await knowledgeService.getKnowledgeDocuments(condominiumId);
+      const minutesDocs = knowledgeDocuments.filter((doc: any) => 
+        doc.type === 'meeting_minutes' || doc.title.includes('議事録')
+      );
+      
+      let allMinutes = [];
+      
+      // Extract minutes from each document
+      for (const doc of minutesDocs) {
+        const extractedMinutes = await knowledgeService.extractMeetingMinutes(doc.content);
+        const enhancedMinutes = extractedMinutes.map((minute, index) => ({
+          ...minute,
+          id: `${doc.id}-minute-${index + 1}`,
           status: 'completed',
           attendees: 45,
           totalUnits: 68,
           attendanceRate: 66.2,
-          summary: '第40期通常総会が開催され、管理規約変更等の重要議題が審議されました。',
-          createdAt: '2024-10-26T10:00:00Z'
-        },
-        {
-          id: 'minute-2', 
-          title: '第40期第2回臨時総会議事録',
-          date: '2024年8月15日',
-          meetingType: '臨時総会',
-          status: 'completed',
-          attendees: 38,
-          totalUnits: 68,
-          attendanceRate: 55.9,
-          summary: '銀行名称変更に伴う管理規約の修正が承認されました。',
-          createdAt: '2024-08-15T10:00:00Z'
-        },
-        {
-          id: 'minute-3',
-          title: '第39期通常総会議事録', 
-          date: '2023年10月28日',
-          meetingType: '通常総会',
-          status: 'completed',
-          attendees: 41,
-          totalUnits: 68,
-          attendanceRate: 60.3,
-          summary: '103号室の賃貸使用に関する管理規約変更が承認されました。',
-          createdAt: '2023-10-28T10:00:00Z'
-        },
-        {
-          id: 'minute-4',
-          title: '第39期臨時総会議事録',
-          date: '2023年5月20日', 
-          meetingType: '臨時総会',
-          status: 'completed',
-          attendees: 32,
-          totalUnits: 68,
-          attendanceRate: 47.1,
-          summary: '総会開催月の変更に関する管理規約改訂が承認されました。',
-          createdAt: '2023-05-20T10:00:00Z'
-        }
-      ];
+          summary: minute.content.slice(0, 100) + '...',
+          sourceDocument: doc.title,
+          createdAt: doc.uploadedAt
+        }));
+        allMinutes.push(...enhancedMinutes);
+      }
 
-      res.json(sampleMinutes);
+      console.log(`Returning ${allMinutes.length} meeting minutes from RAG system`);
+      res.json(allMinutes);
     } catch (error) {
       console.error('Error getting meeting minutes:', error);
       res.status(500).json({ error: 'Failed to get meeting minutes' });

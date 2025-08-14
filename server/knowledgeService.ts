@@ -135,6 +135,83 @@ export class KnowledgeService {
     return decisions;
   }
 
+  // Extract meeting minutes from uploaded meeting minutes documents
+  async extractMeetingMinutes(content: string): Promise<any[]> {
+    if (!content || content.trim() === '') {
+      return [];
+    }
+
+    const minutes = [];
+    const lines = content.split('\n');
+    let currentMinute: any = null;
+    let sectionContent = '';
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Detect meeting headers containing 第...期...総会 or 第...回...理事会
+      if (trimmedLine.includes('第') && 
+          ((trimmedLine.includes('期') && trimmedLine.includes('総会')) ||
+           (trimmedLine.includes('回') && trimmedLine.includes('理事会')))) {
+        
+        // Save previous minute if exists
+        if (currentMinute) {
+          currentMinute.content = sectionContent.trim();
+          minutes.push(currentMinute);
+        }
+        
+        // Start new minute
+        currentMinute = {
+          id: `minute-${minutes.length + 1}`,
+          title: trimmedLine,
+          content: '',
+          date: this.extractDateFromContent(trimmedLine, lines),
+          meetingType: this.extractMeetingType(trimmedLine),
+          rawContent: trimmedLine
+        };
+        sectionContent = '';
+      } else if (currentMinute) {
+        sectionContent += line + '\n';
+      }
+    }
+    
+    // Add last minute
+    if (currentMinute) {
+      currentMinute.content = sectionContent.trim();
+      minutes.push(currentMinute);
+    }
+    
+    console.log(`Extracted ${minutes.length} meeting minutes from content`);
+    return minutes;
+  }
+
+  private extractDateFromContent(title: string, allLines: string[]): string {
+    // Try to extract date from surrounding lines or title
+    const dateRegex = /(\d{4})年(\d{1,2})月(\d{1,2})日/;
+    const match = title.match(dateRegex);
+    if (match) {
+      return `${match[1]}年${match[2]}月${match[3]}日`;
+    }
+    
+    // Look in surrounding lines for date
+    for (const line of allLines.slice(0, 5)) {
+      const lineMatch = line.match(dateRegex);
+      if (lineMatch) {
+        return `${lineMatch[1]}年${lineMatch[2]}月${lineMatch[3]}日`;
+      }
+    }
+    
+    return '日付未記載';
+  }
+
+  private extractMeetingType(title: string): string {
+    if (title.includes('通常総会')) return '通常総会';
+    if (title.includes('臨時総会')) return '臨時総会';
+    if (title.includes('理事会')) return '理事会';
+    if (title.includes('総会')) return '総会';
+    return 'その他会議';
+  }
+
   // Get all knowledge documents for a condominium with chunk count
   async getKnowledgeDocuments(condominiumId: string): Promise<any[]> {
     const documents = await db
