@@ -59,7 +59,7 @@ export default function Sidebar() {
       <div className="p-4">
         <div className="bg-white bg-opacity-10 p-4 rounded-lg text-center">
           <p className="text-sm mb-3">プレミアムプランで<br />全機能をご利用ください</p>
-          <button className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full">
+          <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full">
             アップグレード
           </button>
         </div>
