@@ -58,9 +58,10 @@ export default function CondominiumDetail() {
         <span>{condominium.name}</span>
       </nav>
 
-      {/* Header */}
+      {/* Header - Horizontal Layout */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-        <div className="flex items-start justify-between">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left: Property Info */}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{condominium.name}</h1>
             <p className="text-gray-600 mt-1">{condominium.address}</p>
@@ -68,29 +69,16 @@ export default function CondominiumDetail() {
               築{new Date().getFullYear() - condominium.buildYear}年 / {condominium.units}戸 / 
               管理開始：{new Date(condominium.managementStartDate).toLocaleDateString('ja-JP')}
             </p>
-          </div>
-          <img 
-            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&w=120&h=80&fit=crop" 
-            alt={condominium.name} 
-            className="w-32 h-20 rounded-lg object-cover"
-          />
-        </div>
-
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center">
+            
+            {/* Info Cards - Compact */}
+            <div className="space-y-3 mt-4">
+              <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-sm font-medium text-gray-600">管理組合理事長</p>
                 <p className="text-lg font-semibold text-gray-900">田中 一郎様</p>
                 <p className="text-sm text-gray-500">連絡先: xxx-xxx-xxxx</p>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center">
+              <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-sm font-medium text-gray-600">法改正対応状況</p>
                 <div className="mt-2">
                   <Badge variant={
@@ -104,54 +92,57 @@ export default function CondominiumDetail() {
                 </div>
                 <p className="text-sm text-gray-500 mt-1">期限: 2025年3月</p>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center">
+              <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-sm font-medium text-gray-600">最近の活動</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {condominium.lastActivity ? new Date(condominium.lastActivity).toLocaleDateString('ja-JP') : '未記録'}
-                </p>
+                <p className="text-lg font-semibold text-gray-900">2025/8/14</p>
                 <p className="text-sm text-gray-500">議事録更新</p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
 
-        {/* Action Menu */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
-          <Link href={`/condominiums/${id}/upload`}>
-            <Button className="w-full" variant="outline">
-              <Upload className="mr-2" size={16} />
-              議事録アップロード
-            </Button>
-          </Link>
-          <Link href={`/condominiums/${id}/analysis`}>
-            <Button className="w-full" variant="outline">
-              <Bot className="mr-2" size={16} />
-              規約改訂開始
-            </Button>
-          </Link>
-          <Link href={`/condominiums/${id}/decisions`}>
+          {/* Center: Building Image */}
+          <div className="flex items-center justify-center">
+            <img 
+              src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&w=300&h=200&fit=crop" 
+              alt={condominium.name} 
+              className="w-full max-w-xs h-48 rounded-lg object-cover shadow-sm"
+            />
+          </div>
+
+          {/* Right: Action Buttons */}
+          <div className="space-y-3">
+            <Link href={`/condominiums/${id}/upload`}>
+              <Button className="w-full" variant="outline">
+                <Upload className="mr-2" size={16} />
+                議事録アップロード
+              </Button>
+            </Link>
+            <Link href={`/condominiums/${id}/decisions`}>
+              <Button className="w-full" variant="outline">
+                <FileText className="mr-2" size={16} />
+                規約改訂開始
+              </Button>
+            </Link>
+            <Link href={`/condominiums/${id}/decisions`}>
+              <Button className="w-full" variant="outline">
+                <FileText className="mr-2" size={16} />
+                決議履歴表示
+              </Button>
+            </Link>
             <Button className="w-full" variant="outline">
               <FileText className="mr-2" size={16} />
-              決議履歴表示
+              現行規約表示
             </Button>
-          </Link>
-          <Button className="w-full" variant="outline">
-            <FileText className="mr-2" size={16} />
-            現行規約表示
-          </Button>
-          <Button className="w-full" variant="outline">
-            <FileText className="mr-2" size={16} />
-            レポート出力
-          </Button>
-          <Button className="w-full" variant="outline">
-            <FileText className="mr-2" size={16} />
-            理事会資料作成
-          </Button>
+            <Button className="w-full" variant="outline">
+              <FileText className="mr-2" size={16} />
+              レポート出力
+            </Button>
+            <Button className="w-full" variant="outline">
+              <FileText className="mr-2" size={16} />
+              理事会資料作成
+            </Button>
+          </div>
         </div>
       </div>
 
