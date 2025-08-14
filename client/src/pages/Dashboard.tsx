@@ -19,15 +19,15 @@ import {
 import { Link } from "wouter";
 
 export default function Dashboard() {
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<any>({
     queryKey: ['/api/dashboard/stats'],
   });
 
-  const { data: activities } = useQuery({
+  const { data: activities } = useQuery<any[]>({
     queryKey: ['/api/dashboard/activities'],
   });
 
-  const { data: condominiums } = useQuery({
+  const { data: condominiums } = useQuery<any[]>({
     queryKey: ['/api/condominiums'],
   });
 
