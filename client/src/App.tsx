@@ -13,6 +13,7 @@ import DecisionExtraction from "@/pages/DecisionExtraction";
 import RegulationAnalysis from "@/pages/RegulationAnalysis";
 import AIRevisionGeneration from "@/pages/AIRevisionGeneration";
 import KnowledgeBaseStandalone from "@/pages/KnowledgeBaseStandalone";
+import RegulationWiki from "@/pages/RegulationWiki";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
         <Route path="/condominiums/:id/analysis" component={RegulationAnalysis} />
         <Route path="/condominiums/:id/ai-revision" component={AIRevisionGeneration} />
         <Route path="/condominiums/:id/knowledge" component={KnowledgeBaseStandalone} />
+        <Route path="/condominiums/:id/regulations/wiki" component={RegulationWiki} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

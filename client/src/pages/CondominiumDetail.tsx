@@ -17,7 +17,8 @@ import {
   AlertTriangle,
   FileOutput,
   Search,
-  BarChart3
+  BarChart3,
+  BookOpen
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -341,12 +342,22 @@ export default function CondominiumDetail() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>規約管理</CardTitle>
-                <Link href={`/condominiums/${id}/knowledge`}>
-                  <Button variant="outline" size="sm">
-                    <Search className="mr-2" size={16} />
-                    ナレッジベース
-                  </Button>
-                </Link>
+                <div className="flex items-center space-x-2">
+                  {knowledgeDocuments && knowledgeDocuments.length > 0 && (
+                    <Link href={`/condominiums/${id}/regulations/wiki`}>
+                      <Button size="sm">
+                        <BookOpen className="mr-2" size={16} />
+                        Wiki形式で表示
+                      </Button>
+                    </Link>
+                  )}
+                  <Link href={`/condominiums/${id}/knowledge`}>
+                    <Button variant="outline" size="sm">
+                      <Search className="mr-2" size={16} />
+                      ナレッジベース
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -391,7 +402,13 @@ export default function CondominiumDetail() {
                       )}
                     </div>
                   ))}
-                  <div className="border-t pt-4">
+                  <div className="border-t pt-4 space-y-2">
+                    <Link href={`/condominiums/${id}/regulations/wiki`}>
+                      <Button className="w-full">
+                        <BookOpen className="mr-2" size={16} />
+                        Wiki形式で規約を参照
+                      </Button>
+                    </Link>
                     <Link href={`/condominiums/${id}/knowledge`}>
                       <Button variant="outline" className="w-full">
                         <Search className="mr-2" size={16} />
