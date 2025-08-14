@@ -113,29 +113,20 @@ export default function RegulationWiki() {
     const lines = content.split('\n');
     const chapters: Chapter[] = [];
     let currentChapter: Chapter | null = null;
-    let currentArticle: Article | null = null;
-    let articleContent: string[] = [];
 
-    console.log('Starting to parse', lines.length, 'lines');
+    console.log('Starting to parse regulation content with new structure');
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
       
-      // Match chapter: **第X章** or any variant
-      const chapterMatch = trimmedLine.match(/\*\*第(\d+)章\s*(.+?)\*\*/) || 
-                          trimmedLine.match(/^第(\d+)章\s*(.+?)$/) ||
-                          trimmedLine.match(/第(\d+)章\s*(.+)/);
+      // Match chapter pattern: #### 第X章 タイトル
+      const chapterMatch = trimmedLine.match(/^####\s*第(\d+)章\s*(.+)$/) ||
+                          trimmedLine.match(/\*\*第(\d+)章\s*(.+?)\*\*/) ||
+                          trimmedLine.match(/^第(\d+)章\s*(.+)$/);
       
       if (chapterMatch) {
         console.log('Found chapter:', chapterMatch[0]);
         
-        // Save previous article if exists
-        if (currentArticle) {
-          currentArticle.content = articleContent.join('\n').trim();
-          console.log(`Saved article ${currentArticle.number} with ${currentArticle.content.length} chars`);
-        }
-        
-        // Fix duplicate chapter IDs issue
         const chapterId = `chapter-${chapterMatch[1]}-${chapters.length}`;
         currentChapter = {
           id: chapterId,
@@ -145,98 +136,65 @@ export default function RegulationWiki() {
           expanded: false
         };
         chapters.push(currentChapter);
-        currentArticle = null;
-        articleContent = [];
         return;
       }
 
-      // Match article: **第X条** or any variant
-      const articleMatch = trimmedLine.match(/\*\*第(\d+)条[^*]*\*\*/) ||
-                          trimmedLine.match(/^第(\d+)条/) ||
-                          trimmedLine.match(/第(\d+)条/);
+      // Match article pattern: **（タイトル）**
+      const articleMatch = trimmedLine.match(/^\*\*（(.+?)）\*\*$/);
       
-      if (articleMatch) {
-        console.log('Found article:', articleMatch[0]);
+      if (articleMatch && currentChapter) {
+        console.log('Found article title:', articleMatch[1]);
         
-        // Save previous article if exists
-        if (currentArticle) {
-          currentArticle.content = articleContent.join('\n').trim();
-          console.log(`Saved article ${currentArticle.number} with ${currentArticle.content.length} chars`);
-        }
-
-        // Get article title - look for title in current line or next few lines
-        let articleTitle = '';
+        // Extract content for this article by looking ahead until next article or chapter
+        const articleContent = extractArticleContent(lines, index + 1);
         
-        // Try to extract title from same line
-        const fullLine = trimmedLine.replace(/\*\*/g, '');
-        const titleInLine = fullLine.match(/第\d+条\s*（(.+?)）/) || fullLine.match(/第\d+条\s*\((.+?)\)/);
-        if (titleInLine) {
-          articleTitle = titleInLine[1].trim();
-        } else {
-          // Check next 3 lines for title pattern
-          for (let i = 1; i <= 3 && (index + i) < lines.length; i++) {
-            const nextLine = lines[index + i].trim();
-            if (!nextLine) continue;
-            
-            const titleMatch = nextLine.match(/\*\*（(.+?)）\*\*/) || 
-                             nextLine.match(/^（(.+?)）$/) ||
-                             nextLine.match(/^\((.+?)\)$/);
-            if (titleMatch) {
-              articleTitle = titleMatch[1].trim();
-              break;
-            }
-          }
-        }
-
-        // Fix duplicate article IDs issue
-        const articleId = `article-${articleMatch[1]}-${Date.now()}-${Math.random()}`;
-        currentArticle = {
+        const articleId = `article-${currentChapter.articles.length}-${Date.now()}-${Math.random()}`;
+        const article: Article = {
           id: articleId,
-          number: parseInt(articleMatch[1]),
-          title: articleTitle,
-          content: ''
+          number: currentChapter.articles.length + 1, // Sequential numbering within chapter
+          title: articleMatch[1].trim(),
+          content: articleContent
         };
         
-        if (currentChapter) {
-          currentChapter.articles.push(currentArticle);
-        } else {
-          // Create a default chapter if no chapter found
-          currentChapter = {
-            id: 'chapter-default',
-            number: 1,
-            title: '規約条文',
-            articles: [currentArticle],
-            expanded: false
-          };
-          chapters.push(currentChapter);
-        }
-        
-        articleContent = [];
-        // Add the article header line to content
-        articleContent.push(line);
+        currentChapter.articles.push(article);
+        console.log(`Added article "${article.title}" with ${article.content.length} chars`);
         return;
       }
-
-      // Add content to current article (including empty lines for spacing)
-      if (currentArticle) {
-        articleContent.push(line);
-      }
     });
-
-    // Save the last article content
-    if (currentArticle) {
-      currentArticle.content = articleContent.join('\n').trim();
-      console.log(`Saved final article ${currentArticle.number} with ${currentArticle.content.length} chars`);
-    }
 
     console.log('Final parsed chapters:', chapters.map(c => ({ 
       id: c.id, 
       title: c.title, 
-      articlesCount: c.articles.length,
-      articlesWithContent: c.articles.filter(a => a.content.length > 10).length
+      articlesCount: c.articles.length
     })));
 
     return chapters;
+  };
+
+  // Helper function to extract content for an article
+  const extractArticleContent = (lines: string[], startIndex: number): string => {
+    const contentLines: string[] = [];
+    
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmedLine = line.trim();
+      
+      // Stop at next chapter
+      if (trimmedLine.match(/^####\s*第\d+章/) || 
+          trimmedLine.match(/\*\*第\d+章\s*(.+?)\*\*/) || 
+          trimmedLine.match(/^第\d+章\s*(.+)$/)) {
+        break;
+      }
+      
+      // Stop at next article title
+      if (trimmedLine.match(/^\*\*（(.+?)）\*\*$/)) {
+        break;
+      }
+      
+      contentLines.push(line);
+    }
+    
+    return contentLines.join('\n').trim();
   };
 
   const renderArticleContent = (content: string) => {
@@ -509,10 +467,7 @@ export default function RegulationWiki() {
                             <div className="flex items-center space-x-2">
                               <Hash size={10} className="text-gray-400" />
                               <div>
-                                <div className="font-medium">第{article.number}条</div>
-                                {article.title && (
-                                  <div className="text-xs text-gray-500 mt-0.5">（{article.title}）</div>
-                                )}
+                                <div className="font-medium text-sm">（{article.title}）</div>
                               </div>
                             </div>
                           </button>
@@ -586,13 +541,12 @@ export default function RegulationWiki() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                      第{selectedArticle.number}条
-                      {selectedArticle.title && ` （${selectedArticle.title}）`}
+                      （{selectedArticle.title}）
                     </h1>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <span>{condominium?.name} 管理規約</span>
                       <span>•</span>
-                      <span>条文</span>
+                      <span>規約項目</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
