@@ -126,7 +126,7 @@ export default function MinuteDetail() {
             </div>
             <div className="flex items-center space-x-2">
               <Users className="w-4 h-4 text-gray-600" />
-              <span><strong>出席者:</strong> {minute.attendees}名 / {minute.totalUnits}戸 ({minute.attendanceRate.toFixed(1)}%)</span>
+              <span><strong>出席者:</strong> {minute.attendees}名 / {minute.totalUnits}戸 ({minute.attendanceRate ? minute.attendanceRate.toFixed(1) : '0.0'}%)</span>
             </div>
             <div className="flex items-center space-x-2">
               <Clock className="w-4 h-4 text-gray-600" />
