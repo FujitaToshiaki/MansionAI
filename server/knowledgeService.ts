@@ -195,76 +195,108 @@ export class KnowledgeService {
     const lines = content.split('\n');
     console.log(`Total lines: ${lines.length}`);
     
-    // More flexible pattern matching for Japanese meeting minutes
-    const meetingPatterns = [
-      /第\d+期.*?総会/,
-      /第\d+回.*?理事会/,
-      /第\d+期.*?理事会/,
-      /総会.*?議事録/,
-      /理事会.*?議事録/,
-      /議事録/  // Fallback pattern
-    ];
-    
     let currentMinute: any = null;
     let sectionContent = '';
     let meetingCount = 0;
+    
+    // More precise approach: split by major sections first
+    const majorSections: Array<{start: number, end: number, title: string}> = [];
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const trimmedLine = line.trim();
       
-      if (!trimmedLine) continue;
-      
-      // Check if this line contains a meeting header
-      const isHeader = meetingPatterns.some(pattern => pattern.test(trimmedLine));
-      
-      if (isHeader || trimmedLine.includes('議事録')) {
-        console.log(`Found potential meeting header: "${trimmedLine}"`);
+      // Look specifically for period meeting minutes headers
+      if (trimmedLine.match(/^### 第\d+期.*?総会議事録$/)) {
+        console.log(`Found period meeting minutes header at line ${i}: "${trimmedLine}"`);
+        majorSections.push({
+          start: i,
+          end: lines.length, // Will be updated when next section is found
+          title: trimmedLine
+        });
         
-        // Save previous minute if exists
-        if (currentMinute) {
-          currentMinute.content = sectionContent.trim();
-          minutes.push(currentMinute);
-          console.log(`Saved meeting: ${currentMinute.title}`);
+        // Update previous section's end
+        if (majorSections.length > 1) {
+          majorSections[majorSections.length - 2].end = i - 1;
         }
-        
-        // Start new minute
-        meetingCount++;
-        currentMinute = {
-          id: `minute-${meetingCount}`,
-          title: trimmedLine,
-          content: '',
-          date: this.extractDateFromContent(trimmedLine, lines.slice(Math.max(0, i-5), i+10)),
-          meetingType: this.extractMeetingType(trimmedLine),
-          rawContent: trimmedLine
-        };
-        sectionContent = '';
-        
-        console.log(`Started new meeting: ${currentMinute.title} (${currentMinute.meetingType})`);
-      } else if (currentMinute) {
-        sectionContent += line + '\n';
-      } else if (trimmedLine.length > 10) {
-        // If no header found yet but we have substantial content, create a general minute
-        if (!currentMinute) {
-          console.log('Creating fallback meeting minute from content');
-          currentMinute = {
-            id: 'minute-general',
-            title: '議事録データ',
-            content: '',
-            date: this.extractDateFromContent('', lines.slice(0, 20)),
-            meetingType: '総会',
-            rawContent: '議事録データ'
-          };
-        }
-        sectionContent += line + '\n';
       }
     }
     
-    // Add last minute
-    if (currentMinute) {
-      currentMinute.content = sectionContent.trim();
-      minutes.push(currentMinute);
-      console.log(`Saved final meeting: ${currentMinute.title}`);
+    console.log(`Found ${majorSections.length} major sections`);
+    
+    // Process each major section
+    for (let sectionIndex = 0; sectionIndex < majorSections.length; sectionIndex++) {
+      const section = majorSections[sectionIndex];
+      console.log(`Processing section: "${section.title}" (lines ${section.start}-${section.end})`);
+      
+      const sectionLines = lines.slice(section.start, section.end + 1);
+      const sectionContent = sectionLines.join('\n');
+      
+      meetingCount++;
+      const minute = {
+        id: `minute-${meetingCount}`,
+        title: section.title,
+        content: sectionContent,
+        date: this.extractDateFromContent(section.title, sectionLines.slice(0, 20)),
+        meetingType: this.extractMeetingType(section.title),
+        rawContent: section.title
+      };
+      
+      minutes.push(minute);
+      console.log(`Added meeting minute: "${minute.title}"`);
+    }
+    
+    // If no major sections found, fall back to original logic for smaller documents
+    if (majorSections.length === 0) {
+      console.log('No major sections found, using fallback extraction');
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmedLine = line.trim();
+        
+        if (!trimmedLine) continue;
+        
+        // Look for any meeting headers as fallback
+        const isHeader = trimmedLine.includes('総会') && (
+          trimmedLine.includes('議事録') || 
+          trimmedLine.includes('第') || 
+          trimmedLine.match(/^\d+年/)
+        );
+        
+        if (isHeader) {
+          console.log(`Found fallback meeting header: "${trimmedLine}"`);
+          
+          // Save previous minute if exists
+          if (currentMinute) {
+            currentMinute.content = sectionContent.trim();
+            minutes.push(currentMinute);
+            console.log(`Saved meeting: ${currentMinute.title}`);
+          }
+          
+          // Start new minute
+          meetingCount++;
+          currentMinute = {
+            id: `minute-${meetingCount}`,
+            title: trimmedLine,
+            content: '',
+            date: this.extractDateFromContent(trimmedLine, lines.slice(Math.max(0, i-5), i+10)),
+            meetingType: this.extractMeetingType(trimmedLine),
+            rawContent: trimmedLine
+          };
+          sectionContent = '';
+          
+          console.log(`Started new meeting: ${currentMinute.title} (${currentMinute.meetingType})`);
+        } else if (currentMinute) {
+          sectionContent += line + '\n';
+        }
+      }
+      
+      // Add last minute
+      if (currentMinute) {
+        currentMinute.content = sectionContent.trim();
+        minutes.push(currentMinute);
+        console.log(`Saved final meeting: ${currentMinute.title}`);
+      }
     }
     
     console.log(`Final result: Extracted ${minutes.length} meeting minutes from content`);
