@@ -140,9 +140,17 @@ export default function CondominiumDetail() {
             <CardContent className="p-4">
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-600">次回会議・総会</p>
-                <p className="text-sm text-gray-500 mt-1">前回: 2025年3月</p>
-                <p className="text-lg font-semibold text-gray-900">次回: 2025年8月</p>
-                <p className="text-sm text-gray-500">議事録更新</p>
+                <div className="flex justify-between mt-2">
+                  <div>
+                    <p className="text-xs text-gray-500">前回</p>
+                    <p className="text-sm font-semibold text-gray-900">2025年3月</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">次回</p>
+                    <p className="text-sm font-semibold text-gray-900">2025年8月</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">議事録更新</p>
               </div>
             </CardContent>
           </Card>
