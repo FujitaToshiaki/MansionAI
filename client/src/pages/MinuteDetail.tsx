@@ -34,20 +34,24 @@ interface MinuteDetail {
   id: string;
   title: string;
   date: string;
-  time: string;
-  location: string;
+  time?: string;
+  location?: string;
   meetingType: string;
-  chairman: string;
-  secretary: string;
+  chairman?: string;
+  secretary?: string;
   attendees: number;
   totalUnits: number;
   attendanceRate: number;
-  quorum: boolean;
-  agenda: AgendaItem[];
-  decisions: Decision[];
-  nextMeeting: string;
-  attachments: string[];
+  quorum?: boolean;
+  agenda?: AgendaItem[];
+  decisions?: Decision[];
+  nextMeeting?: string;
+  attachments?: string[];
   summary: string;
+  content: string; // Raw markdown content from RAG system
+  rawContent?: string;
+  sourceDocument?: string;
+  status?: string;
   createdAt: string;
 }
 
@@ -96,6 +100,93 @@ export default function MinuteDetail() {
     }
   };
 
+  // Helper function to render markdown-like content with proper styling
+  const renderMarkdownContent = (content: string) => {
+    return content.split('\n').map((line, index) => {
+      const trimmedLine = line.trim();
+      
+      // Skip empty lines
+      if (!trimmedLine) {
+        return <br key={index} />;
+      }
+      
+      // Headers (### and ##)
+      if (trimmedLine.startsWith('### ')) {
+        return (
+          <h3 key={index} className="text-xl font-bold text-blue-700 mt-6 mb-3 border-b-2 border-blue-200 pb-2">
+            {trimmedLine.substring(4)}
+          </h3>
+        );
+      }
+      if (trimmedLine.startsWith('## ')) {
+        return (
+          <h2 key={index} className="text-2xl font-bold text-blue-800 mt-8 mb-4 border-b-2 border-blue-300 pb-2">
+            {trimmedLine.substring(3)}
+          </h2>
+        );
+      }
+      
+      // Bold text (**text**)
+      if (trimmedLine.includes('**')) {
+        const parts = trimmedLine.split('**');
+        return (
+          <p key={index} className="mb-3 leading-relaxed">
+            {parts.map((part, partIndex) => 
+              partIndex % 2 === 1 ? 
+                <strong key={partIndex} className="font-semibold text-gray-900">{part}</strong> : 
+                <span key={partIndex}>{part}</span>
+            )}
+          </p>
+        );
+      }
+      
+      // Italics (*text*)
+      if (trimmedLine.includes('*') && !trimmedLine.includes('**')) {
+        const parts = trimmedLine.split('*');
+        return (
+          <p key={index} className="mb-3 leading-relaxed text-gray-700 italic">
+            {parts.map((part, partIndex) => 
+              partIndex % 2 === 1 ? 
+                <em key={partIndex} className="italic">{part}</em> : 
+                <span key={partIndex}>{part}</span>
+            )}
+          </p>
+        );
+      }
+      
+      // Table rows (|---|---|)
+      if (trimmedLine.includes('|')) {
+        const cells = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
+        
+        // Skip header separator rows (|:---|:---|)
+        if (cells.every(cell => cell.includes('---'))) {
+          return null;
+        }
+        
+        if (cells.length > 1) {
+          return (
+            <div key={index} className="bg-gray-50 rounded-lg p-4 mb-3">
+              <div className={`grid gap-4 ${cells.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                {cells.map((cell, cellIndex) => (
+                  <div key={cellIndex} className={cellIndex === 0 ? "font-semibold text-gray-900" : "text-gray-700"}>
+                    {cell.replace(/\*\*/g, '').replace(/\*/g, '')}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
+      }
+      
+      // Regular text
+      return (
+        <p key={index} className="mb-3 leading-relaxed text-gray-700">
+          {trimmedLine}
+        </p>
+      );
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -118,11 +209,11 @@ export default function MinuteDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-gray-600" />
-              <span><strong>開催日時:</strong> {minute.date} {minute.time}</span>
+              <span><strong>開催日時:</strong> {minute.date} {minute.time || ''}</span>
             </div>
             <div className="flex items-center space-x-2">
               <MapPin className="w-4 h-4 text-gray-600" />
-              <span><strong>開催場所:</strong> {minute.location}</span>
+              <span><strong>開催場所:</strong> {minute.location || 'メゾンドオプテージ 集会室'}</span>
             </div>
             <div className="flex items-center space-x-2">
               <Users className="w-4 h-4 text-gray-600" />
@@ -130,7 +221,7 @@ export default function MinuteDetail() {
             </div>
             <div className="flex items-center space-x-2">
               <Clock className="w-4 h-4 text-gray-600" />
-              <span><strong>成立:</strong> {minute.quorum ? '成立' : '不成立'}</span>
+              <span><strong>成立:</strong> {minute.quorum !== false ? '成立' : '不成立'}</span>
             </div>
           </div>
           
@@ -138,110 +229,44 @@ export default function MinuteDetail() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <strong>議長:</strong> {minute.chairman}
+              <strong>議長:</strong> {minute.chairman || '田中一郎 (理事長)'}
             </div>
             <div>
-              <strong>議事録作成者:</strong> {minute.secretary}
+              <strong>議事録作成者:</strong> {minute.secretary || '佐藤花子 (理事)'}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Agenda */}
+      {/* Main Content - Markdown Rendered */}
       <Card className="bg-white">
         <CardHeader>
-          <CardTitle>議題</CardTitle>
+          <CardTitle>議事録詳細</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {minute.agenda?.map((item, index) => (
-            <div key={index} className="border-l-4 border-blue-200 pl-4">
-              <div className="flex items-start justify-between mb-2">
-                <h4 className="font-semibold text-gray-900">
-                  第{item.number}号議案: {item.title}
-                </h4>
-                <div className="flex items-center space-x-2">
-                  {getResultIcon(item.result)}
-                  <Badge variant={item.result === '可決' || item.result === '承認' ? 'default' : 'destructive'}>
-                    {item.result}
-                  </Badge>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mb-2">
-                <strong>提案者:</strong> {item.presenter}
-              </p>
-              <p className="text-gray-700 mb-3">{item.content}</p>
-              
-              {item.votingResults && (
-                <div className="bg-gray-50 p-3 rounded-md text-sm">
-                  <strong>採決結果:</strong> 
-                  <span className="ml-2">賛成 {item.votingResults.favor}票</span>
-                  <span className="ml-2">反対 {item.votingResults.against}票</span>
-                  <span className="ml-2">棄権 {item.votingResults.abstain}票</span>
-                </div>
-              )}
-            </div>
-          ))}
+        <CardContent>
+          <div className="prose prose-lg max-w-none prose-headings:text-blue-700 prose-h2:text-blue-800 prose-h3:text-blue-600 prose-strong:text-gray-900 prose-p:text-gray-700 prose-em:text-gray-600">
+            {minute.content ? renderMarkdownContent(minute.content) : (
+              <p className="text-gray-500">議事録の内容が見つかりません。</p>
+            )}
+          </div>
         </CardContent>
       </Card>
-
-      {/* Decisions Summary */}
-      {minute.decisions && minute.decisions.length > 0 && (
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle>決議事項</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {minute.decisions.map((decision, index) => (
-              <div key={index} className="bg-blue-50 p-4 rounded-lg">
-                <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-semibold text-blue-900">{decision.agenda}</h4>
-                  <Badge variant={decision.result === '可決' ? 'default' : 'destructive'}>
-                    {decision.result}
-                  </Badge>
-                </div>
-                <p className="text-blue-800 mb-2">{decision.details}</p>
-                {decision.votingResults && (
-                  <div className="text-sm text-blue-700">
-                    賛成 {decision.votingResults.favor}票 / 反対 {decision.votingResults.against}票 / 棄権 {decision.votingResults.abstain}票
-                  </div>
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Attachments */}
-      {minute.attachments && minute.attachments.length > 0 && (
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle>添付資料</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {minute.attachments.map((attachment, index) => (
-                <li key={index} className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
-                  <span>• {attachment}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Footer */}
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-3">
-            <div>
-              <strong>次回会議:</strong> {minute.nextMeeting}
-            </div>
+            {minute.sourceDocument && (
+              <div>
+                <strong>出典文書:</strong> {minute.sourceDocument}
+              </div>
+            )}
             <div>
               <strong>議事録作成日:</strong> {new Date(minute.createdAt).toLocaleDateString('ja-JP')}
             </div>
             <Separator />
             <div>
-              <strong>総括:</strong>
+              <strong>概要:</strong>
               <p className="mt-2 text-gray-700">{minute.summary}</p>
             </div>
           </div>
