@@ -84,37 +84,37 @@ export default function CondominiumDetail() {
           {/* Right-aligned Button Group */}
           <div className="flex items-center space-x-3">
             <Link href={`/condominiums/${id}/upload`}>
-              <Button variant="outline" size="sm" className="bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300 text-gray-700 hover:text-orange-700">
+              <Button variant="outline" size="sm" className="bg-gray-100 hover:bg-orange-100 border-gray-300 hover:border-orange-400 text-gray-700 hover:text-orange-800">
                 <Upload className="w-4 h-4 mr-2" />
                 議事録アップロード
               </Button>
             </Link>
             <Link href={`/condominiums/${id}/analysis`}>
-              <Button variant="outline" size="sm" className="bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300 text-gray-700 hover:text-orange-700">
+              <Button variant="outline" size="sm" className="bg-gray-100 hover:bg-orange-100 border-gray-300 hover:border-orange-400 text-gray-700 hover:text-orange-800">
                 <FileText className="w-4 h-4 mr-2" />
                 規約改訂履歴
               </Button>
             </Link>
             <Link href={`/condominiums/${id}/report`}>
-              <Button variant="outline" size="sm" className="bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300 text-gray-700 hover:text-orange-700">
+              <Button variant="outline" size="sm" className="bg-gray-100 hover:bg-orange-100 border-gray-300 hover:border-orange-400 text-gray-700 hover:text-orange-800">
                 <FileOutput className="w-4 h-4 mr-2" />
                 レポート出力
               </Button>
             </Link>
             <Link href={`/condominiums/${id}/decisions`}>
-              <Button variant="outline" size="sm" className="bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300 text-gray-700 hover:text-orange-700">
+              <Button variant="outline" size="sm" className="bg-gray-100 hover:bg-orange-100 border-gray-300 hover:border-orange-400 text-gray-700 hover:text-orange-800">
                 <Search className="w-4 h-4 mr-2" />
                 決議議題表示
               </Button>
             </Link>
             <Link href={`/condominiums/${id}/evaluation`}>
-              <Button variant="outline" size="sm" className="bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300 text-gray-700 hover:text-orange-700">
+              <Button variant="outline" size="sm" className="bg-gray-100 hover:bg-orange-100 border-gray-300 hover:border-orange-400 text-gray-700 hover:text-orange-800">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 議事録解析評価
               </Button>
             </Link>
             <Link href={`/condominiums/${id}/issues`}>
-              <Button variant="outline" size="sm" className="bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300 text-gray-700 hover:text-orange-700">
+              <Button variant="outline" size="sm" className="bg-gray-100 hover:bg-orange-100 border-gray-300 hover:border-orange-400 text-gray-700 hover:text-orange-800">
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 課題要解決案件
               </Button>
