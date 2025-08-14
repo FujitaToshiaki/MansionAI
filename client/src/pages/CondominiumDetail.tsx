@@ -140,12 +140,12 @@ export default function CondominiumDetail() {
             <CardContent className="p-4">
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-600">次回会議・総会</p>
-                <div className="flex justify-between mt-2">
-                  <div>
+                <div className="flex justify-center items-center gap-6 mt-2">
+                  <div className="text-center">
                     <p className="text-xs text-gray-500">前回</p>
                     <p className="text-sm font-semibold text-gray-900">2025年3月</p>
                   </div>
-                  <div>
+                  <div className="text-center">
                     <p className="text-xs text-gray-500">次回</p>
                     <p className="text-sm font-semibold text-gray-900">2025年8月</p>
                   </div>
