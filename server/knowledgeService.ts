@@ -48,7 +48,6 @@ export class KnowledgeService {
       const chunkContent = content.slice(i, i + chunkSize);
       
       chunks.push({
-        id: uuidv4(),
         documentId: document.id,
         chunkIndex: Math.floor(i / (chunkSize - overlap)),
         content: chunkContent,
@@ -68,69 +67,72 @@ export class KnowledgeService {
 
   // Extract meeting decisions from decision history documents
   async extractMeetingDecisions(content: string): Promise<any[]> {
-    // Extract decisions from text content
+    // Parse actual uploaded decision history content
+    if (!content || content.trim() === '') {
+      return [];
+    }
+
     const decisions = [];
     
-    // Sample extracted decisions from the uploaded document
-    const sampleDecisions = [
-      {
-        id: 'decision-1',
-        meetingDate: '2024年3月15日',
-        meetingType: '第4回定期総会',
-        agenda: '管理費値上げについて',
-        decision: '月額管理費を15,000円から16,500円に値上げする',
-        result: 'approved',
-        votingResults: { favor: 28, against: 5, abstain: 2 },
-        relatedArticle: '第25条（管理費等）',
-        notes: '令和6年4月分から適用'
-      },
-      {
-        id: 'decision-2', 
-        meetingDate: '2024年1月20日',
-        meetingType: '臨時総会',
-        agenda: 'エレベーター改修工事について',
-        decision: 'エレベーター改修工事を実施する（予算520万円）',
-        result: 'approved',
-        votingResults: { favor: 31, against: 2, abstain: 2 },
-        relatedArticle: '第28条（修繕積立金）',
-        notes: '令和6年6月着工予定'
-      },
-      {
-        id: 'decision-3',
-        meetingDate: '2023年10月14日', 
-        meetingType: '第3回定期総会',
-        agenda: '駐車場使用料改定について',
-        decision: '駐車場使用料を月額8,000円から8,500円に改定',
-        result: 'approved',
-        votingResults: { favor: 24, against: 8, abstain: 3 },
-        relatedArticle: '第30条（使用料等）',
-        notes: '令和6年1月分から適用'
-      },
-      {
-        id: 'decision-4',
-        meetingDate: '2023年7月8日',
-        meetingType: '臨時総会', 
-        agenda: '管理規約変更について',
-        decision: '区分所有法改正に伴う管理規約第15条の変更',
-        result: 'approved',
-        votingResults: { favor: 29, against: 4, abstain: 2 },
-        relatedArticle: '第15条（専有部分の範囲）',
-        notes: '法務省告示に基づく変更'
-      },
-      {
-        id: 'decision-5',
-        meetingDate: '2023年3月18日',
-        meetingType: '第2回定期総会',
-        agenda: '大規模修繕工事について',
-        decision: '外壁・屋上防水工事を実施する（予算1,200万円）',
-        result: 'approved', 
-        votingResults: { favor: 30, against: 3, abstain: 2 },
-        relatedArticle: '第28条（修繕積立金）',
-        notes: '令和5年8月着工、12月竣工'
-      }
-    ];
+    // Parse the structured data from the uploaded file
+    const lines = content.split('\n');
+    let currentSection = '';
+    let decisionCounter = 1;
     
-    return sampleDecisions;
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine || trimmedLine.startsWith('---') || trimmedLine.startsWith('###') || trimmedLine.startsWith('####')) {
+        continue;
+      }
+      
+      // Skip table headers
+      if (trimmedLine.includes('|') && (trimmedLine.includes('回') || trimmedLine.includes('内容') || trimmedLine.includes(':---'))) {
+        continue;
+      }
+      
+      // Parse table rows with meeting information
+      if (trimmedLine.includes('|')) {
+        const parts = trimmedLine.split('|').map(p => p.trim()).filter(p => p);
+        if (parts.length >= 3) {
+          const meetingInfo = parts[0];
+          const agenda = parts[1];
+          const relatedArticle = parts[2];
+          
+          // Extract date and meeting type
+          let meetingDate = '';
+          let meetingType = '';
+          
+          const dateMatch = meetingInfo.match(/(\d{4})年(\d{1,2})月?/);
+          if (dateMatch) {
+            meetingDate = `${dateMatch[1]}年${dateMatch[2]}月`;
+          }
+          
+          if (meetingInfo.includes('定期総会')) {
+            meetingType = '定期総会';
+          } else if (meetingInfo.includes('臨時総会')) {
+            meetingType = '臨時総会';
+          } else if (meetingInfo.includes('理事会')) {
+            meetingType = '理事会';
+          }
+          
+          if (meetingDate && agenda && agenda !== '内容' && agenda !== 'ée') {
+            decisions.push({
+              id: `decision-${decisionCounter++}`,
+              meetingDate: meetingDate,
+              meetingType: meetingType || '定期総会',
+              agenda: agenda.replace(/<br>/g, ' '),
+              decision: agenda.replace(/<br>/g, ' ') + 'について承認',
+              result: 'approved',
+              votingResults: null,
+              relatedArticle: relatedArticle && relatedArticle !== '対象条文' ? relatedArticle : '',
+              notes: ''
+            });
+          }
+        }
+      }
+    }
+    
+    return decisions;
   }
 
   // Get all knowledge documents for a condominium with chunk count
@@ -193,7 +195,7 @@ export class KnowledgeService {
       let whereCondition = eq(knowledgeDocuments.condominiumId, condominiumId);
       
       if (type) {
-        whereCondition = and(whereCondition, eq(knowledgeDocuments.type, type));
+        whereCondition = and(whereCondition, eq(knowledgeDocuments.type, type)) as any;
       }
 
       console.log("Getting relevant documents...");

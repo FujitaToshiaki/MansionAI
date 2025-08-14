@@ -140,9 +140,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allDecisions.push(...decisions);
       }
       
-      // If no decision history documents, return sample data for demonstration
+      // If no decision history documents, read from uploaded file
       if (allDecisions.length === 0) {
-        allDecisions = await knowledgeService.extractMeetingDecisions('');
+        try {
+          const fs = require('fs');
+          const path = require('path');
+          const filePath = path.join(process.cwd(), 'attached_assets', 'メゾンドオプテージ決議履歴_1755195292004.txt');
+          const fileContent = fs.readFileSync(filePath, 'utf-8');
+          allDecisions = await knowledgeService.extractMeetingDecisions(fileContent);
+        } catch (error) {
+          console.error('Failed to read decision history file:', error);
+          // Return empty array if file can't be read
+          allDecisions = [];
+        }
       }
       
       res.json(allDecisions);
