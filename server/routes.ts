@@ -457,113 +457,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Legacy mock data fallback (kept for reference but not used)
-  const legacyMockDetailedMinutes: { [key: string]: any } = {
-        'minute-1': {
-          id: 'minute-1',
-          title: '第40期通常総会議事録',
-          date: '2024年10月26日',
-          time: '10:00-12:30',
-          location: 'メゾンドオプテージ集会室',
-          meetingType: '通常総会',
-          chairman: '田中一郎（理事長）',
-          secretary: '佐藤花子（理事）',
-          attendees: 45,
-          totalUnits: 68,
-          attendanceRate: 66.2,
-          quorum: true,
-          agenda: [
-            {
-              number: 1,
-              title: '前年度事業報告承認の件',
-              presenter: '田中一郎理事長',
-              content: '2023年度の主要事業として、エレベーター点検、外壁清掃、防犯カメラ更新等を実施しました。',
-              result: '承認',
-              votingResults: { favor: 44, against: 0, abstain: 1 }
-            },
-            {
-              number: 2, 
-              title: '前年度収支決算承認の件',
-              presenter: '鈴木太郎会計担当理事',
-              content: '2023年度決算は収入2,850万円、支出2,720万円で130万円の黒字となりました。',
-              result: '承認',
-              votingResults: { favor: 43, against: 1, abstain: 1 }
-            },
-            {
-              number: 3,
-              title: 'メゾンドオプテージマンション管理規約変更の件',
-              presenter: '田中一郎理事長',
-              content: '管理規約第25条「組合管理部分の管理」について、法改正に対応した条文変更を提案します。',
-              result: '可決',
-              votingResults: { favor: 42, against: 1, abstain: 2 }
-            }
-          ],
-          decisions: [
-            {
-              agenda: 'メゾンドオプテージマンション管理規約変更の件',
-              result: '可決',
-              details: '管理規約第25条の変更が承認され、2025年1月1日より施行されます。',
-              votingResults: { favor: 42, against: 1, abstain: 2 }
-            }
-          ],
-          nextMeeting: '2025年10月予定',
-          attachments: [
-            '2023年度事業報告書',
-            '2023年度収支決算書',
-            '管理規約変更案',
-            '2024年度事業計画書',
-            '2024年度収支予算書'
-          ],
-          summary: '第40期通常総会が滞りなく開催され、管理規約変更をはじめとする重要議題が審議・承認されました。',
-          createdAt: '2024-10-26T10:00:00Z'
-        },
-        'minute-2': {
-          id: 'minute-2',
-          title: '第40期第2回臨時総会議事録', 
-          date: '2024年8月15日',
-          time: '19:00-20:30',
-          location: 'メゾンドオプテージ集会室',
-          meetingType: '臨時総会',
-          chairman: '田中一郎（理事長）',
-          secretary: '佐藤花子（理事）',
-          attendees: 38,
-          totalUnits: 68,
-          attendanceRate: 55.9,
-          quorum: true,
-          agenda: [
-            {
-              number: 1,
-              title: '管理規約変更の件（さくら銀行名称削除）',
-              presenter: '田中一郎理事長',
-              content: 'さくら銀行の合併に伴い、管理規約に記載されている銀行名を現在の銀行名に変更します。',
-              result: '可決',
-              votingResults: { favor: 35, against: 0, abstain: 3 }
-            }
-          ],
-          decisions: [
-            {
-              agenda: '管理規約変更の件（さくら銀行名称削除）',
-              result: '可決',
-              details: '管理規約第15条〜第19条、附則第4条、末尾表示の銀行名変更が承認されました。',
-              votingResults: { favor: 35, against: 0, abstain: 3 }
-            }
-          ],
-          nextMeeting: '第40期通常総会（2024年10月予定）',
-          attachments: [
-            '管理規約変更対照表',
-            '銀行名変更通知書'
-          ],
-          summary: '銀行名称変更に伴う管理規約の修正が全会一致で承認されました。',
-          createdAt: '2024-08-15T19:00:00Z'
-        }
-      };
-
-    } catch (error) {
-      console.error('Error getting meeting minute details:', error);
-      res.status(500).json({ error: 'Failed to get meeting minute details' });
-    }
-  });
-
   app.post("/api/condominiums/:id/confirm-decisions", async (req, res) => {
     try {
       const { decisions } = req.body;
@@ -647,7 +540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/condominiums/:id/ai-revision-options", async (req, res) => {
     try {
       // Mock revision options would be returned here
-      const options = [];
+      const options: any[] = [];
       res.json(options);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch revision options" });
@@ -718,7 +611,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/standard-regulations", async (req, res) => {
     try {
       // Mock standard regulations
-      const standardRegs = [];
+      const standardRegs: any[] = [];
       res.json(standardRegs);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch standard regulations" });
@@ -852,7 +745,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("UTF-8 decode failed, trying shift_jis:", error);
         // Try other encodings if UTF-8 fails
         try {
-          content = req.file.buffer.toString('shift_jis');
+          content = req.file.buffer.toString('binary');
         } catch (error) {
           console.error("All encoding attempts failed:", error);
           return res.status(400).json({ error: "Unable to decode file. Please ensure it's a text file." });
@@ -888,7 +781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(document);
     } catch (error) {
       console.error("Upload error:", error);
-      res.status(500).json({ error: "Failed to upload knowledge document", details: error.message });
+      res.status(500).json({ error: "Failed to upload knowledge document", details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -910,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(results);
     } catch (error) {
       console.error("Search error:", error);
-      res.status(500).json({ error: "Failed to search knowledge base", details: error.message });
+      res.status(500).json({ error: "Failed to search knowledge base", details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
