@@ -57,7 +57,7 @@ interface MinuteDetail {
 
 export default function MinuteDetail() {
   const { condominiumId, minuteId } = useParams<{ condominiumId: string; minuteId: string }>();
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
 
   const { data: minute, isLoading } = useQuery<MinuteDetail>({
     queryKey: [`/api/condominiums/${condominiumId}/minutes/${minuteId}`],
@@ -65,12 +65,7 @@ export default function MinuteDetail() {
   });
 
   const handleBack = () => {
-    // Parse URL parameters to determine which tab to return to
-    const searchParams = new URLSearchParams(location.split('?')[1] || '');
-    const fromTab = searchParams.get('from') || 'minutes';
-    
-    // Return to the specific tab that was previously active using window.location
-    window.location.href = `/condominiums/${condominiumId}?tab=${fromTab}`;
+    setLocation(`/condominiums/${condominiumId}`);
   };
 
   if (isLoading) {

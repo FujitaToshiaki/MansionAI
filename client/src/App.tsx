@@ -15,7 +15,6 @@ import AIRevisionGeneration from "@/pages/AIRevisionGeneration";
 import KnowledgeBaseStandalone from "@/pages/KnowledgeBaseStandalone";
 import RegulationWiki from "@/pages/RegulationWiki";
 import MinuteDetail from "@/pages/MinuteDetail";
-import DecisionDetail from "@/pages/DecisionDetail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -34,7 +33,6 @@ function Router() {
         <Route path="/condominiums/:id/wiki" component={RegulationWiki} />
         <Route path="/condominiums/:id/regulations/wiki" component={RegulationWiki} />
         <Route path="/condominiums/:condominiumId/minutes/:minuteId" component={MinuteDetail} />
-        <Route path="/condominiums/:condominiumId/decisions/:decisionId" component={DecisionDetail} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
