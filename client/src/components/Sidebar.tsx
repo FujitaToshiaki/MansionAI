@@ -35,15 +35,15 @@ export default function Sidebar() {
       </div>
       
       {/* Navigation Menu */}
-      <nav className="flex-1 px-4">
-        <div className="space-y-2">
+      <nav className="flex-1">
+        <div className="space-y-0">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
             
             return (
               <Link key={item.path} href={item.path}>
-                <div className={`menu-item py-3 px-4 flex items-center cursor-pointer ${
+                <div className={`menu-item py-3 px-6 flex items-center cursor-pointer relative ${
                   isActive ? 'menu-item-active' : ''
                 }`}>
                   <Icon className="mr-3 text-sm" size={16} />

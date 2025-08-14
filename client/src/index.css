@@ -125,12 +125,21 @@
   
   .menu-item-active {
     background: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    position: relative;
+  }
+  
+  .menu-item-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: rgba(255, 255, 255, 0.8);
   }
   
   .menu-item:hover:not(.menu-item-active) {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
     transition: all 200ms ease;
   }
 
