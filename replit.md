@@ -2,6 +2,13 @@
 
 This is a Japanese condominium management regulation AI system designed for property management companies. The application helps automate the process of analyzing meeting minutes, extracting decisions, and generating regulation amendments using OCR technology and AI analysis. The system provides a complete workflow from document upload to final regulation output, with a focus on legal compliance and standardized regulation management.
 
+## Recent Changes (2025-08-14)
+
+✓ **RAG System Fully Operational**: Successfully implemented PostgreSQL-based knowledge storage with meeting minutes extraction
+✓ **Meeting Minutes Display**: Real-time extraction and display of meeting data from uploaded documents
+✓ **Data Integrity Verified**: System now uses actual RAG data instead of static/mock content
+✓ **Debug System**: Comprehensive logging for RAG data flow and extraction processes
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -42,7 +49,7 @@ Preferred communication style: Simple, everyday language.
 2. **Decision Extraction**: AI-powered analysis to identify and classify meeting decisions from OCR text
 3. **Regulation Analysis**: Comparison of current regulations against standard templates and legal requirements
 4. **AI Revision Generation**: Automated generation of regulation amendment proposals based on extracted decisions
-5. **Meeting Minutes Management**: RAG-integrated meeting minutes with tabular display, individual detail pages, and hierarchical navigation
+5. **Meeting Minutes Management**: RAG-integrated meeting minutes with PostgreSQL storage, real-time extraction from uploaded documents, tabular display, and individual detail pages with hierarchical navigation
 6. **Dashboard Analytics**: Real-time statistics and activity monitoring for management oversight
 
 ## External Dependencies
