@@ -215,7 +215,7 @@ export default function RegulationWiki() {
       if (trimmedLine.match(/\*\*第\d+条[^*]*\*\*/) || trimmedLine.match(/^第\d+条/)) {
         const headerText = trimmedLine.replace(/\*\*/g, '');
         elements.push(
-          <h1 key={index} className="text-2xl font-bold text-gray-900 mb-4 mt-8 pb-2 border-b border-gray-200">
+          <h1 key={index} className="text-2xl font-bold text-gray-900 mb-6 mt-8 pb-3 border-b-2 border-gray-200 font-serif">
             {headerText}
           </h1>
         );
@@ -224,7 +224,7 @@ export default function RegulationWiki() {
       else if (trimmedLine.match(/\*\*（.+?）\*\*/) || trimmedLine.match(/^（.+?）$/)) {
         const headerText = trimmedLine.replace(/\*\*/g, '').replace(/[（）]/g, '');
         elements.push(
-          <h2 key={index} className="text-xl font-semibold text-gray-800 mb-3 mt-6">
+          <h2 key={index} className="text-xl font-semibold text-gray-800 mb-4 mt-8 font-serif">
             {headerText}
           </h2>
         );
@@ -232,23 +232,23 @@ export default function RegulationWiki() {
       // Numbered items (1. 2. etc.)
       else if (trimmedLine.match(/^\d+[\.\)]/)) {
         elements.push(
-          <div key={index} className="mb-3 pl-4 border-l-2 border-blue-100">
-            <p className="text-gray-900 leading-relaxed">{trimmedLine}</p>
+          <div key={index} className="mb-4 pl-6 border-l-3 border-blue-200 bg-blue-50/30 py-2 rounded-r-md">
+            <p className="text-gray-800 leading-relaxed font-medium">{trimmedLine}</p>
           </div>
         );
       }
       // Bullet points or special formatting
       else if (trimmedLine.match(/^[・•\-\*]/)) {
         elements.push(
-          <div key={index} className="mb-2 pl-6">
-            <p className="text-gray-800 leading-relaxed">{trimmedLine}</p>
+          <div key={index} className="mb-3 pl-8">
+            <p className="text-gray-700 leading-relaxed">{trimmedLine}</p>
           </div>
         );
       }
       // Regular paragraphs (non-empty lines)
       else if (trimmedLine.length > 0) {
         elements.push(
-          <p key={index} className="text-gray-800 leading-relaxed mb-3">
+          <p key={index} className="text-gray-700 leading-relaxed mb-4 text-base">
             {trimmedLine}
           </p>
         );
@@ -256,7 +256,7 @@ export default function RegulationWiki() {
       // Empty lines for spacing
       else if (line === '' && elements.length > 0) {
         elements.push(
-          <div key={index} className="mb-2" />
+          <div key={index} className="mb-3" />
         );
       }
     });
@@ -430,19 +430,19 @@ export default function RegulationWiki() {
                     <div className="flex">
                       <button
                         onClick={() => toggleChapter(chapter.id)}
-                        className="p-2 hover:bg-gray-100 transition-colors"
+                        className={`flex items-center w-full p-2 rounded-md text-sm cursor-pointer hover:bg-gray-100 transition-all duration-200 ${
+                          activeChapter === chapter.id ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                        }`}
                       >
-                        {chapter.articles.length > 0 ? (
-                          chapter.expanded ? 
-                            <ChevronDown size={14} className="text-gray-400" /> : 
-                            <ChevronRight size={14} className="text-gray-400" />
-                        ) : (
-                          <div className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                      <div className={`flex-1 p-2 rounded-md text-sm cursor-pointer hover:bg-gray-100 transition-colors ${
-                        activeChapter === chapter.id ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600' : 'text-gray-700'
-                      }`}>
+                        <div className="mr-2">
+                          {chapter.articles.length > 0 ? (
+                            chapter.expanded ? 
+                              <ChevronDown size={14} className="text-gray-400 transition-transform duration-200" /> : 
+                              <ChevronRight size={14} className="text-gray-400 transition-transform duration-200" />
+                          ) : (
+                            <div className="w-3.5 h-3.5" />
+                          )}
+                        </div>
                         <div className="flex items-center space-x-2">
                           <BookOpen size={12} className="text-gray-400" />
                           <div>
@@ -450,30 +450,32 @@ export default function RegulationWiki() {
                             <div className="text-xs text-gray-500 mt-0.5">{chapter.title}</div>
                           </div>
                         </div>
-                      </div>
+                      </button>
                     </div>
                     
                     {/* Articles under Chapter */}
-                    {chapter.expanded && (
-                      <div className="ml-6 space-y-1">
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      chapter.expanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="ml-6 space-y-1 pb-2">
                         {chapter.articles.map((article) => (
                           <button
                             key={article.id}
                             onClick={() => selectArticle(article)}
-                            className={`w-full text-left p-2 rounded-md text-sm hover:bg-gray-100 transition-colors ${
-                              selectedArticle?.id === article.id ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-600' : 'text-gray-600'
+                            className={`w-full text-left p-2 rounded-md text-sm hover:bg-gray-100 transition-all duration-200 ${
+                              selectedArticle?.id === article.id ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600'
                             }`}
                           >
                             <div className="flex items-center space-x-2">
                               <Hash size={10} className="text-gray-400" />
                               <div>
-                                <div className="font-medium text-sm">（{article.title}）</div>
+                                <div className="text-sm">（{article.title}）</div>
                               </div>
                             </div>
                           </button>
                         ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
               </nav>
@@ -563,9 +565,11 @@ export default function RegulationWiki() {
               </div>
 
               {/* Article Content */}
-              <div className="prose max-w-none">
-                <article className="regulation-content bg-white border rounded-lg p-6">
-                  {renderArticleContent(selectedArticle.content)}
+              <div className="max-w-none">
+                <article className="regulation-content bg-white border rounded-lg p-8">
+                  <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed">
+                    {renderArticleContent(selectedArticle.content)}
+                  </div>
                 </article>
               </div>
 
