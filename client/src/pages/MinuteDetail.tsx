@@ -110,7 +110,7 @@ export default function MinuteDetail() {
       </div>
 
       {/* Meeting Info */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle className="text-2xl text-blue-700">{minute.title}</CardTitle>
         </CardHeader>
@@ -148,7 +148,7 @@ export default function MinuteDetail() {
       </Card>
 
       {/* Agenda */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle>議題</CardTitle>
         </CardHeader>
@@ -186,7 +186,7 @@ export default function MinuteDetail() {
 
       {/* Decisions Summary */}
       {minute.decisions && minute.decisions.length > 0 && (
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <CardTitle>決議事項</CardTitle>
           </CardHeader>
@@ -213,7 +213,7 @@ export default function MinuteDetail() {
 
       {/* Attachments */}
       {minute.attachments && minute.attachments.length > 0 && (
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <CardTitle>添付資料</CardTitle>
           </CardHeader>
