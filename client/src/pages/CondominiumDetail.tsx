@@ -163,7 +163,7 @@ export default function CondominiumDetail() {
             <CardHeader>
               <CardTitle>基本情報</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 bg-white">
+            <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-600">マンション名</label>
@@ -199,7 +199,7 @@ export default function CondominiumDetail() {
             <CardHeader>
               <CardTitle>議事録管理</CardTitle>
             </CardHeader>
-            <CardContent className="bg-white">
+            <CardContent>
               {documents?.filter((doc: any) => doc.type === 'minutes').length > 0 ? (
                 <div className="space-y-3">
                   {documents.filter((doc: any) => doc.type === 'minutes').map((doc: any) => (
@@ -246,7 +246,7 @@ export default function CondominiumDetail() {
             <CardHeader>
               <CardTitle>決議履歴</CardTitle>
             </CardHeader>
-            <CardContent className="bg-white">
+            <CardContent>
               {decisions?.length > 0 ? (
                 <div className="space-y-4">
                   {decisions.map((decision: any) => (
@@ -296,7 +296,7 @@ export default function CondominiumDetail() {
             <CardHeader>
               <CardTitle>規約管理</CardTitle>
             </CardHeader>
-            <CardContent className="bg-white">
+            <CardContent>
               <div className="text-center py-8 text-gray-500">
                 <FileText className="mx-auto mb-4" size={48} />
                 <p>規約データが準備中です</p>
@@ -310,7 +310,7 @@ export default function CondominiumDetail() {
             <CardHeader>
               <CardTitle>ファイル管理</CardTitle>
             </CardHeader>
-            <CardContent className="bg-white">
+            <CardContent>
               {documents?.length > 0 ? (
                 <div className="space-y-3">
                   {documents.map((doc: any) => (
