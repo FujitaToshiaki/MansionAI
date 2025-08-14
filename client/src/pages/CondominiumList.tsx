@@ -1,0 +1,147 @@
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CheckCircle, Clock, AlertTriangle, Search, Plus } from "lucide-react";
+import { Link } from "wouter";
+
+export default function CondominiumList() {
+  const { data: condominiums, isLoading } = useQuery({
+    queryKey: ['/api/condominiums'],
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">読み込み中...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">マンション管理</h1>
+        <Button className="bg-purple-600 hover:bg-purple-700">
+          <Plus className="mr-2" size={16} />
+          新規登録
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>マンション一覧</CardTitle>
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 text-gray-400" size={16} />
+              <Input type="text" placeholder="検索..." className="bg-gray-100 border-0 pl-10 w-64" />
+            </div>
+            <Select>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="法改正対応状況" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">すべて</SelectItem>
+                <SelectItem value="completed">完了</SelectItem>
+                <SelectItem value="in_progress">進行中</SelectItem>
+                <SelectItem value="pending">未着手</SelectItem>
+                <SelectItem value="not_required">対応不要</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="管理開始年" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">すべて</SelectItem>
+                <SelectItem value="2023">2023年</SelectItem>
+                <SelectItem value="2022">2022年</SelectItem>
+                <SelectItem value="2021">2021年</SelectItem>
+                <SelectItem value="2020">2020年</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>マンション名</TableHead>
+                <TableHead>所在地</TableHead>
+                <TableHead>戸数</TableHead>
+                <TableHead>管理開始日</TableHead>
+                <TableHead>法改正対応</TableHead>
+                <TableHead>担当者</TableHead>
+                <TableHead>最終活動日</TableHead>
+                <TableHead>アクション</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {condominiums?.map((condo: any) => (
+                <TableRow key={condo.id} className="hover:bg-gray-50">
+                  <TableCell>
+                    <div className="flex items-center">
+                      <img 
+                        src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&w=40&h=40&fit=crop" 
+                        alt={condo.name} 
+                        className="w-10 h-10 rounded-lg mr-3"
+                      />
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{condo.name}</div>
+                        <div className="text-sm text-gray-500">築{new Date().getFullYear() - condo.buildYear}年</div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500">{condo.address}</TableCell>
+                  <TableCell className="text-sm text-gray-500">{condo.units}戸</TableCell>
+                  <TableCell className="text-sm text-gray-500">
+                    {new Date(condo.managementStartDate).toLocaleDateString('ja-JP')}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={
+                      condo.lawRevisionStatus === 'completed' ? 'default' :
+                      condo.lawRevisionStatus === 'in_progress' ? 'secondary' :
+                      condo.lawRevisionStatus === 'pending' ? 'destructive' : 'outline'
+                    }>
+                      {condo.lawRevisionStatus === 'completed' && <CheckCircle className="mr-1" size={12} />}
+                      {condo.lawRevisionStatus === 'in_progress' && <Clock className="mr-1" size={12} />}
+                      {condo.lawRevisionStatus === 'pending' && <AlertTriangle className="mr-1" size={12} />}
+                      {condo.lawRevisionStatus === 'completed' ? '完了' :
+                       condo.lawRevisionStatus === 'in_progress' ? '進行中' :
+                       condo.lawRevisionStatus === 'pending' ? '未着手' : '対応不要'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500">{condo.assignedManager || '未設定'}</TableCell>
+                  <TableCell className="text-sm text-gray-500">
+                    {condo.lastActivity ? new Date(condo.lastActivity).toLocaleDateString('ja-JP') : '未記録'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Link href={`/condominiums/${condo.id}`}>
+                        <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-900">
+                          詳細
+                        </Button>
+                      </Link>
+                      <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-900">
+                        編集
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )) || (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                    マンションデータがありません
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
