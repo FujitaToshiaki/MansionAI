@@ -124,13 +124,15 @@
   }
   
   .menu-item-active {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     margin: 0 4px;
   }
   
-  .menu-item:hover {
+  .menu-item:hover:not(.menu-item-active) {
     background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin: 0 4px;
     transition: all 200ms ease;
   }
 
