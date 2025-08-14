@@ -72,7 +72,7 @@ export class MemStorage implements IStorage {
     // Create mock condominiums
     const mockCondominiums: Condominium[] = [
       {
-        id: randomUUID(),
+        id: "a7af9126-67ff-47d9-9c24-cf4054aeb63c",
         name: "メゾンドオプテージ",
         address: "東京都○○区××1-2-3",
         units: 120,
