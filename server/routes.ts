@@ -318,9 +318,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get meeting minutes documents from knowledge base
       const knowledgeDocuments = await knowledgeService.getKnowledgeDocuments(condominiumId);
+      console.log(`Found ${knowledgeDocuments.length} knowledge documents`);
+      console.log('Document types and titles:', knowledgeDocuments.map(doc => ({ type: doc.type, title: doc.title })));
+      
       const minutesDocs = knowledgeDocuments.filter((doc: any) => 
         doc.type === 'meeting_minutes' || doc.title.includes('議事録')
       );
+      console.log(`Filtered to ${minutesDocs.length} meeting minutes documents`);
       
       let allMinutes = [];
       
