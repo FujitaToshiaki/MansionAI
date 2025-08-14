@@ -84,64 +84,93 @@ export class KnowledgeService {
 
   // Extract meeting decisions from decision history documents
   async extractMeetingDecisions(content: string): Promise<any[]> {
-    // Parse actual uploaded decision history content
+    console.log('Starting decision extraction from decision history...');
     if (!content || content.trim() === '') {
+      console.log('Empty decision history content');
       return [];
     }
 
     const decisions = [];
-    
-    // Parse the structured data from the uploaded file
     const lines = content.split('\n');
-    let currentSection = '';
     let decisionCounter = 1;
     
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      if (!trimmedLine || trimmedLine.startsWith('---') || trimmedLine.startsWith('###') || trimmedLine.startsWith('####')) {
-        continue;
-      }
+    console.log(`Processing ${lines.length} lines from decision history`);
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
       
-      // Skip table headers
-      if (trimmedLine.includes('|') && (trimmedLine.includes('回') || trimmedLine.includes('内容') || trimmedLine.includes(':---'))) {
+      // Skip empty lines, headers, and separators
+      if (!line || line.startsWith('---') || line.startsWith('###') || line.startsWith('####') || 
+          line.startsWith('**') || line.includes(':---')) {
         continue;
       }
       
       // Parse table rows with meeting information
-      if (trimmedLine.includes('|')) {
-        const parts = trimmedLine.split('|').map(p => p.trim()).filter(p => p);
+      if (line.startsWith('|') && line.includes('|')) {
+        const parts = line.split('|').map(p => p.trim()).filter(p => p);
+        
+        // Skip table headers
+        if (parts.some(p => p.includes('開催日') || p.includes('内容') || p.includes('期'))) {
+          continue;
+        }
+        
         if (parts.length >= 3) {
           const meetingInfo = parts[0];
           const agenda = parts[1];
           const relatedArticle = parts[2];
           
-          // Extract date and meeting type
-          let meetingDate = '';
-          let meetingType = '';
+          console.log(`Found decision row: ${meetingInfo} | ${agenda}`);
           
-          const dateMatch = meetingInfo.match(/(\d{4})年(\d{1,2})月?/);
+          // Extract meeting date and type from patterns like "35期通常総会<br>2019年9月"
+          let meetingDate = '';
+          let meetingType = '通常総会';
+          
+          // Look for year and month pattern
+          const dateMatch = meetingInfo.match(/(\d{4})年(\d{1,2})月/);
           if (dateMatch) {
             meetingDate = `${dateMatch[1]}年${dateMatch[2]}月`;
+          } else {
+            // Try to extract from period info like "35期"
+            const periodMatch = meetingInfo.match(/(\d+)期/);
+            if (periodMatch) {
+              meetingDate = `第${periodMatch[1]}期`;
+            }
           }
           
-          if (meetingInfo.includes('定期総会')) {
-            meetingType = '定期総会';
+          // Determine meeting type
+          if (meetingInfo.includes('通常総会')) {
+            meetingType = '通常総会';
           } else if (meetingInfo.includes('臨時総会')) {
-            meetingType = '臨時総会';
+            meetingType = '臨時総会'; 
           } else if (meetingInfo.includes('理事会')) {
             meetingType = '理事会';
           }
           
-          if (meetingDate && agenda && agenda !== '内容' && agenda !== 'ée') {
+          // Categorize decisions based on agenda content
+          let category = 'その他';
+          if (agenda.includes('管理規約')) category = '管理規約改定';
+          else if (agenda.includes('駐車') || agenda.includes('車庫')) category = '駐車場';
+          else if (agenda.includes('バイク')) category = 'バイク置場';
+          else if (agenda.includes('自転車') || agenda.includes('駐輪')) category = '駐輪場';
+          else if (agenda.includes('防犯')) category = '防犯設備';
+          else if (agenda.includes('宅配')) category = '設備追加';
+          else if (agenda.includes('ペット')) category = 'ペット飼育';
+          else if (agenda.includes('賃貸')) category = '賃貸使用';
+          else if (agenda.includes('住宅宿泊')) category = '住宅宿泊';
+          else if (agenda.includes('総会')) category = '総会運営';
+          
+          if (agenda && agenda.length > 3 && !agenda.includes('内容')) {
+            console.log(`Adding decision: ${meetingDate} - ${category} - ${agenda}`);
             decisions.push({
               id: `decision-${decisionCounter++}`,
               meetingDate: meetingDate,
-              meetingType: meetingType || '定期総会',
-              agenda: agenda.replace(/<br>/g, ' '),
-              decision: agenda.replace(/<br>/g, ' ') + 'について承認',
+              meetingType: meetingType,
+              category: category,
+              agenda: agenda.replace(/<br>/g, ' ').replace(/\n/g, ' '),
+              decision: agenda.replace(/<br>/g, ' ').replace(/\n/g, ' ') + 'について承認',
               result: 'approved',
               votingResults: null,
-              relatedArticle: relatedArticle && relatedArticle !== '対象条文' ? relatedArticle : '',
+              relatedArticle: relatedArticle && relatedArticle !== '対象条項' ? relatedArticle : '',
               notes: ''
             });
           }
@@ -149,6 +178,7 @@ export class KnowledgeService {
       }
     }
     
+    console.log(`Extracted ${decisions.length} decisions from decision history`);
     return decisions;
   }
 
