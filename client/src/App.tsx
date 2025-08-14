@@ -31,6 +31,7 @@ function Router() {
         <Route path="/condominiums/:id/ai-revision" component={AIRevisionGeneration} />
         <Route path="/condominiums/:id/knowledge" component={KnowledgeBaseStandalone} />
         <Route path="/condominiums/:id/wiki" component={RegulationWiki} />
+        <Route path="/condominiums/:id/regulations/wiki" component={RegulationWiki} />
         <Route path="/condominiums/:condominiumId/minutes/:minuteId" component={MinuteDetail} />
         <Route component={NotFound} />
       </Switch>

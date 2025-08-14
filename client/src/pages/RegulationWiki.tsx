@@ -87,9 +87,10 @@ export default function RegulationWiki() {
 
   // Parse regulation content into chapters and articles
   useEffect(() => {
-    if (knowledgeDocuments?.[0]?.content) {
+    const currentRegulation = knowledgeDocuments?.find(doc => doc.type === 'current_regulation');
+    if (currentRegulation?.content) {
       console.log('Parsing regulation content...');
-      const content = knowledgeDocuments[0].content;
+      const content = currentRegulation.content;
       console.log('Content preview (first 1000 chars):', content.substring(0, 1000));
       console.log('Content length:', content.length);
       
