@@ -150,7 +150,6 @@ export default function CondominiumDetail() {
                     <p className="text-sm font-semibold text-gray-900">2025年8月</p>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">議事録更新</p>
               </div>
             </CardContent>
           </Card>
