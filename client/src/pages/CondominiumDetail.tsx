@@ -198,11 +198,7 @@ export default function CondominiumDetail() {
       <Tabs defaultValue="basic" className="space-y-4">
         <TabsList>
           <TabsTrigger value="basic">基本情報</TabsTrigger>
-          <Link href={`/condominiums/${id}/wiki`}>
-            <Button variant="ghost" className="h-9 px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow hover:bg-accent hover:text-accent-foreground">
-              管理規約
-            </Button>
-          </Link>
+          <TabsTrigger value="regulations">管理規約</TabsTrigger>
           <TabsTrigger value="decisions">決議履歴</TabsTrigger>
           <TabsTrigger value="minutes">議事録</TabsTrigger>
           <TabsTrigger value="files">その他ファイル</TabsTrigger>
@@ -371,19 +367,20 @@ export default function CondominiumDetail() {
                     アップロード済み規約文書: {knowledgeDocuments.length}件
                   </div>
                   {knowledgeDocuments.map((doc: any) => (
-                    <Link key={doc.id} href={`/condominiums/${id}/wiki`}>
-                      <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <FileText className="text-blue-500" size={20} />
-                              <h4 className="font-medium text-gray-900">{doc.title}</h4>
-                              <Badge variant="outline" className="text-xs">
-                                {doc.type === 'current_regulation' ? '現行規約' : 
-                                 doc.type === 'standard_regulation' ? '標準規約' : 
-                                 doc.type === 'decision_history' ? '決議履歴' : '文書'}
-                              </Badge>
-                            </div>
+                    <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <FileText className="text-blue-500" size={20} />
+                            <Link href={`/condominiums/${id}/wiki`}>
+                              <h4 className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{doc.title}</h4>
+                            </Link>
+                            <Badge variant="outline" className="text-xs">
+                              {doc.type === 'current_regulation' ? '現行規約' : 
+                               doc.type === 'standard_regulation' ? '標準規約' : 
+                               doc.type === 'decision_history' ? '決議履歴' : '文書'}
+                            </Badge>
+                          </div>
                           <p className="text-sm text-gray-600 mb-2">{doc.description}</p>
                           <div className="flex items-center space-x-4 text-xs text-gray-500">
                             <span>アップロード: {new Date(doc.uploadedAt).toLocaleDateString('ja-JP')}</span>
@@ -399,14 +396,13 @@ export default function CondominiumDetail() {
                             検索可能
                           </div>
                         </div>
-                        </div>
-                        {doc.originalFileName && (
-                          <div className="mt-2 text-xs text-gray-500">
-                            元ファイル: {doc.originalFileName}
-                          </div>
-                        )}
                       </div>
-                    </Link>
+                      {doc.originalFileName && (
+                        <div className="mt-2 text-xs text-gray-500">
+                          元ファイル: {doc.originalFileName}
+                        </div>
+                      )}
+                    </div>
                   ))}
                   <div className="border-t pt-4 space-y-2">
                     <Link href={`/condominiums/${id}/regulations/wiki`}>
