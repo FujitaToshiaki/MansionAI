@@ -161,20 +161,18 @@ export default function CondominiumDetail() {
 
           <Card>
             <CardContent className="p-4">
-              <div className="text-center">
+              <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-600">法改正対応状況</p>
-                <div className="mt-2">
-                  <Badge variant={
-                    condominium.lawRevisionStatus === 'completed' ? 'default' :
-                    condominium.lawRevisionStatus === 'in_progress' ? 'secondary' :
-                    'destructive'
-                  }>
-                    {condominium.lawRevisionStatus === 'completed' ? '完了' :
-                     condominium.lawRevisionStatus === 'in_progress' ? '進行中' : '未着手'}
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">期限: 2025年3月</p>
+                <Badge variant={
+                  condominium.lawRevisionStatus === 'completed' ? 'default' :
+                  condominium.lawRevisionStatus === 'in_progress' ? 'secondary' :
+                  'destructive'
+                }>
+                  {condominium.lawRevisionStatus === 'completed' ? '完了' :
+                   condominium.lawRevisionStatus === 'in_progress' ? '進行中' : '未着手'}
+                </Badge>
               </div>
+              <p className="text-xs text-gray-500 mt-2">期限: 2025年3月</p>
             </CardContent>
           </Card>
 
