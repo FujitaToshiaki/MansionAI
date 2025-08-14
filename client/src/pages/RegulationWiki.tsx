@@ -379,19 +379,19 @@ export default function RegulationWiki() {
             
             {/* Right side */}
             <div className="flex items-center space-x-3">
-              <div className="relative">
+              <div className="relative bg-white rounded-md shadow-sm">
                 <Input
                   placeholder="規約を検索..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-80 pr-10"
+                  className="w-80 pr-10 bg-white border-gray-300"
                 />
                 <Button 
                   size="sm" 
                   variant="ghost"
                   onClick={handleSearch}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 bg-white hover:bg-gray-50"
                 >
                   <Search size={16} />
                 </Button>
@@ -442,9 +442,9 @@ export default function RegulationWiki() {
                           <div className="w-3.5 h-3.5" />
                         )}
                       </div>
-                      <div className="flex items-center space-x-3 flex-1">
-                        <BookOpen size={14} className="text-gray-400 flex-shrink-0" />
-                        <div className="flex-1">
+                      <div className="flex items-start space-x-3 flex-1">
+                        <BookOpen size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 text-left">
                           <div className="font-semibold text-base">第{chapter.number}章</div>
                           <div className="text-sm text-gray-500 mt-0.5">{chapter.title}</div>
                         </div>
