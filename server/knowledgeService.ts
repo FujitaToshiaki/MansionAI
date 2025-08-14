@@ -36,6 +36,23 @@ export class KnowledgeService {
     return document;
   }
 
+  // Add knowledge document (convenience method)
+  async addKnowledgeDocument(
+    condominiumId: string, 
+    title: string, 
+    content: string, 
+    type: string, 
+    metadata?: any
+  ): Promise<KnowledgeDocument> {
+    return this.uploadKnowledgeDocument({
+      condominiumId,
+      title,
+      content,
+      type,
+      metadata
+    });
+  }
+
   // Process document content into smaller chunks for RAG
   private async processDocumentIntoChunks(document: KnowledgeDocument): Promise<void> {
     const chunkSize = 1000; // Characters per chunk

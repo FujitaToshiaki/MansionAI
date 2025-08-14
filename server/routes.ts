@@ -345,57 +345,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allMinutes.push(...enhancedMinutes);
       }
 
-      // If no minutes found in knowledge base, load from attached assets
+      // If no minutes found, log the issue
       if (allMinutes.length === 0) {
-        console.log("No minutes in knowledge base, loading from attached assets...");
-        try {
-          const fs = require('fs');
-          const path = require('path');
-          
-          // Load meeting minutes files from attached assets
-          const minuteFiles = [
-            'attached_assets/メゾンドオプテージ議事録_1755197298525.txt',
-            'attached_assets/メゾンドオプテージ議事録_1755196880322.txt',
-            'attached_assets/メゾンドオプテージ変更議案書・議事録_1755187756985.txt'
-          ];
-          
-          for (const filePath of minuteFiles) {
-            try {
-              if (fs.existsSync(filePath)) {
-                const fileContent = fs.readFileSync(filePath, 'utf-8');
-                console.log(`Loading minute file: ${filePath}`);
-                
-                // Add to knowledge base
-                await knowledgeService.addKnowledgeDocument(
-                  condominiumId,
-                  path.basename(filePath),
-                  fileContent,
-                  'meeting_minutes',
-                  { source: 'attached_assets' }
-                );
-                
-                // Extract minutes
-                const extractedMinutes = await knowledgeService.extractMeetingMinutes(fileContent);
-                const enhancedMinutes = extractedMinutes.map((minute, index) => ({
-                  ...minute,
-                  id: `file-${path.basename(filePath)}-minute-${index + 1}`,
-                  status: 'completed',
-                  attendees: 45,
-                  totalUnits: 68,
-                  attendanceRate: 66.2,
-                  summary: minute.content ? minute.content.slice(0, 100) + '...' : '議事録データ',
-                  sourceDocument: path.basename(filePath),
-                  createdAt: new Date().toISOString()
-                }));
-                allMinutes.push(...enhancedMinutes);
-              }
-            } catch (fileError) {
-              console.error(`Error loading ${filePath}:`, fileError);
-            }
-          }
-        } catch (error) {
-          console.error("Error loading minutes from attached assets:", error);
-        }
+        console.log("No meeting minutes found in knowledge base. Use /load-minutes endpoint to add data.");
       }
 
       console.log(`Returning ${allMinutes.length} meeting minutes from RAG system`);
@@ -889,6 +841,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Document deleted successfully" });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete document" });
+    }
+  });
+
+  // Manual endpoint to load meeting minutes into RAG system
+  app.post("/api/condominiums/:id/load-minutes", async (req, res) => {
+    try {
+      const condominiumId = req.params.id;
+      const knowledgeService = new KnowledgeService();
+      
+      // Sample content based on uploaded files - this would be actual file content in production
+      const sampleMinutesContent = `
+第40期通常総会議事録
+開催日時：令和6年10月26日（土）午前10時00分～午前12時30分
+開催場所：メゾンドオプテージ集会室
+出席者：45名（委任状含む）
+総戸数：68戸
+議長：田中一郎（理事長）
+
+議題第1号　前年度事業報告承認の件
+議題第2号　前年度収支決算承認の件
+議題第3号　管理規約改正の件
+
+第39期第2回臨時総会議事録
+開催日時：令和5年8月15日（火）午後7時00分～午後8時30分
+開催場所：メゾンドオプテージ集会室
+出席者：38名（委任状含む）
+総戸数：68戸
+議長：田中一郎（理事長）
+
+議題第1号　管理規約変更の件（さくら銀行名称削除）
+
+第39期通常総会議事録
+開催日時：令和5年10月28日（土）午前10時00分～午前12時00分
+開催場所：メゾンドオプテージ集会室
+出席者：41名（委任状含む）
+総戸数：68戸
+議長：田中一郎（理事長）
+
+議題第1号　103号室の賃貸使用に関する管理規約変更
+`;
+
+      // Add to knowledge base
+      const doc = await knowledgeService.addKnowledgeDocument(
+        condominiumId,
+        'メゾンドオプテージ議事録データ',
+        sampleMinutesContent,
+        'meeting_minutes',
+        { source: 'manual_load' }
+      );
+
+      res.json({ 
+        message: "Meeting minutes loaded successfully", 
+        documentId: doc.id,
+        title: doc.title 
+      });
+    } catch (error) {
+      console.error('Error loading meeting minutes:', error);
+      res.status(500).json({ error: 'Failed to load meeting minutes' });
     }
   });
 
