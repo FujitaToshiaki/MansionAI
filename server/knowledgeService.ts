@@ -66,13 +66,30 @@ export class KnowledgeService {
     }
   }
 
-  // Get all knowledge documents for a condominium
-  async getKnowledgeDocuments(condominiumId: string): Promise<KnowledgeDocument[]> {
-    return await db
+  // Get all knowledge documents for a condominium with chunk count
+  async getKnowledgeDocuments(condominiumId: string): Promise<any[]> {
+    const documents = await db
       .select()
       .from(knowledgeDocuments)
       .where(eq(knowledgeDocuments.condominiumId, condominiumId))
       .orderBy(desc(knowledgeDocuments.uploadedAt));
+
+    // Add chunk count for each document
+    const documentsWithChunkCount = await Promise.all(
+      documents.map(async (doc) => {
+        const chunks = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(knowledgeChunks)
+          .where(eq(knowledgeChunks.documentId, doc.id));
+        
+        return {
+          ...doc,
+          chunkCount: chunks[0]?.count || 0
+        };
+      })
+    );
+
+    return documentsWithChunkCount;
   }
 
   // Get knowledge documents by type

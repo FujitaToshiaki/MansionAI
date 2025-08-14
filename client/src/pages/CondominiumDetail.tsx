@@ -37,6 +37,10 @@ export default function CondominiumDetail() {
     queryKey: ['/api/condominiums', id, 'decisions'],
   });
 
+  const { data: knowledgeDocuments } = useQuery({
+    queryKey: ['/api/condominiums', id, 'knowledge'],
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -335,13 +339,79 @@ export default function CondominiumDetail() {
         <TabsContent value="regulations">
           <Card className="bg-white">
             <CardHeader>
-              <CardTitle>規約管理</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>規約管理</CardTitle>
+                <Link href={`/condominiums/${id}/knowledge`}>
+                  <Button variant="outline" size="sm">
+                    <Search className="mr-2" size={16} />
+                    ナレッジベース
+                  </Button>
+                </Link>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <FileText className="mx-auto mb-4" size={48} />
-                <p>規約データが準備中です</p>
-              </div>
+              {knowledgeDocuments && knowledgeDocuments.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-600 mb-4">
+                    アップロード済み規約文書: {knowledgeDocuments.length}件
+                  </div>
+                  {knowledgeDocuments.map((doc: any) => (
+                    <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <FileText className="text-blue-500" size={20} />
+                            <h4 className="font-medium text-gray-900">{doc.title}</h4>
+                            <Badge variant="outline" className="text-xs">
+                              {doc.type === 'current_regulation' ? '現行規約' : 
+                               doc.type === 'standard_regulation' ? '標準規約' : 
+                               doc.type === 'decision_history' ? '決議履歴' : '文書'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{doc.description}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>アップロード: {new Date(doc.uploadedAt).toLocaleDateString('ja-JP')}</span>
+                            <span>ファイルサイズ: {Math.round(doc.metadata?.fileSize / 1024 || 0)}KB</span>
+                            <span>チャンク数: {doc.chunkCount || 0}個</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="default" className="mb-2">
+                            処理完了
+                          </Badge>
+                          <div className="text-xs text-gray-500">
+                            検索可能
+                          </div>
+                        </div>
+                      </div>
+                      {doc.originalFileName && (
+                        <div className="mt-2 text-xs text-gray-500">
+                          元ファイル: {doc.originalFileName}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <div className="border-t pt-4">
+                    <Link href={`/condominiums/${id}/knowledge`}>
+                      <Button variant="outline" className="w-full">
+                        <Search className="mr-2" size={16} />
+                        ナレッジベースで検索・管理
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <FileText className="mx-auto mb-4" size={48} />
+                  <p>規約文書がアップロードされていません</p>
+                  <Link href={`/condominiums/${id}/knowledge`}>
+                    <Button className="mt-4" variant="outline">
+                      <Upload className="mr-2" size={16} />
+                      規約文書をアップロード
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
