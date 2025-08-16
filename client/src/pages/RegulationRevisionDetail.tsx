@@ -36,29 +36,84 @@ export default function RegulationRevisionDetail() {
     // Mock translation for demo purposes - in real implementation, use translation API
     const translations: Record<string, Record<string, string>> = {
       en: {
+        '個人情報保護規定の追加': 'Addition of Personal Information Protection Regulations',
         '看板、広告等の設置、表示等の承認': 'Approval of Installation and Display of Signs and Advertisements',
         '第18条又は付属書類をマンションにおける看板、広告等の設置・表示等について特定の区分所有者又は、その他付属有者が次の各号下の定めに従って敷地、並びに建物の共用部分又は、第1号を除き第2条第5項により専用使用することを承認するものとする。': 'Article 18 or attached documents regarding the installation and display of signs and advertisements in condominiums, specific unit owners or other related parties shall be approved to use the land and common areas of the building according to the provisions listed below, excluding item 1 but including item 2, section 5.',
-        '改訂詳細': 'Revision Details'
+        '改訂詳細': 'Revision Details',
+        '改訂理由': 'Revision Reason',
+        '規約の変更内容': 'Regulation Changes',
+        '現在の規約条文': 'Current Regulation Article',
+        '新しい規約条文': 'New Regulation Article',
+        '変更のポイント': 'Key Changes',
+        '実施スケジュール': 'Implementation Schedule',
+        '実施手順': 'Implementation Procedures',
+        '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': 'To comply with the revised Personal Information Protection Act, it is necessary to strengthen regulations regarding the handling of personal information. Since the current regulations do not meet the standards required by law, revisions will be made with approval from the general meeting.',
+        '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': 'Article 15: The management association shall properly manage the personal information of unit owners and residents, and use it only when necessary.',
+        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': 'Article 15: The management association shall handle the personal information of unit owners and residents appropriately based on the Personal Information Protection Act (Act No. 57 of 2003), and shall not use it for purposes other than those for which consent has been obtained from the individual or as required by law.'
       },
       zh: {
+        '個人情報保護規定の追加': '个人信息保护规定的追加',
         '看板、広告等の設置、表示等の承認': '招牌、广告等的设置、显示等的批准',
         '第18条又は付属書類をマンションにおける看板、広告等の設置・表示等について特定の区分所有者又は、その他付属有者が次の各号下の定めに従って敷地、並びに建物の共用部分又は、第1号を除き第2条第5項により専用使用することを承認するものとする。': '第18条或附属文件中关于公寓招牌、广告等的设置、显示等，特定区分所有者或其他附属拥有者按照以下各项规定，对土地以及建筑物的共用部分（除第1项外，按第2条第5项）进行专用使用予以批准。',
-        '改訂詳細': '修订详情'
+        '改訂詳細': '修订详情',
+        '改訂理由': '修订理由',
+        '規約の変更内容': '规约变更内容',
+        '現在の規約条文': '现行规约条文',
+        '新しい規約条文': '新的规约条文',
+        '変更のポイント': '变更要点',
+        '実施スケジュール': '实施进度',
+        '実施手順': '实施步骤',
+        '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': '为了应对修订的个人信息保护法，需要加强关于个人信息处理的规定。由于现行规约不满足法律要求的标准，将通过总会批准进行修订。',
+        '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': '第15条 管理组合应适当管理区分所有者和居住者的个人信息，仅在必要时使用。',
+        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': '第15条 管理组合根据个人信息保护法（平成15年法律第57号），应适当处理区分所有者和居住者的个人信息，除获得本人同意或基于法令的情况外，不得进行目的外使用。'
       },
       ko: {
+        '個人情報保護規定の追加': '개인정보보호 규정 추가',
         '看板、広告等の設置、表示等の承認': '간판, 광고 등의 설치, 표시 등의 승인',
         '第18条又は付属書類をマンションにおける看板、広告等の設置・表示等について特定の区分所有者又は、その他付属有者が次の各号下の定めに従って敷地、並びに建物の共用部分又は、第1号を除き第2条第5項により専用使用することを承認するものとする。': '제18조 또는 첨부서류에서 맨션의 간판, 광고 등의 설치·표시 등에 대해 특정 구분소유자 또는 기타 부속 소유자가 다음 각호의 규정에 따라 부지 및 건물의 공용부분 또는 제1호를 제외하고 제2조 제5항에 의해 전용사용하는 것을 승인한다.',
-        '改訂詳細': '개정 상세'
+        '改訂詳細': '개정 상세',
+        '改訂理由': '개정 이유',
+        '規約の変更内容': '규약 변경 내용',
+        '現在の規約条文': '현재 규약 조문',
+        '新しい規約条文': '새로운 규약 조문',
+        '変更のポイント': '변경 포인트',
+        '実施スケジュール': '실시 일정',
+        '実施手順': '실시 절차',
+        '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': '개정 개인정보보호법에 대응하기 위해 개인정보 취급에 관한 규정을 강화할 필요가 있습니다. 현행 규약으로는 법률이 요구하는 기준을 충족하지 못하기 때문에 총회 승인을 받아 개정을 실시합니다.',
+        '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': '제15조 관리조합은 구분소유자 및 거주자의 개인정보를 적절히 관리하고, 필요한 경우에만 이용하는 것으로 한다.',
+        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': '제15조 관리조합은 개인정보의 보호에 관한 법률(평성15년 법률 제57호)에 따라 구분소유자 및 거주자의 개인정보를 적정하게 취급하고, 본인의 동의를 얻은 경우 또는 법령에 근거한 경우를 제외하고는 목적 외 이용을 해서는 안 된다.'
       },
       vi: {
+        '個人情報保護規定の追加': 'Bổ sung quy định bảo vệ thông tin cá nhân',
         '看板、広告等の設置、表示等の承認': 'Phê duyệt việc lắp đặt, hiển thị biển báo, quảng cáo, v.v.',
         '第18条又は付属書類をマンションにおける看板、広告等の設置・表示等について特定の区分所有者又は、その他付属有者が次の各号下の定めに従って敷地、並びに建物の共用部分又は、第1号を除き第2条第5項により専用使用することを承認するものとする。': 'Điều 18 hoặc tài liệu đính kèm về việc lắp đặt và hiển thị biển báo, quảng cáo tại chung cư, chủ sở hữu phân khu cụ thể hoặc các chủ sở hữu phụ thuộc khác được phê duyệt sử dụng khu đất và các khu vực chung của tòa nhà theo các quy định dưới đây, ngoại trừ khoản 1, theo khoản 5 Điều 2.',
-        '改訂詳細': 'Chi tiết sửa đổi'
+        '改訂詳細': 'Chi tiết sửa đổi',
+        '改訂理由': 'Lý do sửa đổi',
+        '規約の変更内容': 'Nội dung thay đổi quy định',
+        '現在の規約条文': 'Điều khoản quy định hiện tại',
+        '新しい規約条文': 'Điều khoản quy định mới',
+        '変更のポイント': 'Điểm thay đổi',
+        '実施スケジュール': 'Lịch trình thực hiện',
+        '実施手順': 'Quy trình thực hiện',
+        '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': 'Để đáp ứng Luật Bảo vệ Thông tin Cá nhân sửa đổi, cần tăng cường các quy định về xử lý thông tin cá nhân. Vì quy định hiện tại không đáp ứng tiêu chuẩn do pháp luật yêu cầu, việc sửa đổi sẽ được thực hiện sau khi có sự phê duyệt từ đại hội.',
+        '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': 'Điều 15: Hiệp hội quản lý phải quản lý thông tin cá nhân của chủ sở hữu đơn vị và cư dân một cách thích hợp, chỉ sử dụng khi cần thiết.',
+        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': 'Điều 15: Hiệp hội quản lý phải xử lý thông tin cá nhân của chủ sở hữu đơn vị và cư dân một cách thích hợp dựa trên Luật Bảo vệ Thông tin Cá nhân (Luật số 57 năm 2003), và không được sử dụng cho mục đích khác ngoài trường hợp đã có sự đồng ý của cá nhân hoặc theo yêu cầu của pháp luật.'
       },
       fil: {
+        '個人情報保護規定の追加': 'Pagdagdag ng mga regulasyon sa proteksyon ng personal na impormasyon',
         '看板、広告等の設置、表示等の承認': 'Pag-apruba sa pag-install at pagpapakita ng mga signboard, advertising, atbp.',
         '第18条又は付属書類をマンションにおける看板、広告等の設置・表示等について特定の区分所有者又は、その他付属有者が次の各号下の定めに従って敷地、並びに建物の共用部分又は、第1号を除き第2条第5項により専用使用することを承認するものとする。': 'Artikulo 18 o mga kasamang dokumento tungkol sa pag-install at pagpapakita ng mga signboard at advertising sa condominium, ang mga specific na unit owner o iba pang kaugnay na may-ari ay aprubado na gamitin ang lupa at mga common area ng gusali ayon sa mga sumusunod na probisyon, maliban sa item 1, sa pamamagitan ng seksyon 5 ng Artikulo 2.',
-        '改訂詳細': 'Mga Detalye ng Rebisyon'
+        '改訂詳細': 'Mga Detalye ng Rebisyon',
+        '改訂理由': 'Dahilan ng Rebisyon',
+        '規約の変更内容': 'Mga Pagbabago sa Regulasyon',
+        '現在の規約条文': 'Kasalukuyang Artikulo ng Regulasyon',
+        '新しい規約条文': 'Bagong Artikulo ng Regulasyon',
+        '変更のポイント': 'Mga Puntong Pagbabago',
+        '実施スケジュール': 'Takda ng Pagpapatupad',
+        '実施手順': 'Mga Hakbang sa Pagpapatupad',
+        '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': 'Upang tumugon sa binagong Personal Information Protection Act, kailangan palakasin ang mga regulasyon tungkol sa pangangalaga ng personal na impormasyon. Dahil ang kasalukuyang mga regulasyon ay hindi natutugunan ang mga pamantayang hinihiling ng batas, gagawin ang mga rebisyon na may pahintulot mula sa general meeting.',
+        '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': 'Artikulo 15: Ang management association ay dapat na tamang pamahalaan ang personal na impormasyon ng mga unit owner at mga residente, at gamitin lamang kapag kinakailangan.',
+        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': 'Artikulo 15: Ang management association ay dapat na tamang pangasiwaan ang personal na impormasyon ng mga unit owner at mga residente batay sa Personal Information Protection Act (Act No. 57 ng 2003), at hindi gagamitin para sa iba pang layunin maliban sa mga pagkakaon na may pahintulot ng indibidwal o ayon sa batas.'
       }
     };
     
