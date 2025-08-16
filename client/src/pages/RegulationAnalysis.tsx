@@ -299,7 +299,10 @@ export default function RegulationAnalysis() {
                               <div className="w-4 h-4 rounded-full bg-gray-300 flex items-center justify-center">
                                 <span className="text-xs text-white font-medium">{index + 1}</span>
                               </div>
-                              <span className="text-sm text-gray-500 font-medium">{step.name}</span>
+                              <div>
+                                <span className="text-sm text-gray-500 font-medium">{step.name}</span>
+                                <p className="text-xs text-gray-600 mt-1">{step.description}</p>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -373,7 +376,7 @@ export default function RegulationAnalysis() {
                                 <CheckCircle className="w-2.5 h-2.5 text-white" />
                               )}
                               {step.status === 'running' && (
-                                <CircuitBoard className="w-2.5 h-2.5 text-white" />
+                                <div className="animate-spin rounded-full h-2.5 w-2.5 border border-white border-t-transparent"></div>
                               )}
                             </div>
                             <div className="flex-1">
@@ -384,6 +387,7 @@ export default function RegulationAnalysis() {
                               }`}>
                                 {step.name}
                               </span>
+                              <p className="text-xs text-gray-600 mt-1">{step.description}</p>
                               {step.status === 'running' && step.details && (
                                 <p className="text-xs text-blue-600 mt-1 animate-pulse">{step.details}</p>
                               )}
