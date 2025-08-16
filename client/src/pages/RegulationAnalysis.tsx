@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { AlertTriangle, CheckCircle, Clock, FileText, Bot, Gavel, RotateCcw, Settings, Filter, Mic, MicOff, Play, Pause, Zap, Activity } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, FileText, Bot, Gavel, RotateCcw, Settings, Filter, Mic, MicOff, Play, Pause, Brain, CircuitBoard } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -190,7 +190,7 @@ export default function RegulationAnalysis() {
       <nav className="text-sm text-gray-500">
         <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
         <span className="mx-2">{'>'}</span>
-        <Link href={`/condominiums/${id}`} className="hover:text-gray-700">{condominium?.name}</Link>
+        <Link href={`/condominiums/${id}`} className="hover:text-gray-700">{condominium?.name || 'マンション詳細'}</Link>
         <span className="mx-2">{'>'}</span>
         <span>規約改訂分析</span>
       </nav>
@@ -281,9 +281,9 @@ export default function RegulationAnalysis() {
                             </Button>
                           </div>
                           {isListening && (
-                            <div className="text-sm text-red-600 flex items-center animate-fadeIn">
-                              <div className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></div>
-                              <Zap className="w-3 h-3 mr-1 animate-bounce" />
+                            <div className="text-sm text-blue-600 flex items-center animate-fadeIn">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                              <Brain className="w-3 h-3 mr-1 animate-bounce" />
                               音声を認識中...
                             </div>
                           )}
@@ -326,36 +326,54 @@ export default function RegulationAnalysis() {
                     </div>
                   ) : (
                     /* Execution Progress View */
-                    <div className="space-y-6 animate-fadeIn">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600 animate-pulse">{Math.round(analysisProgress)}%</div>
-                        <Progress value={analysisProgress} className="mt-2 transition-all duration-500" />
-                        <p className="text-sm text-gray-600 mt-2 animate-bounce">{currentStep}</p>
+                    <div className="space-y-6 animate-slideIn">
+                      <div className="text-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6">
+                        <div className="flex justify-center mb-4">
+                          <Bot className="w-12 h-12 text-blue-600 animate-pulse" />
+                        </div>
+                        <div className="text-3xl font-bold text-blue-600 mb-2">{Math.round(analysisProgress)}%</div>
+                        <Progress 
+                          value={analysisProgress} 
+                          className="mt-2 transition-all duration-500 h-3 bg-gray-200"
+                        />
+                        <p className="text-sm text-gray-700 mt-3 font-medium">{currentStep}</p>
                       </div>
                       
                       <div className="space-y-3">
                         {analysisSteps.map((step, index) => (
                           <div 
                             key={step.id} 
-                            className={`flex items-center space-x-3 transition-all duration-300 transform ${
-                              step.status === 'running' ? 'scale-105 translate-x-2' : ''
+                            className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 transform ${
+                              step.status === 'running' ? 'bg-blue-50 scale-102 translate-x-1 shadow-sm' : 
+                              step.status === 'completed' ? 'bg-green-50' : 'bg-gray-50'
                             }`}
                             style={{ animationDelay: `${index * 100}ms` }}
                           >
-                            <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                              step.status === 'completed' ? 'bg-green-500 scale-125' :
-                              step.status === 'running' ? 'bg-blue-500 animate-pulse scale-125' :
+                            <div className={`w-4 h-4 rounded-full transition-all duration-300 flex items-center justify-center ${
+                              step.status === 'completed' ? 'bg-green-500 scale-110' :
+                              step.status === 'running' ? 'bg-blue-500 animate-pulse scale-110' :
                               'bg-gray-300'
-                            }`}></div>
-                            <span className={`text-sm transition-all duration-300 ${
+                            }`}>
+                              {step.status === 'completed' && (
+                                <CheckCircle className="w-2.5 h-2.5 text-white" />
+                              )}
+                              {step.status === 'running' && (
+                                <CircuitBoard className="w-2.5 h-2.5 text-white animate-spin" />
+                              )}
+                            </div>
+                            <span className={`text-sm transition-all duration-300 flex-1 ${
                               step.status === 'completed' ? 'text-green-700 font-semibold' :
-                              step.status === 'running' ? 'text-blue-700 font-medium animate-pulse' :
+                              step.status === 'running' ? 'text-blue-700 font-medium' :
                               'text-gray-500'
                             }`}>
                               {step.name}
                             </span>
                             {step.status === 'running' && (
-                              <Activity className="w-4 h-4 text-blue-600 animate-spin" />
+                              <div className="flex items-center space-x-1 text-blue-600">
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                              </div>
                             )}
                           </div>
                         ))}
