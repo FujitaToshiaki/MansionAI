@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { 
   ArrowLeft, 
   FileText, 
@@ -28,11 +28,9 @@ interface RegulationRevision {
   creation_date: string;
 }
 
-interface StandardRegulationDetailProps {
-  id: string;
-}
-
-export default function StandardRegulationDetail({ id }: StandardRegulationDetailProps) {
+export default function StandardRegulationDetail() {
+  const params = useParams();
+  const id = params.id;
   const [, setLocation] = useLocation();
 
   const { data: revision, isLoading } = useQuery({
@@ -40,7 +38,7 @@ export default function StandardRegulationDetail({ id }: StandardRegulationDetai
     queryFn: async () => {
       const response = await fetch(`/api/regulation-revisions/${id}`);
       if (!response.ok) throw new Error('改正詳細の取得に失敗しました');
-      return response.json() as RegulationRevision;
+      return response.json();
     }
   });
 

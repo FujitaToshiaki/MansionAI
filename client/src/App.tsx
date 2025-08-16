@@ -34,8 +34,8 @@ function Router() {
         <Route path="/condominiums/:id/knowledge" component={KnowledgeBaseStandalone} />
         <Route path="/condominiums/:id/wiki" component={RegulationWiki} />
         <Route path="/condominiums/:id/regulations/wiki" component={RegulationWiki} />
-        <Route path="/standard-regulations" component={StandardRegulations} />
         <Route path="/standard-regulations/:id" component={StandardRegulationDetail} />
+        <Route path="/standard-regulations" component={StandardRegulations} />
         <Route path="/condominiums/:condominiumId/minutes/:minuteId" component={MinuteDetail} />
         <Route component={NotFound} />
       </Switch>

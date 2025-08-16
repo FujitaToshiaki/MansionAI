@@ -41,10 +41,6 @@ export default function StandardRegulations() {
     }
   });
 
-  const handleViewDetails = (revisionId: number) => {
-    setLocation(`/standard-regulations/${revisionId}`);
-  };
-
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case '充電設備':
@@ -196,7 +192,7 @@ export default function StandardRegulations() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => handleViewDetails(revision.id)}
+                  onClick={() => setLocation(`/standard-regulations/${revision.id}`)}
                   className="flex items-center gap-2"
                 >
                   <Eye className="h-4 w-4" />
