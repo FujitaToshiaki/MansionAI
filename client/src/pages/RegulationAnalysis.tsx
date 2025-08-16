@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { AlertTriangle, CheckCircle, Clock, FileText, Bot, Gavel, RotateCcw, Settings, Filter, Mic, MicOff, Play, Pause } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, FileText, Bot, Gavel, RotateCcw, Settings, Filter, Mic, MicOff, Play, Pause, Zap, Activity } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -191,15 +191,22 @@ export default function RegulationAnalysis() {
       </nav>
 
       {/* Header */}
-      <Card className="bg-white">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>規約改訂分析結果</CardTitle>
+      <Card className="bg-white hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+        <CardHeader className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative flex justify-between items-center">
+            <CardTitle className="flex items-center group">
+              <Bot className="w-5 h-5 mr-2 text-blue-600 group-hover:animate-pulse" />
+              規約改訂分析結果
+            </CardTitle>
             <div className="flex space-x-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button disabled={startAnalysisMutation.isPending}>
-                    <RotateCcw className="w-4 h-4 mr-2" />
+                  <Button 
+                    disabled={startAnalysisMutation.isPending}
+                    className="group hover:scale-105 transition-all duration-200 hover:shadow-md"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
                     改訂分析実行
                   </Button>
                 </DialogTrigger>
@@ -213,8 +220,11 @@ export default function RegulationAnalysis() {
                   {!isExecuting ? (
                     <div className="space-y-6">
                       {/* Current Settings Summary */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="font-medium mb-3">📋 設定条件</h4>
+                      <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors duration-200">
+                        <h4 className="font-medium mb-3 flex items-center">
+                          <Settings className="w-4 h-4 mr-2 animate-spin-slow" />
+                          📋 設定条件
+                        </h4>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-gray-600">分析期間:</span>
@@ -259,14 +269,15 @@ export default function RegulationAnalysis() {
                             <Button
                               variant={isListening ? "destructive" : "outline"}
                               onClick={toggleVoiceInput}
-                              className="px-3"
+                              className={`px-3 transition-all duration-300 ${isListening ? 'animate-pulse scale-105' : 'hover:scale-105'}`}
                             >
-                              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                              {isListening ? <MicOff className="w-4 h-4 animate-bounce" /> : <Mic className="w-4 h-4" />}
                             </Button>
                           </div>
                           {isListening && (
-                            <div className="text-sm text-red-600 flex items-center">
+                            <div className="text-sm text-red-600 flex items-center animate-fadeIn">
                               <div className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></div>
+                              <Zap className="w-3 h-3 mr-1 animate-bounce" />
                               音声を認識中...
                             </div>
                           )}
@@ -278,8 +289,8 @@ export default function RegulationAnalysis() {
                         <h4 className="font-medium mb-3">🔄 実行されるAI分析フロー</h4>
                         <div className="space-y-2">
                           {analysisSteps.map((step, index) => (
-                            <div key={step.id} className="flex items-center space-x-3 p-2 bg-blue-50 rounded text-sm">
-                              <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                            <div key={step.id} className="flex items-center space-x-3 p-2 bg-blue-50 rounded text-sm hover:bg-blue-100 transition-colors duration-200 transform hover:scale-102">
+                              <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:animate-pulse">
                                 {index + 1}
                               </span>
                               <div>
@@ -295,36 +306,48 @@ export default function RegulationAnalysis() {
                         <DialogTrigger asChild>
                           <Button variant="outline">キャンセル</Button>
                         </DialogTrigger>
-                        <Button onClick={() => startAnalysisMutation.mutate()}>
-                          <Bot className="w-4 h-4 mr-2" />
+                        <Button 
+                          onClick={() => startAnalysisMutation.mutate()}
+                          className="group hover:scale-105 transition-all duration-200 hover:shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        >
+                          <Bot className="w-4 h-4 mr-2 group-hover:animate-bounce" />
                           AI分析開始
                         </Button>
                       </div>
                     </div>
                   ) : (
                     /* Execution Progress View */
-                    <div className="space-y-6">
+                    <div className="space-y-6 animate-fadeIn">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{Math.round(analysisProgress)}%</div>
-                        <Progress value={analysisProgress} className="mt-2" />
-                        <p className="text-sm text-gray-600 mt-2">{currentStep}</p>
+                        <div className="text-2xl font-bold text-blue-600 animate-pulse">{Math.round(analysisProgress)}%</div>
+                        <Progress value={analysisProgress} className="mt-2 transition-all duration-500" />
+                        <p className="text-sm text-gray-600 mt-2 animate-bounce">{currentStep}</p>
                       </div>
                       
                       <div className="space-y-3">
-                        {analysisSteps.map((step) => (
-                          <div key={step.id} className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 rounded-full ${
-                              step.status === 'completed' ? 'bg-green-500' :
-                              step.status === 'running' ? 'bg-blue-500 animate-pulse' :
+                        {analysisSteps.map((step, index) => (
+                          <div 
+                            key={step.id} 
+                            className={`flex items-center space-x-3 transition-all duration-300 transform ${
+                              step.status === 'running' ? 'scale-105 translate-x-2' : ''
+                            }`}
+                            style={{ animationDelay: `${index * 100}ms` }}
+                          >
+                            <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                              step.status === 'completed' ? 'bg-green-500 scale-125' :
+                              step.status === 'running' ? 'bg-blue-500 animate-pulse scale-125' :
                               'bg-gray-300'
                             }`}></div>
-                            <span className={`text-sm ${
-                              step.status === 'completed' ? 'text-green-700' :
-                              step.status === 'running' ? 'text-blue-700 font-medium' :
+                            <span className={`text-sm transition-all duration-300 ${
+                              step.status === 'completed' ? 'text-green-700 font-semibold' :
+                              step.status === 'running' ? 'text-blue-700 font-medium animate-pulse' :
                               'text-gray-500'
                             }`}>
                               {step.name}
                             </span>
+                            {step.status === 'running' && (
+                              <Activity className="w-4 h-4 text-blue-600 animate-spin" />
+                            )}
                           </div>
                         ))}
                       </div>
@@ -470,13 +493,21 @@ export default function RegulationAnalysis() {
       </Card>
 
       {/* Analysis Results Table */}
-      <Card className="bg-white">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>改訂必要箇所一覧</CardTitle>
+      <Card className="bg-white hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-slideIn">
+        <CardHeader className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-50 to-blue-50 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative flex justify-between items-center">
+            <CardTitle className="flex items-center group">
+              <FileText className="w-5 h-5 mr-2 text-green-600 group-hover:animate-pulse" />
+              改訂必要箇所一覧
+            </CardTitle>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="group hover:scale-105 transition-all duration-200 hover:shadow-md"
+              >
+                <Filter className="w-4 h-4 mr-2 group-hover:animate-bounce" />
                 フィルタ
               </Button>
             </div>
@@ -498,9 +529,13 @@ export default function RegulationAnalysis() {
               </TableHeader>
               <TableBody>
                 {((analysisResults as any)?.issues || []).map((issue: any, index: number) => (
-                  <TableRow key={index}>
+                  <TableRow 
+                    key={index} 
+                    className="hover:bg-gray-50 transition-colors duration-200 animate-fadeIn"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
                     <TableCell>
-                      <Badge className={getPriorityColor(issue.priority)}>
+                      <Badge className={`${getPriorityColor(issue.priority)} hover:scale-105 transition-transform duration-200`}>
                         <div className="flex items-center space-x-1">
                           {getPriorityIcon(issue.priority)}
                           <span>
@@ -547,7 +582,12 @@ export default function RegulationAnalysis() {
                     </TableCell>
                     <TableCell>
                       <Link href={`/condominiums/${id}/regulation-analysis/${issue.id || index}`}>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="group hover:scale-105 transition-all duration-200 hover:shadow-md hover:bg-blue-50"
+                        >
+                          <FileText className="w-3 h-3 mr-1 group-hover:animate-pulse" />
                           詳細
                         </Button>
                       </Link>
@@ -557,10 +597,12 @@ export default function RegulationAnalysis() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Bot className="mx-auto mb-4" size={48} />
-              <p>分析結果がありません</p>
-              <p className="text-sm">決議事項の抽出と分類を先に実行してください</p>
+            <div className="text-center py-8 text-gray-500 animate-fadeIn">
+              <div className="group">
+                <Bot className="mx-auto mb-4 group-hover:animate-bounce transition-transform duration-200" size={48} />
+                <p className="font-medium">分析結果がありません</p>
+                <p className="text-sm animate-pulse">決議事項の抽出と分類を先に実行してください</p>
+              </div>
             </div>
           )}
         </CardContent>
@@ -573,14 +615,21 @@ export default function RegulationAnalysis() {
       {/* Action Buttons */}
       <div className="flex justify-center space-x-4">
         <Link href={`/condominiums/${id}/ai-agent-history`}>
-          <Button variant="outline" size="lg" className="px-8">
-            <Clock className="mr-2" size={20} />
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="px-8 group hover:scale-105 transition-all duration-200 hover:shadow-lg hover:border-blue-400"
+          >
+            <Clock className="mr-2 group-hover:animate-spin" size={20} />
             AI実行履歴
           </Button>
         </Link>
         <Link href={`/condominiums/${id}/ai-revision`}>
-          <Button size="lg" className="bg-purple-600 hover:bg-purple-700 px-8">
-            <Bot className="mr-2" size={20} />
+          <Button 
+            size="lg" 
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-8 group hover:scale-105 transition-all duration-200 hover:shadow-lg"
+          >
+            <Bot className="mr-2 group-hover:animate-bounce" size={20} />
             AI改訂案生成開始
           </Button>
         </Link>
