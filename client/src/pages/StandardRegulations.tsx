@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation, useParams } from "wouter";
 import { 
   FileText, 
@@ -14,8 +15,19 @@ import {
   Users,
   Shield,
   Monitor,
-  ArrowLeft
+  ArrowLeft,
+  Languages
 } from "lucide-react";
+import { useState, useEffect } from "react";
+
+const languages = {
+  ja: { name: '日本語', flag: '🇯🇵' },
+  en: { name: 'English', flag: '🇺🇸' },
+  zh: { name: '中文', flag: '🇨🇳' },
+  ko: { name: '한국어', flag: '🇰🇷' },
+  vi: { name: 'Tiếng Việt', flag: '🇻🇳' },
+  fil: { name: 'Filipino', flag: '🇵🇭' }
+};
 
 interface RegulationRevision {
   id: number;
@@ -34,6 +46,8 @@ export default function StandardRegulations() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const versionId = params.versionId;
+  const [currentLanguage, setCurrentLanguage] = useState<keyof typeof languages>('ja');
+  const [translatedContent, setTranslatedContent] = useState<Record<string, string>>({});
 
   const { data: revisions = [], isLoading } = useQuery({
     queryKey: ['/api/regulation-revisions', versionId],
@@ -43,6 +57,113 @@ export default function StandardRegulations() {
       return response.json() as RegulationRevision[];
     }
   });
+
+  // Translation function
+  const translateText = async (text: string, targetLanguage: string): Promise<string> => {
+    if (targetLanguage === 'ja') return text;
+    
+    const translations: Record<string, Record<string, string>> = {
+      en: {
+        '標準管理規約': 'Standard Management Regulations',
+        '改正項目一覧': 'List of Amendment Items',
+        '専有部分等の範囲': 'Scope of Exclusive Portions',
+        '充電設備': 'Charging Equipment',
+        '宅配ボックス設置': 'Package Delivery Box Installation',
+        '外部専門家活用': 'Utilization of External Experts',
+        '監事機能強化': 'Strengthening Audit Functions',
+        '電磁的方法活用': 'Utilization of Electronic Methods',
+        '管理情報提供': 'Provision of Management Information',
+        '組合員名簿管理': 'Management of Member Registry'
+      },
+      zh: {
+        '標準管理規約': '标准管理规约',
+        '改正項目一覧': '修正项目清单',
+        '専有部分等の範囲': '专有部分等的范围',
+        '充電設備': '充电设备',
+        '宅配ボックス設置': '快递箱安装',
+        '外部専門家活用': '利用外部专家',
+        '監事機能強化': '强化监事功能',
+        '電磁的方法活用': '利用电磁方法',
+        '管理情報提供': '管理信息提供',
+        '組合員名簿管理': '会员名册管理'
+      },
+      ko: {
+        '標準管理規約': '표준 관리규약',
+        '改正項目一覧': '개정 항목 목록',
+        '専有部分等の範囲': '전유부분 등의 범위',
+        '充電設備': '충전설비',
+        '宅配ボックス設置': '택배함 설치',
+        '外部専門家活用': '외부 전문가 활용',
+        '監事機能強化': '감사 기능 강화',
+        '電磁的方法活用': '전자적 방법 활용',
+        '管理情報提供': '관리정보 제공',
+        '組合員名簿管理': '조합원 명부 관리'
+      },
+      vi: {
+        '標準管理規約': 'Quy ước Quản lý Tiêu chuẩn',
+        '改正項目一覧': 'Danh sách các Mục Sửa đổi',
+        '専有部分等の範囲': 'Phạm vi Phần Sở hữu Riêng',
+        '充電設備': 'Thiết bị Sạc',
+        '宅配ボックス設置': 'Lắp đặt Hộp Giao hàng',
+        '外部専門家活用': 'Sử dụng Chuyên gia Bên ngoài',
+        '監事機能強化': 'Tăng cường Chức năng Kiểm toán',
+        '電磁的方法活用': 'Sử dụng Phương pháp Điện từ',
+        '管理情報提供': 'Cung cấp Thông tin Quản lý',
+        '組合員名簿管理': 'Quản lý Danh sách Thành viên'
+      },
+      fil: {
+        '標準管理規約': 'Standard na Regulasyon sa Pamamahala',
+        '改正項目一覧': 'Listahan ng mga Amendment Items',
+        '専有部分等の範囲': 'Saklaw ng mga Eksklusibong Bahagi',
+        '充電設備': 'Charging Equipment',
+        '宅配ボックス設置': 'Package Delivery Box Installation',
+        '外部専門家活用': 'Paggamit ng External Experts',
+        '監事機能強化': 'Pagpapalakas ng Audit Functions',
+        '電磁的方法活用': 'Paggamit ng Electronic Methods',
+        '管理情報提供': 'Pagbibigay ng Management Information',
+        '組合員名簿管理': 'Pamamahala ng Member Registry'
+      }
+    };
+    
+    return translations[targetLanguage]?.[text] || text;
+  };
+
+  // Helper function to get translated text
+  const getTranslatedText = (text: string): string => {
+    if (currentLanguage === 'ja') return text;
+    return translatedContent[text] || text;
+  };
+
+  // Update translations when language changes
+  useEffect(() => {
+    if (currentLanguage === 'ja') return;
+
+    const textsToTranslate = [
+      '標準管理規約',
+      '改正項目一覧',
+      '専有部分等の範囲',
+      '充電設備',
+      '宅配ボックス設置',
+      '外部専門家活用',
+      '監事機能強化',
+      '電磁的方法活用',
+      '管理情報提供',
+      '組合員名簿管理'
+    ];
+
+    Promise.all(
+      textsToTranslate.map(async (text) => ({
+        original: text,
+        translated: await translateText(text, currentLanguage)
+      }))
+    ).then(results => {
+      const newTranslations: Record<string, string> = {};
+      results.forEach(({ original, translated }) => {
+        newTranslations[original] = translated;
+      });
+      setTranslatedContent(newTranslations);
+    });
+  }, [currentLanguage]);
 
   const getVersionName = (versionId: string) => {
     switch (versionId) {
@@ -145,13 +266,34 @@ export default function StandardRegulations() {
               改正版一覧に戻る
             </Button>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">{getVersionName(versionId || '')} - 改正項目一覧</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{getVersionName(versionId || '')} - {getTranslatedText('改正項目一覧')}</h1>
           <p className="text-gray-600 mt-2">この改正版における全ての変更項目と新設規定</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Download className="h-4 w-4 mr-2" />
-          改正項目をエクスポート
-        </Button>
+        
+        {/* Language Selector and Export Button */}
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <Languages className="w-4 h-4 text-gray-500" />
+            <Select value={currentLanguage} onValueChange={(value: keyof typeof languages) => setCurrentLanguage(value)}>
+              <SelectTrigger className="w-32">
+                <SelectValue>
+                  {languages[currentLanguage].flag} {languages[currentLanguage].name}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(languages).map(([code, lang]) => (
+                  <SelectItem key={code} value={code}>
+                    {lang.flag} {lang.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <Download className="h-4 w-4 mr-2" />
+            改正項目をエクスポート
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4">
@@ -162,16 +304,16 @@ export default function StandardRegulations() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     {getCategoryIcon(revision.category)}
-                    <CardTitle className="text-lg">{revision.title}</CardTitle>
+                    <CardTitle className="text-lg">{getTranslatedText(revision.title)}</CardTitle>
                     <Badge className={getCategoryColor(revision.category)}>
-                      {revision.category}
+                      {getTranslatedText(revision.category)}
                     </Badge>
                     <Badge variant="outline" className="flex items-center gap-1">
                       {getChangeTypeIcon(revision.change_type)}
                       {revision.change_type}
                     </Badge>
                   </div>
-                  <p className="text-gray-600 text-sm">{revision.change_description}</p>
+                  <p className="text-gray-600 text-sm">{getTranslatedText(revision.change_description)}</p>
                 </div>
               </div>
             </CardHeader>
