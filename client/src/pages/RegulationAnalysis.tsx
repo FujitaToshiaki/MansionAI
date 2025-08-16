@@ -327,38 +327,39 @@ export default function RegulationAnalysis() {
                   ) : (
                     /* Execution Progress View */
                     <div className="space-y-6 animate-slideIn">
-                      <div className="text-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6">
+                      <div className="text-center bg-gray-50 rounded-lg p-6 border">
                         <div className="flex justify-center mb-4">
-                          <Bot className="w-12 h-12 text-blue-600 animate-pulse" />
+                          <Bot className="w-12 h-12 text-blue-600" />
                         </div>
-                        <div className="text-3xl font-bold text-blue-600 mb-2">{Math.round(analysisProgress)}%</div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">AI分析実行中</h3>
+                        <div className="text-2xl font-bold text-blue-600 mb-2">{Math.round(analysisProgress)}%</div>
                         <Progress 
                           value={analysisProgress} 
                           className="mt-2 transition-all duration-500 h-3 bg-gray-200"
                         />
-                        <p className="text-sm text-gray-700 mt-3 font-medium">{currentStep}</p>
+                        <p className="text-sm text-gray-700 mt-3 font-medium">{currentStep}を実行しています</p>
                       </div>
                       
                       <div className="space-y-3">
                         {analysisSteps.map((step, index) => (
                           <div 
                             key={step.id} 
-                            className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 transform ${
-                              step.status === 'running' ? 'bg-blue-50 scale-102 translate-x-1 shadow-sm' : 
-                              step.status === 'completed' ? 'bg-green-50' : 'bg-gray-50'
+                            className={`flex items-center space-x-3 p-3 rounded-lg border transition-all duration-300 ${
+                              step.status === 'running' ? 'bg-blue-50 border-blue-200' : 
+                              step.status === 'completed' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
                             }`}
                             style={{ animationDelay: `${index * 100}ms` }}
                           >
                             <div className={`w-4 h-4 rounded-full transition-all duration-300 flex items-center justify-center ${
-                              step.status === 'completed' ? 'bg-green-500 scale-110' :
-                              step.status === 'running' ? 'bg-blue-500 animate-pulse scale-110' :
+                              step.status === 'completed' ? 'bg-green-500' :
+                              step.status === 'running' ? 'bg-blue-500' :
                               'bg-gray-300'
                             }`}>
                               {step.status === 'completed' && (
                                 <CheckCircle className="w-2.5 h-2.5 text-white" />
                               )}
                               {step.status === 'running' && (
-                                <CircuitBoard className="w-2.5 h-2.5 text-white animate-spin" />
+                                <CircuitBoard className="w-2.5 h-2.5 text-white" />
                               )}
                             </div>
                             <span className={`text-sm transition-all duration-300 flex-1 ${
