@@ -119,7 +119,7 @@ export default function AIRevisionGeneration() {
       </nav>
 
       {/* Header */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Bot className="mr-2" size={24} />
@@ -163,7 +163,7 @@ export default function AIRevisionGeneration() {
       </Card>
 
       {/* Revision Options */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle>改訂案選択</CardTitle>
         </CardHeader>
@@ -175,7 +175,7 @@ export default function AIRevisionGeneration() {
                   <div className="flex items-start space-x-4">
                     <RadioGroupItem value={option.id} id={option.id} className="mt-1" />
                     <Label htmlFor={option.id} className="flex-1 cursor-pointer">
-                      <Card className={`transition-colors ${selectedOption === option.id ? 'bg-purple-50 border-purple-200' : 'hover:bg-gray-50'}`}>
+                      <Card className={`bg-white transition-colors ${selectedOption === option.id ? 'border-purple-200' : 'hover:bg-gray-50'}`}>
                         <CardHeader className="pb-3">
                           <div className="flex items-center justify-between">
                             <CardTitle className="text-base">{option.title}</CardTitle>
@@ -251,7 +251,7 @@ export default function AIRevisionGeneration() {
       </Card>
 
       {/* Preview and Comparison */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle>改訂内容プレビュー</CardTitle>
         </CardHeader>
@@ -265,8 +265,8 @@ export default function AIRevisionGeneration() {
             
             <TabsContent value="comparison">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader className="bg-red-50">
+                <Card className="bg-white">
+                  <CardHeader className="bg-white">
                     <CardTitle className="text-base text-red-900">改訂前（現行）</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4">
@@ -279,8 +279,8 @@ export default function AIRevisionGeneration() {
                   </CardContent>
                 </Card>
                 
-                <Card>
-                  <CardHeader className="bg-green-50">
+                <Card className="bg-white">
+                  <CardHeader className="bg-white">
                     <CardTitle className="text-base text-green-900">改訂後（提案）</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4">

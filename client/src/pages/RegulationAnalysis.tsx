@@ -57,7 +57,7 @@ export default function RegulationAnalysis() {
       </nav>
 
       {/* Header */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle>規約改訂分析結果</CardTitle>
         </CardHeader>
@@ -172,8 +172,8 @@ export default function RegulationAnalysis() {
 
       {/* Regulation Comparison */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="bg-gray-50">
+        <Card className="bg-white">
+          <CardHeader className="bg-white">
             <CardTitle className="flex items-center">
               <FileText className="mr-2" size={20} />
               現行条文表示
@@ -226,8 +226,8 @@ export default function RegulationAnalysis() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="bg-green-50">
+        <Card className="bg-white">
+          <CardHeader className="bg-white">
             <CardTitle className="flex items-center">
               <Gavel className="mr-2" size={20} />
               標準規約条文
