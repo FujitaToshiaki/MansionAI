@@ -49,12 +49,12 @@ export default function StandardRegulations() {
   const [currentLanguage, setCurrentLanguage] = useState<keyof typeof languages>('ja');
   const [translatedContent, setTranslatedContent] = useState<Record<string, string>>({});
 
-  const { data: revisions = [], isLoading } = useQuery({
+  const { data: revisions = [], isLoading } = useQuery<RegulationRevision[]>({
     queryKey: ['/api/regulation-revisions', versionId],
     queryFn: async () => {
       const response = await fetch('/api/regulation-revisions');
       if (!response.ok) throw new Error('改正情報の取得に失敗しました');
-      return response.json() as RegulationRevision[];
+      return response.json();
     }
   });
 

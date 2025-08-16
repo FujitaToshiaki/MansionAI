@@ -78,7 +78,7 @@ export default function RegulationRevisionDetail() {
     if (currentLanguage === 'ja' || !revisionDetail) return;
 
     const textsToTranslate = [
-      revisionDetail.title,
+      revisionDetail?.title || '',
       '改訂詳細',
       '改訂理由',
       '規約の変更内容',
@@ -87,9 +87,9 @@ export default function RegulationRevisionDetail() {
       '変更のポイント',
       '実施スケジュール',
       '実施手順',
-      revisionDetail.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。',
-      revisionDetail.currentText || '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。',
-      revisionDetail.proposedText || '第15条 管理組合は、個人情報の保護に関する法律に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。'
+      revisionDetail?.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。',
+      revisionDetail?.currentText || '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。',
+      revisionDetail?.proposedText || '第15条 管理組合は、個人情報の保護に関する法律に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。'
     ];
 
     Promise.all(
@@ -123,7 +123,7 @@ export default function RegulationRevisionDetail() {
       <nav className="text-sm text-gray-500">
         <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
         <span className="mx-2">{'>'}</span>
-        <Link href={`/condominiums/${id}`} className="hover:text-gray-700">{condominium?.name}</Link>
+        <Link href={`/condominiums/${id}`} className="hover:text-gray-700">{condominium?.name || ''}</Link>
         <span className="mx-2">{'>'}</span>
         <Link href={`/condominiums/${id}/regulation-analysis`} className="hover:text-gray-700">規約改訂分析</Link>
         <span className="mx-2">{'>'}</span>
@@ -137,19 +137,19 @@ export default function RegulationRevisionDetail() {
             <div>
               <div className="flex items-center space-x-3">
                 <FileText className="w-5 h-5" />
-                <h1 className="text-xl font-bold">{revisionDetail.title}</h1>
+                <h1 className="text-xl font-bold">{revisionDetail?.title || ''}</h1>
                 <Badge variant={
-                  revisionDetail.impact === 'high' ? 'destructive' :
-                  revisionDetail.impact === 'medium' ? 'secondary' : 'outline'
+                  revisionDetail?.impact === 'high' ? 'destructive' :
+                  revisionDetail?.impact === 'medium' ? 'secondary' : 'outline'
                 }>
-                  {revisionDetail.impact === 'high' ? '緊急度：高' :
-                   revisionDetail.impact === 'medium' ? '緊急度：中' : '緊急度：低'}
+                  {revisionDetail?.impact === 'high' ? '緊急度：高' :
+                   revisionDetail?.impact === 'medium' ? '緊急度：中' : '緊急度：低'}
                 </Badge>
-                {revisionDetail.lawRevisionRequired && (
+                {revisionDetail?.lawRevisionRequired && (
                   <Badge variant="outline">法改正対応</Badge>
                 )}
               </div>
-              <p className="text-gray-600 mt-1">{getTranslatedText('改訂詳細')} - {revisionDetail.article}</p>
+              <p className="text-gray-600 mt-1">{getTranslatedText('改訂詳細')} - {revisionDetail?.article || ''}</p>
             </div>
             
             {/* Language Selector and Back Button */}
@@ -184,7 +184,7 @@ export default function RegulationRevisionDetail() {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <h3 className="font-medium mb-3">{getTranslatedText('改訂理由')}</h3>
             <p className="text-gray-700 leading-relaxed">
-              {getTranslatedText(revisionDetail.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。')}
+              {getTranslatedText(revisionDetail?.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。')}
             </p>
           </div>
 
@@ -200,7 +200,7 @@ export default function RegulationRevisionDetail() {
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-sm leading-relaxed mb-3">
-                    {getTranslatedText(revisionDetail.currentText || `第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。`)}
+                    {getTranslatedText(revisionDetail?.currentText || `第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。`)}
                   </p>
                   <div className="text-sm text-red-600">
                     ⚠️ 法的根拠が不明確
@@ -214,7 +214,7 @@ export default function RegulationRevisionDetail() {
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-sm leading-relaxed mb-3">
-                    {getTranslatedText(revisionDetail.proposedText || `第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。`)}
+                    {getTranslatedText(revisionDetail?.proposedText || `第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。`)}
                   </p>
                   <div className="text-sm text-green-600">
                     ✅ 法的要件を完全満足
