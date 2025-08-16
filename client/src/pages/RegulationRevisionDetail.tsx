@@ -46,16 +46,9 @@ export default function RegulationRevisionDetail() {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <FileText className="w-5 h-5" />
                 <h1 className="text-xl font-bold">{revisionDetail.title}</h1>
-              </div>
-              <p className="text-gray-600 mt-1">改訂詳細 - {revisionDetail.article}</p>
-            </div>
-            
-            {/* Status Badges and Back Button */}
-            <div className="flex items-center space-x-3">
-              <div className="flex space-x-2">
                 <Badge variant={
                   revisionDetail.impact === 'high' ? 'destructive' :
                   revisionDetail.impact === 'medium' ? 'secondary' : 'outline'
@@ -67,6 +60,11 @@ export default function RegulationRevisionDetail() {
                   <Badge variant="outline">法改正対応</Badge>
                 )}
               </div>
+              <p className="text-gray-600 mt-1">改訂詳細 - {revisionDetail.article}</p>
+            </div>
+            
+            {/* Back Button */}
+            <div>
               <Link href={`/condominiums/${id}/regulation-analysis`}>
                 <Button variant="ghost" size="sm">
                   <ArrowLeft className="w-4 h-4 mr-2" />
