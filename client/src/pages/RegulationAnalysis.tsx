@@ -228,7 +228,7 @@ export default function RegulationAnalysis() {
                       {/* Current Settings Summary */}
                       <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors duration-200">
                         <h4 className="font-medium mb-3 flex items-center">
-                          <Settings className="w-4 h-4 mr-2 animate-spin-slow" />
+                          <Settings className="w-4 h-4 mr-2" />
                           📋 設定条件
                         </h4>
                         <div className="grid grid-cols-2 gap-4 text-sm">
