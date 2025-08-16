@@ -142,14 +142,9 @@ export default function MinuteDetail() {
         return null;
       }
       
-      // Headers (### and ##)
+      // Headers (### and ##) - completely hide ### headers to remove RAG management labels
       if (trimmedLine.startsWith('### ')) {
-        const headerText = trimmedLine.substring(4);
-        return (
-          <h3 key={index} className="text-xl font-bold text-blue-700 mt-2 mb-2 border-b border-blue-200 pb-1">
-            {headerText}
-          </h3>
-        );
+        return null; // Hide all ### headers including titles
       }
       if (trimmedLine.startsWith('## ')) {
         return (

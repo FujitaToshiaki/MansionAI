@@ -66,7 +66,7 @@ export function MinutesTab({ condominiumId }: MinutesTabProps) {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <CardTitle className="text-lg text-blue-600 hover:text-blue-800">
-                  {minute.title}
+                  {minute.title.replace(/^### /, '')}
                 </CardTitle>
                 <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
                   <div className="flex items-center space-x-1">
