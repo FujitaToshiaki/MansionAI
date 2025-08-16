@@ -39,6 +39,7 @@ function Router() {
         <Route path="/condominiums/:id/ai-revision" component={AIRevisionGeneration} />
         <Route path="/condominiums/:id/ai-agent-history" component={AIAgentHistory} />
         <Route path="/condominiums/:id/ai-agent-history/:executionId" component={AIAgentExecutionDetail} />
+        <Route path="/ai-agent-history" component={AIAgentHistory} />
         <Route path="/condominiums/:id/knowledge" component={KnowledgeBaseStandalone} />
         <Route path="/condominiums/:id/wiki" component={RegulationWiki} />
         <Route path="/condominiums/:id/regulations/wiki" component={RegulationWiki} />
