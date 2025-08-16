@@ -31,7 +31,7 @@ export default function CondominiumList() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="bg-white">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>マンション一覧</CardTitle>
           <div className="flex items-center space-x-3">
