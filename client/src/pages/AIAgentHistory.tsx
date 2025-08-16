@@ -10,6 +10,9 @@ import { Link } from "wouter";
 export default function AIAgentHistory() {
   const { id } = useParams();
 
+  // Check if we're in global view (no condominium ID) or condominium-specific view
+  const isGlobalView = !id;
+
   // Mock data for AI agent execution history
   const aiHistory = [
     {
@@ -72,6 +75,7 @@ export default function AIAgentHistory() {
 
   const { data: condominium } = useQuery({
     queryKey: ['/api/condominiums', id],
+    enabled: !!id,
   });
 
   const getStatusBadge = (status: string) => {
@@ -99,13 +103,23 @@ export default function AIAgentHistory() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="text-sm text-gray-500">
-        <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
-        <span className="mx-2">{'>'}</span>
-        <Link href={`/condominiums/${id}`} className="hover:text-gray-700">{condominium?.name || 'ローディング中...'}</Link>
-        <span className="mx-2">{'>'}</span>
-        <Link href={`/condominiums/${id}/regulation-analysis`} className="hover:text-gray-700">規約改訂分析</Link>
-        <span className="mx-2">{'>'}</span>
-        <span>AIエージェント実行履歴</span>
+        {isGlobalView ? (
+          <>
+            <Link href="/" className="hover:text-gray-700">ダッシュボード</Link>
+            <span className="mx-2">{'>'}</span>
+            <span>AI履歴</span>
+          </>
+        ) : (
+          <>
+            <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
+            <span className="mx-2">{'>'}</span>
+            <Link href={`/condominiums/${id}`} className="hover:text-gray-700">{condominium?.name || 'ローディング中...'}</Link>
+            <span className="mx-2">{'>'}</span>
+            <Link href={`/condominiums/${id}/regulation-analysis`} className="hover:text-gray-700">規約改訂分析</Link>
+            <span className="mx-2">{'>'}</span>
+            <span>AIエージェント実行履歴</span>
+          </>
+        )}
       </nav>
 
       {/* Header */}
@@ -115,25 +129,29 @@ export default function AIAgentHistory() {
             <div>
               <div className="flex items-center space-x-2">
                 <Bot className="w-5 h-5" />
-                <h1 className="text-xl font-bold">AIエージェント実行履歴</h1>
+                <h1 className="text-xl font-bold">{isGlobalView ? 'AI履歴' : 'AIエージェント実行履歴'}</h1>
               </div>
-              <p className="text-gray-600 mt-1">AI分析の実行記録と処理詳細</p>
+              <p className="text-gray-600 mt-1">{isGlobalView ? '全マンションのAI分析実行記録' : 'AI分析の実行記録と処理詳細'}</p>
             </div>
             
-            <Link href={`/condominiums/${id}/regulation-analysis`}>
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                分析結果に戻る
-              </Button>
-            </Link>
+            {!isGlobalView && (
+              <Link href={`/condominiums/${id}/regulation-analysis`}>
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  分析結果に戻る
+                </Button>
+              </Link>
+            )}
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">対象マンション:</span>
-              <p className="font-medium">{condominium?.name || 'ローディング中...'}</p>
-            </div>
+            {!isGlobalView && (
+              <div>
+                <span className="text-gray-600">対象マンション:</span>
+                <p className="font-medium">{condominium?.name || 'ローディング中...'}</p>
+              </div>
+            )}
             <div>
               <span className="text-gray-600">総実行回数:</span>
               <p className="font-medium">{aiHistory.length}回</p>
@@ -142,6 +160,12 @@ export default function AIAgentHistory() {
               <span className="text-gray-600">最終実行:</span>
               <p className="font-medium">{formatDateTime(aiHistory[0].timestamp).date} {formatDateTime(aiHistory[0].timestamp).time}</p>
             </div>
+            {isGlobalView && (
+              <div>
+                <span className="text-gray-600">対象範囲:</span>
+                <p className="font-medium">全マンション</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
