@@ -41,7 +41,7 @@ export default function RegulationRevisionDetail() {
         <span>改訂詳細</span>
       </nav>
 
-      {/* Header with Key Info - Unified Card */}
+      {/* Header with All Content - Single Unified Card */}
       <Card className="bg-white">
         <CardHeader>
           <div className="flex items-start justify-between">
@@ -83,19 +83,14 @@ export default function RegulationRevisionDetail() {
               {revisionDetail.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。'}
             </p>
           </div>
-        </CardHeader>
-      </Card>
 
-      {/* 規約の変更内容 */}
-      <Card className="bg-white">
-        <CardHeader>
-          <CardTitle>規約の変更内容</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+          {/* 規約の変更内容 */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="font-medium mb-6">規約の変更内容</h3>
+            
             {/* 変更のポイント */}
-            <div>
-              <h3 className="font-medium mb-3">変更のポイント</h3>
+            <div className="mb-6">
+              <h4 className="font-medium mb-3">変更のポイント</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center">
                   <span className="w-2 h-2 bg-gray-400 rounded-full mr-3 flex-shrink-0"></span>
@@ -116,7 +111,7 @@ export default function RegulationRevisionDetail() {
               <div>
                 <div className="flex items-center mb-3">
                   <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium mr-3">現行</span>
-                  <h3 className="font-medium text-gray-700">現在の規約条文</h3>
+                  <h4 className="font-medium text-gray-700">現在の規約条文</h4>
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-sm leading-relaxed mb-3">
@@ -130,7 +125,7 @@ export default function RegulationRevisionDetail() {
               <div>
                 <div className="flex items-center mb-3">
                   <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium mr-3">改訂案</span>
-                  <h3 className="font-medium text-gray-700">新しい規約条文</h3>
+                  <h4 className="font-medium text-gray-700">新しい規約条文</h4>
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-sm leading-relaxed mb-3">
@@ -143,7 +138,7 @@ export default function RegulationRevisionDetail() {
               </div>
             </div>
           </div>
-        </CardContent>
+        </CardHeader>
       </Card>
 
       {/* 実施手順とスケジュール */}
