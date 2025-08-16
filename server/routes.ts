@@ -80,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const query = `
         SELECT * FROM regulation_revisions 
-        WHERE id = $1
+        WHERE id = ?
       `;
       const result = await db.execute(query, [req.params.id]);
       if (result.rows.length === 0) {
