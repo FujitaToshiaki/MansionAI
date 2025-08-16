@@ -160,9 +160,63 @@ export const insertKnowledgeChunkSchema = createInsertSchema(knowledgeChunks).om
   createdAt: true
 });
 
+// AI Agent Task Management
+export const aiTasks = pgTable("ai_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  taskId: text("task_id").unique().notNull(),
+  taskType: text("task_type").notNull(), // 規約改定分析, 議事録分析, etc
+  agentType: text("agent_type").notNull(), // 規約分析エージェント, etc
+  condominiumId: varchar("condominium_id").references(() => condominiums.id),
+  status: text("status").notNull().default("queued"), // queued, running, completed, failed, cancelled
+  progress: integer("progress").default(0), // 0-100
+  currentStep: text("current_step"),
+  settings: jsonb("settings"), // 分析設定内容
+  result: jsonb("result"), // 分析結果
+  errorMessage: text("error_message"),
+  estimatedDuration: integer("estimated_duration"), // 分単位
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+// Regulation Revision Analysis Results
+export const regulationAnalysisResults = pgTable("regulation_analysis_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  taskId: varchar("task_id").references(() => aiTasks.id),
+  priority: text("priority").notNull(), // high, medium, low
+  article: text("article").notNull(),
+  title: text("title").notNull(),
+  reason: text("reason").notNull(),
+  currentText: text("current_text"),
+  proposedText: text("proposed_text"),
+  legalBasis: text("legal_basis"),
+  standardRegulationRef: text("standard_regulation_ref"),
+  relatedDecisionId: varchar("related_decision_id").references(() => decisions.id),
+  lawRevisionRequired: boolean("law_revision_required").default(false),
+  impact: text("impact").notNull(), // high, medium, low
+  implementationNotes: text("implementation_notes"),
+  dataSources: jsonb("data_sources"), // 根拠となるデータソース
+  changeHistory: jsonb("change_history"), // 時系列変更履歴
+  status: text("status").default("draft"), // draft, approved, implemented, rejected
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
 export const insertAiSearchHistorySchema = createInsertSchema(aiSearchHistory).omit({
   id: true,
   createdAt: true
+});
+
+export const insertAiTaskSchema = createInsertSchema(aiTasks).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertRegulationAnalysisResultSchema = createInsertSchema(regulationAnalysisResults).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
 });
 
 // Types
@@ -192,3 +246,9 @@ export type InsertKnowledgeChunk = z.infer<typeof insertKnowledgeChunkSchema>;
 
 export type AiSearchHistory = typeof aiSearchHistory.$inferSelect;
 export type InsertAiSearchHistory = z.infer<typeof insertAiSearchHistorySchema>;
+
+export type AiTask = typeof aiTasks.$inferSelect;
+export type InsertAiTask = z.infer<typeof insertAiTaskSchema>;
+
+export type RegulationAnalysisResult = typeof regulationAnalysisResults.$inferSelect;
+export type InsertRegulationAnalysisResult = z.infer<typeof insertRegulationAnalysisResultSchema>;

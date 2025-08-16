@@ -11,6 +11,7 @@ import DocumentUpload from "@/pages/DocumentUpload";
 import OCRProcessing from "@/pages/OCRProcessing";
 import DecisionExtraction from "@/pages/DecisionExtraction";
 import RegulationAnalysis from "@/pages/RegulationAnalysis";
+import RegulationRevisionDetail from "@/pages/RegulationRevisionDetail";
 import AIRevisionGeneration from "@/pages/AIRevisionGeneration";
 import KnowledgeBaseStandalone from "@/pages/KnowledgeBaseStandalone";
 import RegulationWiki from "@/pages/RegulationWiki";
@@ -30,6 +31,8 @@ function Router() {
         <Route path="/condominiums/:id/upload" component={DocumentUpload} />
         <Route path="/condominiums/:id/ocr" component={OCRProcessing} />
         <Route path="/condominiums/:id/decisions" component={DecisionExtraction} />
+        <Route path="/condominiums/:id/regulation-analysis" component={RegulationAnalysis} />
+        <Route path="/condominiums/:id/regulation-analysis/:revisionId" component={RegulationRevisionDetail} />
         <Route path="/condominiums/:id/analysis" component={RegulationAnalysis} />
         <Route path="/condominiums/:id/ai-revision" component={AIRevisionGeneration} />
         <Route path="/condominiums/:id/knowledge" component={KnowledgeBaseStandalone} />

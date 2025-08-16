@@ -1,15 +1,36 @@
 import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, CheckCircle, Clock, FileText, Bot, Gavel } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { AlertTriangle, CheckCircle, Clock, FileText, Bot, Gavel, RotateCcw, Settings, Filter } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function RegulationAnalysis() {
   const { id } = useParams();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // State for analysis settings
+  const [analysisSettings, setAnalysisSettings] = useState({
+    period: 'past_6_months',
+    checkLawRevision: true,
+    checkStandardRegulation: true,
+    checkPastDecisions: true,
+    priorities: ['high', 'medium', 'low'],
+    strictness: 'standard',
+    mergeSimular: true
+  });
 
   const { data: condominium } = useQuery({
     queryKey: ['/api/condominiums', id],
@@ -25,6 +46,28 @@ export default function RegulationAnalysis() {
 
   const { data: standardRegulations } = useQuery({
     queryKey: ['/api/standard-regulations'],
+  });
+
+  // Mutation for starting analysis
+  const startAnalysisMutation = useMutation({
+    mutationFn: () => apiRequest(`/api/condominiums/${id}/start-regulation-analysis`, {
+      method: 'POST',
+      body: analysisSettings
+    }),
+    onSuccess: () => {
+      toast({
+        title: "分析開始",
+        description: "規約改定分析を開始しました。数分後に結果が更新されます。",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/condominiums', id, 'regulation-analysis'] });
+    },
+    onError: () => {
+      toast({
+        title: "エラー",
+        description: "分析の開始に失敗しました。",
+        variant: "destructive",
+      });
+    }
   });
 
   const getPriorityColor = (priority: string) => {
@@ -59,7 +102,144 @@ export default function RegulationAnalysis() {
       {/* Header */}
       <Card className="bg-white">
         <CardHeader>
-          <CardTitle>規約改訂分析結果</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>規約改訂分析結果</CardTitle>
+            <div className="flex space-x-2">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button disabled={startAnalysisMutation.isPending}>
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    改訂分析実行
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>規約改定分析を実行しますか？</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      設定条件に従ってAIエージェントが分析を実行します。
+                      この処理には数分かかる場合があります。
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>いいえ</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => startAnalysisMutation.mutate()}>
+                      はい
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Settings className="w-4 h-4 mr-2" />
+                    分析設定
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>⚙️ 規約改定分析設定</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-6">
+                    {/* 分析対象期間 */}
+                    <div>
+                      <Label className="text-sm font-medium">📅 分析対象期間</Label>
+                      <RadioGroup 
+                        value={analysisSettings.period} 
+                        onValueChange={(value) => setAnalysisSettings(prev => ({...prev, period: value}))}
+                        className="mt-2"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="past_6_months" id="past_6_months" />
+                          <Label htmlFor="past_6_months">過去6ヶ月</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="past_1_year" id="past_1_year" />
+                          <Label htmlFor="past_1_year">過去1年</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="all_period" id="all_period" />
+                          <Label htmlFor="all_period">全期間</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    {/* 分析範囲 */}
+                    <div>
+                      <Label className="text-sm font-medium">🎯 分析範囲</Label>
+                      <div className="mt-2 space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="law_revision"
+                            checked={analysisSettings.checkLawRevision}
+                            onCheckedChange={(checked) => setAnalysisSettings(prev => ({...prev, checkLawRevision: checked as boolean}))}
+                          />
+                          <Label htmlFor="law_revision">法改正チェック</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="standard_regulation"
+                            checked={analysisSettings.checkStandardRegulation}
+                            onCheckedChange={(checked) => setAnalysisSettings(prev => ({...prev, checkStandardRegulation: checked as boolean}))}
+                          />
+                          <Label htmlFor="standard_regulation">標準管理規約チェック</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="past_decisions"
+                            checked={analysisSettings.checkPastDecisions}
+                            onCheckedChange={(checked) => setAnalysisSettings(prev => ({...prev, checkPastDecisions: checked as boolean}))}
+                          />
+                          <Label htmlFor="past_decisions">過去決議事項チェック</Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 詳細設定 */}
+                    <div>
+                      <Label className="text-sm font-medium">🔍 詳細設定</Label>
+                      <div className="mt-2 space-y-3">
+                        <div>
+                          <Label className="text-xs text-gray-600">影響度評価</Label>
+                          <RadioGroup 
+                            value={analysisSettings.strictness} 
+                            onValueChange={(value) => setAnalysisSettings(prev => ({...prev, strictness: value}))}
+                            className="mt-1"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="strict" id="strict" />
+                              <Label htmlFor="strict">厳格</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="standard" id="standard" />
+                              <Label htmlFor="standard">標準</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="relaxed" id="relaxed" />
+                              <Label htmlFor="relaxed">緩和</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="merge_similar"
+                            checked={analysisSettings.mergeSimular}
+                            onCheckedChange={(checked) => setAnalysisSettings(prev => ({...prev, mergeSimular: checked as boolean}))}
+                          />
+                          <Label htmlFor="merge_similar">類似条項統合</Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button variant="outline" onClick={() => {}}>キャンセル</Button>
+                      <Button onClick={() => {}}>設定保存</Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
@@ -86,7 +266,15 @@ export default function RegulationAnalysis() {
       {/* Analysis Results Table */}
       <Card className="bg-white">
         <CardHeader>
-          <CardTitle>改訂必要箇所一覧</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>改訂必要箇所一覧</CardTitle>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm">
+                <Filter className="w-4 h-4 mr-2" />
+                フィルタ
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {analysisResults?.issues?.length > 0 ? (
@@ -152,9 +340,11 @@ export default function RegulationAnalysis() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm">
-                        詳細
-                      </Button>
+                      <Link href={`/condominiums/${id}/regulation-analysis/${issue.id || index}`}>
+                        <Button variant="ghost" size="sm">
+                          詳細
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}

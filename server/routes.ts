@@ -76,6 +76,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Regulation analysis results endpoint (overrides the mock one further down)
+  app.get("/api/condominiums/:id/regulation-analysis", async (req, res) => {
+    try {
+      // Use raw SQL query to avoid PostgreSQL parameter issues
+      const query = `
+        SELECT * FROM regulation_analysis_results 
+        WHERE condominium_id = '${req.params.id}'
+        ORDER BY 
+          CASE priority 
+            WHEN 'high' THEN 1 
+            WHEN 'medium' THEN 2 
+            WHEN 'low' THEN 3 
+          END, 
+          created_at DESC
+      `;
+      const result = await db.execute(query);
+      
+      res.json({
+        totalIssues: result.rows.length,
+        issues: result.rows
+      });
+    } catch (error) {
+      console.error('Error fetching regulation analysis results:', error);
+      res.status(500).json({ error: "Failed to fetch regulation analysis results" });
+    }
+  });
+
+  // Specific regulation analysis result endpoint
+  app.get("/api/condominiums/:id/regulation-analysis/:revisionId", async (req, res) => {
+    try {
+      const query = `
+        SELECT * FROM regulation_analysis_results 
+        WHERE condominium_id = '${req.params.id}' AND id = '${req.params.revisionId}'
+      `;
+      const result = await db.execute(query);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Analysis result not found" });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error fetching specific regulation analysis result:', error);
+      res.status(500).json({ error: "Failed to fetch regulation analysis result" });
+    }
+  });
+
+  // Start regulation analysis endpoint
+  app.post("/api/condominiums/:id/start-regulation-analysis", async (req, res) => {
+    try {
+      // Create AI task
+      const taskId = `REG_ANALYSIS_${Date.now()}`;
+      const insertTaskQuery = `
+        INSERT INTO ai_tasks (task_id, task_type, agent_type, condominium_id, status, settings, estimated_duration)
+        VALUES ('${taskId}', '規約改定分析', '規約分析エージェント', '${req.params.id}', 'running', '${JSON.stringify(req.body)}', 15)
+        RETURNING id
+      `;
+      const taskResult = await db.execute(insertTaskQuery);
+
+      // Simulate analysis completion after 3 seconds
+      setTimeout(async () => {
+        try {
+          await db.execute(`UPDATE ai_tasks SET status = 'completed', completed_at = NOW() WHERE task_id = '${taskId}'`);
+          console.log('Analysis task completed and database updated');
+        } catch (error) {
+          console.error('Error completing analysis task:', error);
+        }
+      }, 3000);
+
+      res.json({ 
+        taskId,
+        message: "規約改定分析を開始しました"
+      });
+    } catch (error) {
+      console.error('Error starting regulation analysis:', error);
+      res.status(500).json({ error: "Failed to start regulation analysis" });
+    }
+  });
+
   app.get("/api/regulation-revisions/:id", async (req, res) => {
     try {
       const query = `
@@ -594,55 +673,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Analysis endpoints
-  app.get("/api/condominiums/:id/regulation-analysis", async (req, res) => {
-    try {
-      // Mock analysis results
-      const analysisResults = {
-        totalIssues: 4,
-        issues: [
-          {
-            article: "第3条",
-            title: "動物飼育規定",
-            reason: "決議内容との不整合",
-            priority: "high",
-            relatedDecision: { date: "2024/3/15", type: "理事会" },
-            lawRevision: { required: false },
-            impact: "medium"
-          },
-          {
-            article: "第15条",
-            title: "決議要件",
-            reason: "5分の4→4分の3変更",
-            priority: "high",
-            relatedDecision: null,
-            lawRevision: { required: true },
-            impact: "high"
-          },
-          {
-            article: "第25条",
-            title: "修繕積立金",
-            reason: "値上げ反映",
-            priority: "medium",
-            relatedDecision: { date: "2024/3/15", type: "理事会" },
-            lawRevision: { required: false },
-            impact: "low"
-          },
-          {
-            article: "第30条",
-            title: "理事会開催",
-            reason: "オンライン対応",
-            priority: "low",
-            relatedDecision: null,
-            lawRevision: { required: false },
-            impact: "low"
-          }
-        ]
-      };
-      res.json(analysisResults);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch analysis results" });
-    }
+  // Alternative analysis endpoint for backwards compatibility
+  app.get("/api/condominiums/:id/analysis", async (req, res) => {
+    // Redirect to the new regulation-analysis endpoint
+    return req.url = req.url.replace('/analysis', '/regulation-analysis');
   });
 
   app.get("/api/condominiums/:id/extraction-results", async (req, res) => {
