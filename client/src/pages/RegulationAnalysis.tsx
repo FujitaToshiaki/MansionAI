@@ -46,12 +46,12 @@ export default function RegulationAnalysis() {
   const [currentStep, setCurrentStep] = useState('');
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [analysisSteps, setAnalysisSteps] = useState([
-    { id: 1, name: '文書解析開始', status: 'pending', description: 'アップロードされた議事録を解析しています' },
-    { id: 2, name: '決議事項抽出', status: 'pending', description: 'AI が決議内容を識別・分類しています' },
-    { id: 3, name: '法改正チェック', status: 'pending', description: '最新の法改正との適合性を確認しています' },
-    { id: 4, name: '標準規約比較', status: 'pending', description: '標準管理規約との差分を分析しています' },
-    { id: 5, name: '改訂案生成', status: 'pending', description: '規約改訂案を自動生成しています' },
-    { id: 6, name: '分析完了', status: 'pending', description: '結果をまとめています' }
+    { id: 1, name: '文書解析開始', status: 'pending', description: 'アップロードされた議事録を解析しています', details: '議事録テキストから決議項目を特定中...' },
+    { id: 2, name: '決議事項抽出', status: 'pending', description: 'AI が決議内容を識別・分類しています', details: '個人情報保護法対応、ペット飼育規定等を評価中...' },
+    { id: 3, name: '法改正チェック', status: 'pending', description: '最新の法改正との適合性を確認しています', details: '令和6年改正区分所有法との整合性を確認中...' },
+    { id: 4, name: '標準規約比較', status: 'pending', description: '標準管理規約との差分を分析しています', details: '第15条 管理組合の権限について差分を確認中...' },
+    { id: 5, name: '改訂案生成', status: 'pending', description: '規約改訂案を自動生成しています', details: '改訂提案書と新旧対照表を作成中...' },
+    { id: 6, name: '分析完了', status: 'pending', description: '結果をまとめています', details: '最終レポートを生成しています...' }
   ]);
 
   const { data: condominium } = useQuery({
@@ -219,7 +219,7 @@ export default function RegulationAnalysis() {
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>
-                      {isExecuting ? '🤖 AI分析実行中' : '🤖 AI規約改定分析の実行'}
+                      {isExecuting ? '🤖 規約改定分析実行中' : '🤖 AI規約改定分析の実行'}
                     </DialogTitle>
                   </DialogHeader>
                   
@@ -329,9 +329,9 @@ export default function RegulationAnalysis() {
                     <div className="space-y-6 animate-slideIn">
                       <div className="text-center bg-gray-50 rounded-lg p-6 border">
                         <div className="flex justify-center mb-4">
-                          <Bot className="w-12 h-12 text-blue-600" />
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">AI分析実行中</h3>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">規約改定分析実行中</h3>
                         <div className="text-2xl font-bold text-blue-600 mb-2">{Math.round(analysisProgress)}%</div>
                         <Progress 
                           value={analysisProgress} 
@@ -341,6 +341,7 @@ export default function RegulationAnalysis() {
                       </div>
                       
                       <div className="space-y-3">
+                        <h4 className="font-medium text-gray-900 mb-3">🔄 実行中のAI分析フロー</h4>
                         {analysisSteps.map((step, index) => (
                           <div 
                             key={step.id} 
@@ -362,13 +363,19 @@ export default function RegulationAnalysis() {
                                 <CircuitBoard className="w-2.5 h-2.5 text-white" />
                               )}
                             </div>
-                            <span className={`text-sm transition-all duration-300 flex-1 ${
-                              step.status === 'completed' ? 'text-green-700 font-semibold' :
-                              step.status === 'running' ? 'text-blue-700 font-medium' :
-                              'text-gray-500'
-                            }`}>
-                              {step.name}
-                            </span>
+                            <div className="flex-1">
+                              <span className={`text-sm transition-all duration-300 ${
+                                step.status === 'completed' ? 'text-green-700 font-semibold' :
+                                step.status === 'running' ? 'text-blue-700 font-medium' :
+                                'text-gray-500'
+                              }`}>
+                                {step.name}
+                              </span>
+                              <p className="text-xs text-gray-600 mt-1">{step.description}</p>
+                              {step.status === 'running' && step.details && (
+                                <p className="text-xs text-blue-600 mt-1 animate-pulse">{step.details}</p>
+                              )}
+                            </div>
                             {step.status === 'running' && (
                               <div className="flex items-center space-x-1 text-blue-600">
                                 <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
