@@ -44,6 +44,7 @@ export default function RegulationAnalysis() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [analysisSteps, setAnalysisSteps] = useState([
     { id: 1, name: '文書解析開始', status: 'pending', description: 'アップロードされた議事録を解析しています' },
     { id: 2, name: '決議事項抽出', status: 'pending', description: 'AI が決議内容を識別・分類しています' },
@@ -131,12 +132,13 @@ export default function RegulationAnalysis() {
 
     setCurrentStep('分析が完了しました');
     
-    // Wait 2 seconds then reset
+    // Wait 2 seconds then reset and close modal
     setTimeout(() => {
       setIsExecuting(false);
       setAnalysisProgress(0);
       setCurrentStep('');
       setAnalysisSteps(prev => prev.map(step => ({ ...step, status: 'pending' })));
+      setShowAnalysisModal(false);
       toast({
         title: "分析完了",
         description: "規約改定分析が完了しました。結果を確認してください。",
@@ -148,9 +150,12 @@ export default function RegulationAnalysis() {
   // Mutation for starting analysis
   const startAnalysisMutation = useMutation({
     mutationFn: () => {
-      // Start the simulation instead of real API call
-      simulateAnalysisFlow();
+      // Just return a promise, actual simulation starts separately
       return Promise.resolve();
+    },
+    onSuccess: () => {
+      // Start the simulation after successful mutation
+      simulateAnalysisFlow();
     },
     onError: () => {
       toast({
@@ -200,11 +205,12 @@ export default function RegulationAnalysis() {
               規約改訂分析結果
             </CardTitle>
             <div className="flex space-x-2">
-              <Dialog>
+              <Dialog open={showAnalysisModal} onOpenChange={setShowAnalysisModal}>
                 <DialogTrigger asChild>
                   <Button 
                     disabled={startAnalysisMutation.isPending}
                     className="group hover:scale-105 transition-all duration-200 hover:shadow-md"
+                    onClick={() => setShowAnalysisModal(true)}
                   >
                     <RotateCcw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
                     改訂分析実行
@@ -303,9 +309,12 @@ export default function RegulationAnalysis() {
                       </div>
 
                       <div className="flex justify-end space-x-2 pt-4">
-                        <DialogTrigger asChild>
-                          <Button variant="outline">キャンセル</Button>
-                        </DialogTrigger>
+                        <Button 
+                          variant="outline"
+                          onClick={() => setShowAnalysisModal(false)}
+                        >
+                          キャンセル
+                        </Button>
                         <Button 
                           onClick={() => startAnalysisMutation.mutate()}
                           className="group hover:scale-105 transition-all duration-200 hover:shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
