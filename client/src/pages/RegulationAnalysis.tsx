@@ -224,38 +224,8 @@ export default function RegulationAnalysis() {
                   </DialogHeader>
                   
                   {!isExecuting ? (
-                    <div className="space-y-6">
-                      {/* Current Settings Summary */}
-                      <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors duration-200">
-                        <h4 className="font-medium mb-3 flex items-center">
-                          <Settings className="w-4 h-4 mr-2" />
-                          📋 設定条件
-                        </h4>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-600">分析期間:</span>
-                            <p className="font-medium">
-                              {analysisSettings.period === 'past_6_months' ? '過去6ヶ月' :
-                               analysisSettings.period === 'past_1_year' ? '過去1年' : '全期間'}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">分析厳格度:</span>
-                            <p className="font-medium">
-                              {analysisSettings.strictness === 'strict' ? '厳格' :
-                               analysisSettings.strictness === 'standard' ? '標準' : '緩和'}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">法改正チェック:</span>
-                            <p className="font-medium">{analysisSettings.checkLawRevision ? '有効' : '無効'}</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">標準規約チェック:</span>
-                            <p className="font-medium">{analysisSettings.checkStandardRegulation ? '有効' : '無効'}</p>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="space-y-4">
+
 
                       {/* Voice Input for Additional Instructions */}
                       <div>
