@@ -84,7 +84,7 @@ export default function RegulationAnalysis() {
       </Card>
 
       {/* Analysis Results Table */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle>改訂必要箇所一覧</CardTitle>
         </CardHeader>
