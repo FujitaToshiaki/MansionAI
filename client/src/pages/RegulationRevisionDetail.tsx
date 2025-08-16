@@ -48,8 +48,23 @@ export default function RegulationRevisionDetail() {
         '実施スケジュール': 'Implementation Schedule',
         '実施手順': 'Implementation Procedures',
         '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': 'To comply with the revised Personal Information Protection Act, it is necessary to strengthen regulations regarding the handling of personal information. Since the current regulations do not meet the standards required by law, revisions will be made with approval from the general meeting.',
+        '改正個人情報保護法への対応が必要': 'Response to revised Personal Information Protection Act required',
+        '法的根拠の明確化': 'Clarification of legal basis',
+        '法適用範囲への統一': 'Unification of legal application scope',
+        '利用条件の明確化': 'Clarification of usage conditions',
+        '実施期間': 'Implementation Period',
+        '法改正対応のため': 'To respond to legal revision',
+        '3ヶ月以内に実施完了': 'Complete implementation within 3 months',
+        '理事会での議案準備': 'Prepare agenda at board meeting',
+        '改訂案・議事録作成（1～2週間）': 'Prepare revision proposal and meeting minutes (1-2 weeks)',
+        '組合員への事前通知': 'Advance notice to union members',
+        '総会関連資料作成（2週間前必須）': 'Create general meeting materials (required 2 weeks prior)',
+        '臨時総会での決議': 'Resolution at extraordinary general meeting',
+        '改訂規約の施行': 'Enforcement of revised regulations',
         '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': 'Article 15: The management association shall properly manage the personal information of unit owners and residents, and use it only when necessary.',
-        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': 'Article 15: The management association shall handle the personal information of unit owners and residents appropriately based on the Personal Information Protection Act (Act No. 57 of 2003), and shall not use it for purposes other than those for which consent has been obtained from the individual or as required by law.'
+        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': 'Article 15: The management association shall handle the personal information of unit owners and residents appropriately based on the Personal Information Protection Act (Act No. 57 of 2003), and shall not use it for purposes other than those for which consent has been obtained from the individual or as required by law.',
+        '法的要件を完全満足': 'Fully meets legal requirements',
+        '法的根拠が不明確': 'Legal basis is unclear'
       },
       zh: {
         '個人情報保護規定の追加': '个人信息保护规定的追加',
@@ -64,8 +79,23 @@ export default function RegulationRevisionDetail() {
         '実施スケジュール': '实施进度',
         '実施手順': '实施步骤',
         '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': '为了应对修订的个人信息保护法，需要加强关于个人信息处理的规定。由于现行规约不满足法律要求的标准，将通过总会批准进行修订。',
+        '改正個人情報保護法への対応が必要': '需要应对修订个人信息保护法',
+        '法的根拠の明確化': '法律依据明确化',
+        '法適用範囲への統一': '统一法律适用范围',
+        '利用条件の明確化': '使用条件明确化',
+        '実施期間': '实施期间',
+        '法改正対応のため': '为应对法律修订',
+        '3ヶ月以内に実施完了': '3个月内完成实施',
+        '理事会での議案準備': '理事会准备议案',
+        '改訂案・議事録作成（1～2週間）': '制定修订案和会议记录（1-2周）',
+        '組合員への事前通知': '提前通知组合成员',
+        '総会関連資料作成（2週間前必須）': '制作总会相关资料（必须提前2周）',
+        '臨時総会での決議': '临时总会决议',
+        '改訂規約の施行': '修订规约的施行',
         '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': '第15条 管理组合应适当管理区分所有者和居住者的个人信息，仅在必要时使用。',
-        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': '第15条 管理组合根据个人信息保护法（平成15年法律第57号），应适当处理区分所有者和居住者的个人信息，除获得本人同意或基于法令的情况外，不得进行目的外使用。'
+        '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': '第15条 管理组合根据个人信息保护法（平成15年法律第57号），应适当处理区分所有者和居住者的个人信息，除获得本人同意或基于法令的情况外，不得进行目的外使用。',
+        '法的要件を完全満足': '完全满足法律要求',
+        '法的根拠が不明確': '法律依据不明确'
       },
       ko: {
         '個人情報保護規定の追加': '개인정보보호 규정 추가',
@@ -79,6 +109,21 @@ export default function RegulationRevisionDetail() {
         '変更のポイント': '변경 포인트',
         '実施スケジュール': '실시 일정',
         '実施手順': '실시 절차',
+        '改正個人情報保護法への対応が必要': '개정 개인정보보호법 대응 필요',
+        '法的根拠の明確化': '법적 근거 명확화',
+        '法適用範囲への統一': '법 적용 범위 통일',
+        '利用条件の明確化': '이용 조건 명확화',
+        '実施期間': '실시 기간',
+        '法改正対応のため': '법 개정 대응을 위해',
+        '3ヶ月以内に実施完了': '3개월 이내 실시 완료',
+        '理事会での議案準備': '이사회에서 의안 준비',
+        '改訂案・議事録作成（1～2週間）': '개정안·회의록 작성 (1～2주)',
+        '組合員への事前通知': '조합원에게 사전 통지',
+        '総会関連資料作成（2週間前必須）': '총회 관련 자료 작성 (2주 전 필수)',
+        '臨時総会での決議': '임시총회에서 결의',
+        '改訂規約の施行': '개정 규약 시행',
+        '法的要件を完全満足': '법적 요건 완전 충족',
+        '法的根拠が不明確': '법적 근거가 불분명',
         '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': '개정 개인정보보호법에 대응하기 위해 개인정보 취급에 관한 규정을 강화할 필요가 있습니다. 현행 규약으로는 법률이 요구하는 기준을 충족하지 못하기 때문에 총회 승인을 받아 개정을 실시합니다.',
         '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': '제15조 관리조합은 구분소유자 및 거주자의 개인정보를 적절히 관리하고, 필요한 경우에만 이용하는 것으로 한다.',
         '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': '제15조 관리조합은 개인정보의 보호에 관한 법률(평성15년 법률 제57호)에 따라 구분소유자 및 거주자의 개인정보를 적정하게 취급하고, 본인의 동의를 얻은 경우 또는 법령에 근거한 경우를 제외하고는 목적 외 이용을 해서는 안 된다.'
@@ -95,6 +140,21 @@ export default function RegulationRevisionDetail() {
         '変更のポイント': 'Điểm thay đổi',
         '実施スケジュール': 'Lịch trình thực hiện',
         '実施手順': 'Quy trình thực hiện',
+        '改正個人情報保護法への対応が必要': 'Cần đáp ứng Luật Bảo vệ Thông tin Cá nhân sửa đổi',
+        '法的根拠の明確化': 'Làm rõ căn cứ pháp lý',
+        '法適用範囲への統一': 'Thống nhất phạm vi áp dụng pháp luật',
+        '利用条件の明確化': 'Làm rõ điều kiện sử dụng',
+        '実施期間': 'Thời gian thực hiện',
+        '法改正対応のため': 'Để đáp ứng sửa đổi pháp luật',
+        '3ヶ月以内に実施完了': 'Hoàn thành thực hiện trong 3 tháng',
+        '理事会での議案準備': 'Chuẩn bị đề án tại hội đồng quản trị',
+        '改訂案・議事録作成（1～2週間）': 'Tạo đề án sửa đổi và biên bản (1-2 tuần)',
+        '組合員への事前通知': 'Thông báo trước cho thành viên hiệp hội',
+        '総会関連資料作成（2週間前必須）': 'Tạo tài liệu liên quan đại hội (bắt buộc 2 tuần trước)',
+        '臨時総会での決議': 'Nghị quyết tại đại hội bất thường',
+        '改訂規約の施行': 'Thi hành quy định sửa đổi',
+        '法的要件を完全満足': 'Đáp ứng đầy đủ yêu cầu pháp lý',
+        '法的根拠が不明確': 'Căn cứ pháp lý không rõ ràng',
         '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': 'Để đáp ứng Luật Bảo vệ Thông tin Cá nhân sửa đổi, cần tăng cường các quy định về xử lý thông tin cá nhân. Vì quy định hiện tại không đáp ứng tiêu chuẩn do pháp luật yêu cầu, việc sửa đổi sẽ được thực hiện sau khi có sự phê duyệt từ đại hội.',
         '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': 'Điều 15: Hiệp hội quản lý phải quản lý thông tin cá nhân của chủ sở hữu đơn vị và cư dân một cách thích hợp, chỉ sử dụng khi cần thiết.',
         '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': 'Điều 15: Hiệp hội quản lý phải xử lý thông tin cá nhân của chủ sở hữu đơn vị và cư dân một cách thích hợp dựa trên Luật Bảo vệ Thông tin Cá nhân (Luật số 57 năm 2003), và không được sử dụng cho mục đích khác ngoài trường hợp đã có sự đồng ý của cá nhân hoặc theo yêu cầu của pháp luật.'
@@ -111,6 +171,21 @@ export default function RegulationRevisionDetail() {
         '変更のポイント': 'Mga Puntong Pagbabago',
         '実施スケジュール': 'Takda ng Pagpapatupad',
         '実施手順': 'Mga Hakbang sa Pagpapatupad',
+        '改正個人情報保護法への対応が必要': 'Kailangan tumugon sa binagong Personal Information Protection Act',
+        '法的根拠の明確化': 'Paglilinaw ng legal na batayan',
+        '法適用範囲への統一': 'Pagkakaisa sa saklaw ng aplikasyon ng batas',
+        '利用条件の明確化': 'Paglilinaw ng mga kondisyon ng paggamit',
+        '実施期間': 'Panahon ng pagpapatupad',
+        '法改正対応のため': 'Para sa pagtugon sa pagbabago ng batas',
+        '3ヶ月以内に実施完了': 'Kumpletuhing pagpapatupad sa loob ng 3 buwan',
+        '理事会での議案準備': 'Paghahanda ng agenda sa board meeting',
+        '改訂案・議事録作成（1～2週間）': 'Paggawa ng revision proposal at minutes (1-2 linggo)',
+        '組合員への事前通知': 'Advance notice sa mga miyembro ng union',
+        '総会関連資料作成（2週間前必須）': 'Paggawa ng mga materyales na may kinalaman sa general meeting (required 2 linggo bago)',
+        '臨時総会での決議': 'Resolusyon sa special general meeting',
+        '改訂規約の施行': 'Pagpapatupad ng binagong mga regulasyon',
+        '法的要件を完全満足': 'Lubos na natutugunan ang mga legal na requirement',
+        '法的根拠が不明確': 'Hindi malinaw ang legal na batayan',
         '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。': 'Upang tumugon sa binagong Personal Information Protection Act, kailangan palakasin ang mga regulasyon tungkol sa pangangalaga ng personal na impormasyon. Dahil ang kasalukuyang mga regulasyon ay hindi natutugunan ang mga pamantayang hinihiling ng batas, gagawin ang mga rebisyon na may pahintulot mula sa general meeting.',
         '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。': 'Artikulo 15: Ang management association ay dapat na tamang pamahalaan ang personal na impormasyon ng mga unit owner at mga residente, at gamitin lamang kapag kinakailangan.',
         '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。': 'Artikulo 15: Ang management association ay dapat na tamang pangasiwaan ang personal na impormasyon ng mga unit owner at mga residente batay sa Personal Information Protection Act (Act No. 57 ng 2003), at hindi gagamitin para sa iba pang layunin maliban sa mga pagkakaon na may pahintulot ng indibidwal o ayon sa batas.'
@@ -142,6 +217,21 @@ export default function RegulationRevisionDetail() {
       '変更のポイント',
       '実施スケジュール',
       '実施手順',
+      '改正個人情報保護法への対応が必要',
+      '法的根拠の明確化',
+      '法適用範囲への統一',
+      '利用条件の明確化',
+      '実施期間',
+      '法改正対応のため',
+      '3ヶ月以内に実施完了',
+      '理事会での議案準備',
+      '改訂案・議事録作成（1～2週間）',
+      '組合員への事前通知',
+      '総会関連資料作成（2週間前必須）',
+      '臨時総会での決議',
+      '改訂規約の施行',
+      '法的要件を完全満足',
+      '法的根拠が不明確',
       revisionDetail?.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。',
       revisionDetail?.currentText || '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。',
       revisionDetail?.proposedText || '第15条 管理組合は、個人情報の保護に関する法律に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。'
@@ -192,7 +282,7 @@ export default function RegulationRevisionDetail() {
             <div>
               <div className="flex items-center space-x-3">
                 <FileText className="w-5 h-5" />
-                <h1 className="text-xl font-bold">{revisionDetail?.title || ''}</h1>
+                <h1 className="text-xl font-bold">{getTranslatedText(revisionDetail?.title || '')}</h1>
                 <Badge variant={
                   revisionDetail?.impact === 'high' ? 'destructive' :
                   revisionDetail?.impact === 'medium' ? 'secondary' : 'outline'
@@ -258,7 +348,7 @@ export default function RegulationRevisionDetail() {
                     {getTranslatedText(revisionDetail?.currentText || `第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。`)}
                   </p>
                   <div className="text-sm text-red-600">
-                    ⚠️ 法的根拠が不明確
+                    ⚠️ {getTranslatedText('法的根拠が不明確')}
                   </div>
                 </div>
               </div>
@@ -272,7 +362,7 @@ export default function RegulationRevisionDetail() {
                     {getTranslatedText(revisionDetail?.proposedText || `第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。`)}
                   </p>
                   <div className="text-sm text-green-600">
-                    ✅ 法的要件を完全満足
+                    ✅ {getTranslatedText('法的要件を完全満足')}
                   </div>
                 </div>
               </div>
@@ -302,9 +392,9 @@ export default function RegulationRevisionDetail() {
           </CardHeader>
           <CardContent>
             <div className="border border-gray-200 rounded-lg p-4">
-              <h3 className="font-medium mb-2">実施期限</h3>
+              <h3 className="font-medium mb-2">{getTranslatedText('実施期間')}</h3>
               <p className="text-gray-700">
-                法改正対応のため<br/><strong>3ヶ月以内</strong>に実施推奨
+                {getTranslatedText('法改正対応のため')}<br/><strong>{getTranslatedText('3ヶ月以内に実施完了')}</strong>
               </p>
             </div>
           </CardContent>
@@ -319,23 +409,23 @@ export default function RegulationRevisionDetail() {
               <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
                 <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">1</div>
                 <div>
-                  <h4 className="font-medium">理事会での議案準備</h4>
-                  <p className="text-sm text-gray-600 mt-1">改訂案確認・議案書作成（1-2週間）</p>
+                  <h4 className="font-medium">{getTranslatedText('理事会での議案準備')}</h4>
+                  <p className="text-sm text-gray-600 mt-1">{getTranslatedText('改訂案・議事録作成（1～2週間）')}</p>
                 </div>
               </div>
               
               <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
                 <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">2</div>
                 <div>
-                  <h4 className="font-medium">組合員への事前通知</h4>
-                  <p className="text-sm text-gray-600 mt-1">総会開催通知発送（2週間前必須）</p>
+                  <h4 className="font-medium">{getTranslatedText('組合員への事前通知')}</h4>
+                  <p className="text-sm text-gray-600 mt-1">{getTranslatedText('総会関連資料作成（2週間前必須）')}</p>
                 </div>
               </div>
               
               <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
                 <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">3</div>
                 <div>
-                  <h4 className="font-medium">臨時総会での決議</h4>
+                  <h4 className="font-medium">{getTranslatedText('臨時総会での決議')}</h4>
                   <p className="text-sm text-gray-600 mt-1">4分の3以上の賛成で可決</p>
                 </div>
               </div>
@@ -343,7 +433,7 @@ export default function RegulationRevisionDetail() {
               <div className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
                 <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">4</div>
                 <div>
-                  <h4 className="font-medium">改訂規約の施行</h4>
+                  <h4 className="font-medium">{getTranslatedText('改訂規約の施行')}</h4>
                   <p className="text-sm text-gray-600 mt-1">決議後即座に効力発生</p>
                 </div>
               </div>
