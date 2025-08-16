@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { 
   FileText, 
   Download, 
@@ -13,7 +13,8 @@ import {
   Package,
   Users,
   Shield,
-  Monitor
+  Monitor,
+  ArrowLeft
 } from "lucide-react";
 
 interface RegulationRevision {
@@ -31,15 +32,30 @@ interface RegulationRevision {
 
 export default function StandardRegulations() {
   const [, setLocation] = useLocation();
+  const params = useParams();
+  const versionId = params.versionId;
 
   const { data: revisions = [], isLoading } = useQuery({
-    queryKey: ['/api/regulation-revisions'],
+    queryKey: ['/api/regulation-revisions', versionId],
     queryFn: async () => {
       const response = await fetch('/api/regulation-revisions');
       if (!response.ok) throw new Error('改正情報の取得に失敗しました');
       return response.json() as RegulationRevision[];
     }
   });
+
+  const getVersionName = (versionId: string) => {
+    switch (versionId) {
+      case 'r6':
+        return '令和6年度改訂';
+      case 'r3':
+        return '令和3年度改訂';
+      case 'h29':
+        return '平成29年度改訂';
+      default:
+        return '不明な改正版';
+    }
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -118,12 +134,23 @@ export default function StandardRegulations() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">標準管理規約改正管理</h1>
-          <p className="text-gray-600 mt-2">令和6年改正における全ての変更項目と新設規定を包括管理</p>
+          <div className="flex items-center gap-4 mb-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setLocation('/standard-regulations')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              改正版一覧に戻る
+            </Button>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">{getVersionName(versionId || '')} - 改正項目一覧</h1>
+          <p className="text-gray-600 mt-2">この改正版における全ての変更項目と新設規定</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
           <Download className="h-4 w-4 mr-2" />
-          改正履歴をエクスポート
+          改正項目をエクスポート
         </Button>
       </div>
 
@@ -192,7 +219,7 @@ export default function StandardRegulations() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setLocation(`/standard-regulations/${revision.id}`)}
+                  onClick={() => setLocation(`/standard-regulations/${versionId}/${revision.id}`)}
                   className="flex items-center gap-2"
                 >
                   <Eye className="h-4 w-4" />

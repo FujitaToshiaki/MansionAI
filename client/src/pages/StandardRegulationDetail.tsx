@@ -30,17 +30,31 @@ interface RegulationRevision {
 
 export default function StandardRegulationDetail() {
   const params = useParams();
+  const versionId = params.versionId;
   const id = params.id;
   const [, setLocation] = useLocation();
 
   const { data: revision, isLoading } = useQuery({
-    queryKey: ['/api/regulation-revisions', id],
+    queryKey: ['/api/regulation-revisions', versionId, id],
     queryFn: async () => {
       const response = await fetch(`/api/regulation-revisions/${id}`);
       if (!response.ok) throw new Error('改正詳細の取得に失敗しました');
       return response.json();
     }
   });
+
+  const getVersionName = (versionId: string) => {
+    switch (versionId) {
+      case 'r6':
+        return '令和6年度改訂';
+      case 'r3':
+        return '令和3年度改訂';
+      case 'h29':
+        return '平成29年度改訂';
+      default:
+        return '不明な改正版';
+    }
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -100,11 +114,11 @@ export default function StandardRegulationDetail() {
       <div className="space-y-6">
         <Button
           variant="outline"
-          onClick={() => setLocation('/standard-regulations')}
+          onClick={() => setLocation(`/standard-regulations/${versionId}`)}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
-          一覧に戻る
+          {getVersionName(versionId || '')}一覧に戻る
         </Button>
         <Card className="bg-white">
           <CardContent className="text-center py-12">
@@ -123,11 +137,11 @@ export default function StandardRegulationDetail() {
       <div className="flex items-center justify-between">
         <Button
           variant="outline"
-          onClick={() => setLocation('/standard-regulations')}
+          onClick={() => setLocation(`/standard-regulations/${versionId}`)}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
-          一覧に戻る
+          {getVersionName(versionId || '')}一覧に戻る
         </Button>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">

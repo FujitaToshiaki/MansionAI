@@ -18,7 +18,7 @@ import { useState } from "react";
 const menuItems = [
   { icon: LayoutDashboard, label: "ダッシュボード", path: "/" },
   { icon: Building, label: "マンション管理", path: "/condominiums" },
-  { icon: FileText, label: "標準管理規約改正", path: "/standard-regulations" },
+  { icon: FileText, label: "標準管理規約", path: "/standard-regulations" },
   { icon: ClipboardList, label: "議事録管理", path: "/minutes" },
   { icon: ScanLine, label: "OCR処理", path: "/ocr" },
   { icon: Bot, label: "AI分析", path: "/ai-analysis" },
