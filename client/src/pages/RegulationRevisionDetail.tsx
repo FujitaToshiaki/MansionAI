@@ -62,236 +62,258 @@ export default function RegulationRevisionDetail() {
         </CardHeader>
       </Card>
 
-      {/* 改訂根拠サマリ */}
+      {/* 改訂の必要性 */}
       <Card className="bg-white">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Target className="w-5 h-5 mr-2" />
-            改訂根拠サマリ
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-gray-600">法的根拠:</span>
-                <p className="font-medium">{revisionDetail.legalBasis || '改正個人情報保護法(2024年)'}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600">標準規約:</span>
-                <p className="font-medium">{revisionDetail.standardRegulationRef || '第15条改定内容との整合性'}</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-gray-600">過去決議:</span>
-                <p className="font-medium">{revisionDetail.relatedDecision || '2023年度総会方針決定'}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600">影響度:</span>
-                <Badge variant={
-                  revisionDetail.impact === 'high' ? 'destructive' :
-                  revisionDetail.impact === 'medium' ? 'secondary' : 'outline'
-                }>
-                  {revisionDetail.impact === 'high' ? '高（法的義務）' :
-                   revisionDetail.impact === 'medium' ? '中（推奨対応）' : '低（任意対応）'}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Before / After 比較 */}
-      <Card className="bg-white">
-        <CardHeader>
-          <CardTitle>📊 Before / After 比較</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-medium text-gray-700 mb-3">Before (現行)</h3>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm whitespace-pre-line">
-                  {revisionDetail.currentText || `第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。`}
-                </p>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-700 mb-3">After (改訂案)</h3>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm whitespace-pre-line">
-                  {revisionDetail.proposedText || `第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。`}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 条項変更履歴・時系列 */}
-      <Card className="bg-white">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Calendar className="w-5 h-5 mr-2" />
-            条項変更履歴・時系列
+            📋 なぜこの改訂が必要なのか
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {revisionDetail.changeHistory?.map((history: any, index: number) => (
-              <div key={index} className="flex items-start space-x-4 border-l-2 border-gray-200 pl-4 pb-4">
-                <div className="flex-shrink-0">
-                  <div className={`w-3 h-3 rounded-full mt-1 ${
-                    history.type === 'required' ? 'bg-red-500' :
-                    history.type === 'approved' ? 'bg-green-500' :
-                    history.type === 'modified' ? 'bg-yellow-500' : 'bg-blue-500'
-                  }`} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium text-sm">{history.date}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {history.type === 'required' ? '改訂必要' :
-                       history.type === 'approved' ? '方針決定' :
-                       history.type === 'modified' ? '一部修正' : '初回制定'}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">{history.description}</p>
-                  {history.details && (
-                    <p className="text-xs text-gray-500 mt-1">{history.details}</p>
-                  )}
-                </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-medium text-blue-900 mb-2">改訂理由</h3>
+              <p className="text-sm text-blue-800">
+                {revisionDetail.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。'}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <h4 className="font-medium text-red-900 text-sm mb-1">緊急度</h4>
+                <Badge variant={
+                  revisionDetail.impact === 'high' ? 'destructive' :
+                  revisionDetail.impact === 'medium' ? 'secondary' : 'outline'
+                }>
+                  {revisionDetail.impact === 'high' ? '高（法的義務のため必須）' :
+                   revisionDetail.impact === 'medium' ? '中（推奨対応）' : '低（任意対応）'}
+                </Badge>
               </div>
-            )) || (
-              <div className="space-y-4">
-                <div className="flex items-start space-x-4 border-l-2 border-gray-200 pl-4 pb-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-3 h-3 rounded-full mt-1 bg-red-500" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-sm">2024-12-15</span>
-                      <Badge variant="outline" className="text-xs">改訂必要</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">法改正による必要性判定</p>
-                    <p className="text-xs text-gray-500 mt-1">根拠: 個人情報保護法改正</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4 border-l-2 border-gray-200 pl-4 pb-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-3 h-3 rounded-full mt-1 bg-green-500" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-sm">2023-03-15</span>
-                      <Badge variant="outline" className="text-xs">方針決定</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">定期総会にて個人情報保護強化を決議</p>
-                    <p className="text-xs text-gray-500 mt-1">決議内容: プライバシー方針策定</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4 border-l-2 border-gray-200 pl-4 pb-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-3 h-3 rounded-full mt-1 bg-yellow-500" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-sm">2022-06-10</span>
-                      <Badge variant="outline" className="text-xs">一部修正</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">個人情報の定義を明確化</p>
-                    <p className="text-xs text-gray-500 mt-1">変更箇所: 第15条第2項追加</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4 border-l-2 border-gray-200 pl-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-3 h-3 rounded-full mt-1 bg-blue-500" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-sm">2020-04-01</span>
-                      <Badge variant="outline" className="text-xs">初回制定</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">管理規約制定時の原文</p>
-                  </div>
-                </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <h4 className="font-medium text-yellow-900 text-sm mb-1">法的対応</h4>
+                <span className="text-sm">
+                  {revisionDetail.lawRevisionRequired ? '法改正対応が必要' : '組合内改善事項'}
+                </span>
               </div>
-            )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* データソース */}
+      {/* 規約の変更内容 */}
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle>📝 規約の変更内容</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* 変更点の説明 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-medium text-blue-900 mb-2">📌 変更のポイント</h3>
+              <ul className="text-sm text-blue-800 space-y-2">
+                <li className="flex items-start">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span>個人情報保護法の法律名と条文番号を明記し、法的根拠を明確化</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span>「適切な管理」から「適正な取り扱い」へ表現を法律用語に統一</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span>個人情報の利用条件を「本人同意」または「法令根拠」に限定して強化</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <div className="flex items-center mb-3">
+                  <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-medium mr-2">現行</span>
+                  <h3 className="font-medium text-gray-700">現在の規約条文</h3>
+                </div>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-sm leading-relaxed">
+                    {revisionDetail.currentText || `第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。`}
+                  </p>
+                  <div className="mt-3 text-xs text-red-600">
+                    ⚠️ 法的根拠が不明確で、個人情報保護法の要件を満たしていません
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center mb-3">
+                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium mr-2">改訂案</span>
+                  <h3 className="font-medium text-gray-700">新しい規約条文</h3>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-sm leading-relaxed">
+                    {revisionDetail.proposedText || `第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。`}
+                  </p>
+                  <div className="mt-3 text-xs text-green-600">
+                    ✅ 法的根拠が明確で、個人情報保護法の要件を完全に満たします
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 実施手順とスケジュール */}
       <Card className="bg-white">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Database className="w-5 h-5 mr-2" />
-            データソース
+            <Calendar className="w-5 h-5 mr-2" />
+            改訂の実施手順とスケジュール
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {revisionDetail.dataSources?.map((source: string, index: number) => (
-              <div key={index} className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                <span className="text-sm">{source}</span>
+          <div className="space-y-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <h3 className="font-medium text-yellow-900 mb-2">⏰ 実施予定</h3>
+              <p className="text-sm text-yellow-800">
+                この改訂は法改正対応のため、<strong>3ヶ月以内</strong>に実施することが推奨されます。
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="font-medium text-gray-800">📋 実施手順</h3>
+              
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0">1</div>
+                  <div>
+                    <h4 className="font-medium text-sm">理事会での議案準備</h4>
+                    <p className="text-xs text-gray-600 mt-1">改訂案の最終確認と総会議案書の作成（所要期間：1-2週間）</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0">2</div>
+                  <div>
+                    <h4 className="font-medium text-sm">組合員への事前通知</h4>
+                    <p className="text-xs text-gray-600 mt-1">改訂内容の説明と総会開催通知の発送（総会の2週間前までに必須）</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0">3</div>
+                  <div>
+                    <h4 className="font-medium text-sm">臨時総会での決議</h4>
+                    <p className="text-xs text-gray-600 mt-1">組合員の4分の3以上の賛成で可決（区分所有法第31条）</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0">4</div>
+                  <div>
+                    <h4 className="font-medium text-sm">改訂規約の施行</h4>
+                    <p className="text-xs text-gray-600 mt-1">決議後すぐに効力発生、組合員への新規約配布</p>
+                  </div>
+                </div>
               </div>
-            )) || (
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-sm">標準管理規約 第15条 (2024年改定版)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-sm">2023年度定期総会議事録 第3号議案</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-sm">個人情報保護法改正資料（国交省）</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-sm">類似管理組合事例（3件）</span>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 実装時の注意事項 */}
+      {/* よくある質問 */}
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            💡 よくある質問
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-medium text-gray-800 mb-2">Q. この改訂をしないとどうなりますか？</h4>
+              <p className="text-sm text-gray-600">
+                個人情報保護法に準拠していない規約のままでは、万が一個人情報の漏洩事故が発生した場合に、法的責任を問われる可能性があります。また、行政指導の対象になることもあります。
+              </p>
+            </div>
+            
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-medium text-gray-800 mb-2">Q. 総会での決議要件は？</h4>
+              <p className="text-sm text-gray-600">
+                規約改正は区分所有法第31条により、区分所有者及び議決権の各4分の3以上の賛成が必要です。重要な決議のため、事前の説明と理解促進が重要です。
+              </p>
+            </div>
+            
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-medium text-gray-800 mb-2">Q. 費用はかかりますか？</h4>
+              <p className="text-sm text-gray-600">
+                規約改訂自体に直接の費用はかかりませんが、臨時総会の開催費用（会場費、資料印刷費など）や司法書士等への相談費用が発生する場合があります。
+              </p>
+            </div>
+            
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-medium text-gray-800 mb-2">Q. 他のマンションでも同様の改訂を行っていますか？</h4>
+              <p className="text-sm text-gray-600">
+                はい。個人情報保護法の改正に伴い、多くのマンション管理組合で同様の規約改訂が行われています。国土交通省も標準管理規約を改正して対応を推奨しています。
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 準備すべき資料と注意点 */}
       <Card className="bg-white">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Lightbulb className="w-5 h-5 mr-2" />
-            実装時の注意事項
+            準備すべき資料と注意点
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {revisionDetail.implementationNotes?.split('\n').map((note: string, index: number) => (
-              <div key={index} className="flex items-start space-x-2">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
-                <span className="text-sm">{note}</span>
-              </div>
-            )) || (
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">📂 準備すべき資料</h3>
               <div className="space-y-2">
                 <div className="flex items-start space-x-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
-                  <span className="text-sm">既存の個人情報取扱規程との整合性確認</span>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                  <span className="text-sm">現行規約と改訂案の対照表（組合員への説明用）</span>
                 </div>
                 <div className="flex items-start space-x-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
-                  <span className="text-sm">区分所有者への事前周知期間の確保</span>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                  <span className="text-sm">個人情報保護法改正の説明資料（国交省資料等）</span>
                 </div>
                 <div className="flex items-start space-x-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
-                  <span className="text-sm">管理会社との契約書見直しの必要性</span>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                  <span className="text-sm">臨時総会の議事次第と議案書</span>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                  <span className="text-sm">委任状（欠席者用）</span>
                 </div>
               </div>
-            )}
+            </div>
+            
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">⚠️ 実施時の注意点</h3>
+              <div className="space-y-3">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <h4 className="font-medium text-yellow-900 text-sm mb-1">管理会社との調整</h4>
+                  <p className="text-xs text-yellow-800">
+                    管理委託契約書の個人情報取扱条項も同時に見直しが必要な場合があります
+                  </p>
+                </div>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <h4 className="font-medium text-yellow-900 text-sm mb-1">組合員への説明</h4>
+                  <p className="text-xs text-yellow-800">
+                    法改正の必要性を分かりやすく説明し、理解と協力を得ることが重要です
+                  </p>
+                </div>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <h4 className="font-medium text-yellow-900 text-sm mb-1">決議要件の確保</h4>
+                  <p className="text-xs text-yellow-800">
+                    4分の3以上の賛成が必要なため、事前の意見調整を十分に行いましょう
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
