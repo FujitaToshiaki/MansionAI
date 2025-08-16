@@ -88,26 +88,7 @@ export default function RegulationRevisionDetail() {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <h3 className="font-medium mb-6">規約の変更内容</h3>
             
-            {/* 変更のポイント */}
-            <div className="mb-6">
-              <h4 className="font-medium mb-3">変更のポイント</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full mr-3 flex-shrink-0"></span>
-                  <span>法的根拠を明確化</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full mr-3 flex-shrink-0"></span>
-                  <span>法律用語に統一</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full mr-3 flex-shrink-0"></span>
-                  <span>利用条件を限定強化</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div>
                 <div className="flex items-center mb-3">
                   <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium mr-3">現行</span>
@@ -135,6 +116,16 @@ export default function RegulationRevisionDetail() {
                     ✅ 法的要件を完全満足
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* 変更のポイント - 最下段に配置 */}
+            <div className="border-t border-gray-200 pt-4">
+              <h4 className="font-medium mb-3">変更のポイント</h4>
+              <div className="flex flex-wrap gap-2">
+                <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">#法的根拠の明確化</span>
+                <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">#法律用語への統一</span>
+                <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">#利用条件の限定強化</span>
               </div>
             </div>
           </div>
