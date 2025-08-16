@@ -80,9 +80,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const query = `
         SELECT * FROM regulation_revisions 
-        WHERE id = ?
+        WHERE id = $1
       `;
-      const result = await db.execute(query, [req.params.id]);
+      const result = await db.execute(query, [parseInt(req.params.id)]);
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "Regulation revision not found" });
       }
