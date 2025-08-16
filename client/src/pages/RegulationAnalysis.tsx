@@ -190,7 +190,7 @@ export default function RegulationAnalysis() {
       <nav className="text-sm text-gray-500">
         <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
         <span className="mx-2">{'>'}</span>
-        <Link href={`/condominiums/${id}`} className="hover:text-gray-700">{condominium?.name || 'マンション詳細'}</Link>
+        <Link href={`/condominiums/${id}`} className="hover:text-gray-700">{(condominium as any)?.name || 'マンション詳細'}</Link>
         <span className="mx-2">{'>'}</span>
         <span>規約改訂分析</span>
       </nav>
@@ -495,7 +495,7 @@ export default function RegulationAnalysis() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="text-gray-600">分析対象:</span>
-              <p className="font-medium">{condominium?.name || 'ローディング中...'} 管理規約</p>
+              <p className="font-medium">{(condominium as any)?.name || 'ローディング中...'} 管理規約</p>
             </div>
             <div>
               <span className="text-gray-600">分析基準:</span>
@@ -541,7 +541,8 @@ export default function RegulationAnalysis() {
                 <TableRow>
                   <TableHead>優先度</TableHead>
                   <TableHead>条文</TableHead>
-                  <TableHead>改訂理由</TableHead>
+                  <TableHead>改訂タイトル</TableHead>
+                  <TableHead>改定理由</TableHead>
                   <TableHead>関連決議</TableHead>
                   <TableHead>法改正</TableHead>
                   <TableHead>影響度</TableHead>
@@ -567,27 +568,27 @@ export default function RegulationAnalysis() {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium">{issue.article}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{issue.title}</p>
-                        <p className="text-sm text-gray-600">{issue.reason}</p>
-                      </div>
+                    <TableCell className="font-medium max-w-xs">
+                      <p className="truncate">{issue.title}</p>
+                    </TableCell>
+                    <TableCell className="max-w-sm">
+                      <p className="text-sm text-gray-600 line-clamp-2">{issue.reason}</p>
                     </TableCell>
                     <TableCell>
-                      {issue.relatedDecision ? (
-                        <div className="text-sm">
-                          <p>{issue.relatedDecision.date}</p>
-                          <p className="text-gray-600">{issue.relatedDecision.type}</p>
-                        </div>
+                      {issue.legal_basis?.includes('決議') || issue.legal_basis?.includes('総会') ? (
+                        <button className="text-blue-600 hover:text-blue-800 underline text-sm">
+                          {issue.legal_basis?.match(/\d{4}年\d{1,2}月/) ? issue.legal_basis.match(/\d{4}年\d{1,2}月/)[0] + '決議' : '関連決議'}
+                        </button>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {issue.lawRevision ? (
-                        <Badge variant={issue.lawRevision.required ? 'destructive' : 'secondary'}>
-                          {issue.lawRevision.required ? '◯対応必須' : '△推奨'}
-                        </Badge>
+                      {issue.law_revision_required ? (
+                        <button className="text-blue-600 hover:text-blue-800 underline text-sm">
+                          {issue.legal_basis?.includes('2025年') ? '2025年改正法' : 
+                           issue.legal_basis?.includes('区分所有法') ? '区分所有法' : '法改正対応'}
+                        </button>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
