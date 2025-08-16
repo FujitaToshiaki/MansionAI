@@ -5,6 +5,7 @@ import { KnowledgeService } from "./knowledgeService";
 import { z } from "zod";
 import { insertKnowledgeDocumentSchema } from "@shared/schema";
 import multer from "multer";
+import { db } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
@@ -57,6 +58,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(documents);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch documents" });
+    }
+  });
+
+  // Regulation revisions endpoint
+  app.get("/api/regulation-revisions", async (req, res) => {
+    try {
+      const query = `
+        SELECT * FROM regulation_revisions 
+        ORDER BY creation_date DESC, id ASC
+      `;
+      const result = await db.execute(query);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching regulation revisions:', error);
+      res.status(500).json({ error: "Failed to fetch regulation revisions" });
+    }
+  });
+
+  app.get("/api/regulation-revisions/:id", async (req, res) => {
+    try {
+      const query = `
+        SELECT * FROM regulation_revisions 
+        WHERE id = $1
+      `;
+      const result = await db.execute(query, [req.params.id]);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Regulation revision not found" });
+      }
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error fetching regulation revision:', error);
+      res.status(500).json({ error: "Failed to fetch regulation revision" });
     }
   });
 

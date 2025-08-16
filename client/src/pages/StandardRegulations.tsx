@@ -5,219 +5,222 @@ import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 import { 
   FileText, 
-  Calendar, 
   Download, 
   Eye, 
   AlertCircle,
   CheckCircle,
-  Clock
+  Car,
+  Package,
+  Users,
+  Shield,
+  Monitor
 } from "lucide-react";
 
 interface RegulationRevision {
-  id: string;
-  version: string;
+  id: number;
+  category: string;
   title: string;
-  revisionDate: string;
-  effectiveDate: string;
-  status: 'current' | 'upcoming' | 'archived';
-  majorChanges: string[];
-  changedArticles: number;
-  description: string;
+  change_description: string;
+  before_text: string | null;
+  after_text: string | null;
+  article_number: string | null;
+  reference_section: string | null;
+  change_type: string;
+  creation_date: string;
 }
-
-const mockRevisions: RegulationRevision[] = [
-  {
-    id: "r6-revision",
-    version: "令和6年改正版",
-    title: "マンション標準管理規約（単棟型）令和6年改正",
-    revisionDate: "2024-03-01",
-    effectiveDate: "2024-04-01",
-    status: "current",
-    majorChanges: [
-      "外部専門家の活用に関する規定整備",
-      "住宅宿泊事業に関する条項の明確化",
-      "管理組合運営の適正化措置",
-      "決議要件の見直し"
-    ],
-    changedArticles: 15,
-    description: "マンション管理の適正化を図るため、外部専門家の活用や住宅宿泊事業への対応等について規定を整備"
-  },
-  {
-    id: "h30-revision",
-    version: "平成30年改正版",
-    title: "マンション標準管理規約（単棟型）平成30年改正",
-    revisionDate: "2018-03-01",
-    effectiveDate: "2018-04-01",
-    status: "archived",
-    majorChanges: [
-      "コミュニティ条項の削除",
-      "外部専門家活用の基本的考え方",
-      "暴力団排除条項の追加"
-    ],
-    changedArticles: 8,
-    description: "コミュニティ形成に関する条項の見直しと、外部専門家活用に関する基本的な考え方を整理"
-  },
-  {
-    id: "r7-upcoming",
-    version: "令和7年改正予定版",
-    title: "マンション標準管理規約（単棟型）令和7年改正予定",
-    revisionDate: "2025-03-01",
-    effectiveDate: "2025-04-01",
-    status: "upcoming",
-    majorChanges: [
-      "デジタル化対応の強化",
-      "脱炭素化への対応",
-      "高齢化社会への配慮"
-    ],
-    changedArticles: 12,
-    description: "デジタル技術の活用とカーボンニュートラルへの対応、高齢化社会に配慮した規定整備を予定"
-  }
-];
-
-
 
 export default function StandardRegulations() {
   const [, setLocation] = useLocation();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'current': return 'bg-green-100 text-green-800 border-green-200';
-      case 'upcoming': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  const { data: revisions = [], isLoading } = useQuery({
+    queryKey: ['/api/regulation-revisions'],
+    queryFn: async () => {
+      const response = await fetch('/api/regulation-revisions');
+      if (!response.ok) throw new Error('改正情報の取得に失敗しました');
+      return response.json() as RegulationRevision[];
     }
-  };
+  });
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'current': return <CheckCircle size={14} />;
-      case 'upcoming': return <Clock size={14} />;
-      case 'archived': return <FileText size={14} />;
-      default: return <FileText size={14} />;
-    }
-  };
-
-  const handleViewDetails = (revisionId: string) => {
+  const handleViewDetails = (revisionId: number) => {
     setLocation(`/standard-regulations/${revisionId}`);
   };
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case '充電設備':
+        return <Car className="h-5 w-5 text-green-600" />;
+      case '宅配ボックス設置':
+        return <Package className="h-5 w-5 text-blue-600" />;
+      case '外部専門家活用':
+      case '外部専門家活用詳細':
+        return <Users className="h-5 w-5 text-purple-600" />;
+      case '役員欠格条項':
+      case '監事機能強化':
+        return <Shield className="h-5 w-5 text-red-600" />;
+      case '電磁的方法活用':
+      case '管理情報提供':
+      case '組合員名簿管理':
+        return <Monitor className="h-5 w-5 text-orange-600" />;
+      default:
+        return <FileText className="h-5 w-5 text-gray-600" />;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case '充電設備':
+        return 'bg-green-100 text-green-800';
+      case '宅配ボックス設置':
+        return 'bg-blue-100 text-blue-800';
+      case '外部専門家活用':
+      case '外部専門家活用詳細':
+        return 'bg-purple-100 text-purple-800';
+      case '役員欠格条項':
+      case '監事機能強化':
+        return 'bg-red-100 text-red-800';
+      case '電磁的方法活用':
+      case '管理情報提供':
+      case '組合員名簿管理':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getChangeTypeIcon = (changeType: string) => {
+    switch (changeType) {
+      case '新設':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case '追加':
+        return <AlertCircle className="h-4 w-4 text-blue-600" />;
+      case '義務化':
+        return <AlertCircle className="h-4 w-4 text-red-600" />;
+      default:
+        return <FileText className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500">
-        <span>規約管理</span>
-        <span className="mx-2">{'>'}</span>
-        <span>標準規約改訂版管理</span>
-      </nav>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">標準管理規約改正管理</h1>
+          <p className="text-gray-600 mt-2">令和6年改正における全ての変更項目と新設規定を包括管理</p>
+        </div>
+        <Button className="bg-blue-600 hover:bg-blue-700">
+          <Download className="h-4 w-4 mr-2" />
+          改正履歴をエクスポート
+        </Button>
+      </div>
 
-      {/* Header */}
-      <Card className="bg-white">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="mr-2" size={24} />
-            標準規約改訂版管理
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">
-            国土交通省が公表するマンション標準管理規約の改訂版を管理し、各改正点の詳細な比較確認を行えます。
-          </p>
-          <div className="flex items-center space-x-4 text-sm">
-            <div className="flex items-center space-x-1">
-              <CheckCircle size={16} className="text-green-600" />
-              <span>現行版: 令和6年改正版</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Calendar size={16} className="text-gray-600" />
-              <span>最終更新: 2024年3月1日</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <AlertCircle size={16} className="text-orange-600" />
-              <span>改正箇所: 15条文</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Revision List */}
-      <Card className="bg-white">
-        <CardHeader>
-          <CardTitle>改訂版一覧</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {mockRevisions.map((revision) => (
-              <Card 
-                key={revision.id} 
-                className="hover:bg-gray-50 transition-all"
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="font-medium text-lg">{revision.version}</h3>
-                        <Badge className={`${getStatusColor(revision.status)} flex items-center space-x-1`}>
-                          {getStatusIcon(revision.status)}
-                          <span>
-                            {revision.status === 'current' ? '現行版' :
-                             revision.status === 'upcoming' ? '予定' : 'アーカイブ'}
-                          </span>
-                        </Badge>
-                      </div>
-                      <p className="text-gray-600 mb-3">{revision.description}</p>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-500">改正日:</span>
-                          <p className="font-medium">{new Date(revision.revisionDate).toLocaleDateString('ja-JP')}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">施行日:</span>
-                          <p className="font-medium">{new Date(revision.effectiveDate).toLocaleDateString('ja-JP')}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">変更条文数:</span>
-                          <p className="font-medium">{revision.changedArticles}箇所</p>
-                        </div>
-                      </div>
-                      <div className="mt-3">
-                        <span className="text-gray-500 text-sm">主な改正点:</span>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {revision.majorChanges.slice(0, 3).map((change, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {change}
-                            </Badge>
-                          ))}
-                          {revision.majorChanges.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{revision.majorChanges.length - 3}件
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col space-y-2 ml-4">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleViewDetails(revision.id)}
-                      >
-                        <Eye className="mr-1" size={14} />
-                        詳細
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Download className="mr-1" size={14} />
-                        DL
-                      </Button>
-                    </div>
+      <div className="grid gap-4">
+        {revisions.map((revision) => (
+          <Card key={revision.id} className="bg-white hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    {getCategoryIcon(revision.category)}
+                    <CardTitle className="text-lg">{revision.title}</CardTitle>
+                    <Badge className={getCategoryColor(revision.category)}>
+                      {revision.category}
+                    </Badge>
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      {getChangeTypeIcon(revision.change_type)}
+                      {revision.change_type}
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                  <p className="text-gray-600 text-sm">{revision.change_description}</p>
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {revision.article_number && (
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-600">条文: {revision.article_number}</span>
+                  </div>
+                )}
+                {revision.reference_section && (
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-600">参照: {revision.reference_section}</span>
+                  </div>
+                )}
+              </div>
 
+              {(revision.before_text || revision.after_text) && (
+                <div className="space-y-3">
+                  {revision.before_text && revision.before_text !== '（新設）' && (
+                    <div>
+                      <h5 className="font-medium text-red-700 mb-1">改正前</h5>
+                      <p className="text-sm text-gray-700 bg-red-50 p-3 rounded border-l-4 border-red-200">
+                        {revision.before_text}
+                      </p>
+                    </div>
+                  )}
+                  {revision.after_text && (
+                    <div>
+                      <h5 className="font-medium text-green-700 mb-1">
+                        {revision.before_text === '（新設）' ? '新設内容' : '改正後'}
+                      </h5>
+                      <p className="text-sm text-gray-700 bg-green-50 p-3 rounded border-l-4 border-green-200">
+                        {revision.after_text}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
+              <div className="flex gap-3 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleViewDetails(revision.id)}
+                  className="flex items-center gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  詳細を見る
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  出力
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {revisions.length === 0 && (
+        <Card className="bg-white">
+          <CardContent className="text-center py-12">
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">改正情報がありません</h3>
+            <p className="text-gray-600">標準管理規約の改正情報が見つかりませんでした。</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

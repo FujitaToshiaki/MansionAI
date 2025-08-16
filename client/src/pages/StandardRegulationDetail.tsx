@@ -1,323 +1,269 @@
-import { useState } from "react";
-import { useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
+import { useLocation } from "wouter";
 import { 
-  FileText, 
-  Calendar, 
-  Download, 
   ArrowLeft, 
-  ArrowRight,
-  AlertCircle,
-  CheckCircle,
-  Search,
-  Filter
+  FileText, 
+  Download, 
+  Share,
+  Car,
+  Package,
+  Users,
+  Shield,
+  Monitor
 } from "lucide-react";
-import { Link } from "wouter";
 
-interface RevisionComparison {
-  articleNumber: string;
-  title: string;
-  before: string;
-  after: string;
-  changeType: 'addition' | 'modification' | 'deletion';
-  rationale: string;
+interface RegulationRevision {
+  id: number;
   category: string;
+  title: string;
+  change_description: string;
+  before_text: string | null;
+  after_text: string | null;
+  article_number: string | null;
+  reference_section: string | null;
+  change_type: string;
+  creation_date: string;
 }
 
-// アップロードされた改訂内容をRAG化したデータ
-const revisionData: Record<string, RevisionComparison[]> = {
-  "r6-revision": [
-    {
-      articleNumber: "第12条",
-      title: "専有部分の用途",
-      before: "区分所有者は、その専有部分を専ら住宅として使用するものとし、他の用途に供してはならない。",
-      after: "区分所有者は、その専有部分を専ら住宅として使用するものとし、他の用途に供してはならない。\n２ 区分所有者は、その専有部分を住宅宿泊事業法（平成２９年法律第６５号）第３条第１項の届出を行って営む同法第２条第３項の住宅宿泊事業に使用することができる。",
-      changeType: "addition",
-      rationale: "住宅宿泊事業（民泊）に関する取り扱いを明確化するため、新たに第2項を追加。住宅宿泊事業法に基づく適正な届出を前提とした民泊事業を可能とする。",
-      category: "住宅宿泊事業"
-    },
-    {
-      articleNumber: "第35条",
-      title: "役員",
-      before: "理事及び監事は、組合員のうちから、総会で選任する。",
-      after: "理事及び監事は、組合員のうちから、総会で選任する。\n２ 前項の規定にかかわらず、理事及び監事は、組合員以外の者のうちから選任することができる。",
-      changeType: "addition",
-      rationale: "外部専門家の活用を可能とするため、組合員以外からの役員選任を認める規定を追加。マンション管理士等の専門知識を有する外部専門家の活用により、管理組合運営の適正化を図る。",
-      category: "外部専門家活用"
-    },
-    {
-      articleNumber: "第46条",
-      title: "議決権",
-      before: "各組合員の議決権は、第14条に定める議決権の割合による。",
-      after: "各組合員の議決権は、第14条に定める議決権の割合による。\n２ 組合員以外の理事は、議決権を有しない。",
-      changeType: "addition",
-      rationale: "外部専門家が理事に就任した場合の議決権の取り扱いを明確化。組合員以外の理事は議決権を有しないことを明示し、組合員の権利保護を図る。",
-      category: "外部専門家活用"
-    },
-    {
-      articleNumber: "第54条",
-      title: "決議事項",
-      before: "次の各号に掲げる事項については、総会の決議を経なければならない。\n(1) 収支予算及び事業計画並びにこれらの変更\n(2) 収支決算\n(3) 管理費等及び使用料の額並びに賦課徴収方法\n(4) 役員の選任及び解任\n(5) 規約及び使用細則等の制定、変更及び廃止\n(6) 専有部分等の変更\n(7) 建物の建替え\n(8) その他管理組合の業務に関する重要事項",
-      after: "次の各号に掲げる事項については、総会の決議を経なければならない。\n(1) 収支予算及び事業計画並びにこれらの変更\n(2) 収支決算\n(3) 管理費等及び使用料の額並びに賦課徴収方法\n(4) 役員の選任及び解任\n(5) 規約及び使用細則等の制定、変更及び廃止\n(6) 専有部分等の変更\n(7) 建物の建替え\n(8) 長期修繕計画の作成又は変更\n(9) その他管理組合の業務に関する重要事項",
-      changeType: "addition",
-      rationale: "長期修繕計画の重要性に鑑み、その作成又は変更について総会決議事項として明確化。適切な修繕計画により建物の維持保全を図る。",
-      category: "修繕・維持管理"
-    },
-    {
-      articleNumber: "第18条",
-      title: "専有部分の修繕等",
-      before: "区分所有者は、その専有部分について、修繕、模様替え又は建具の取替えを行おうとするときは、あらかじめ、理事長にその旨を申請し、書面による承認を受けなければならない。",
-      after: "区分所有者は、その専有部分について、修繕、模様替え又は建具の取替えを行おうとするときは、あらかじめ、理事長にその旨を申請し、書面による承認を受けなければならない。\n２ 前項の規定にかかわらず、専有部分の模様替え等であって、建物の構造に影響を与えず、かつ、他の区分所有者の利害に関係しないと認められるものについては、理事長への報告をもって足りる。",
-      changeType: "addition",
-      rationale: "軽微な模様替え等については手続きを簡素化し、区分所有者の利便性向上を図る。建物の構造や他の区分所有者への影響がない場合は報告のみで足りることとする。",
-      category: "手続き簡素化"
+interface StandardRegulationDetailProps {
+  id: string;
+}
+
+export default function StandardRegulationDetail({ id }: StandardRegulationDetailProps) {
+  const [, setLocation] = useLocation();
+
+  const { data: revision, isLoading } = useQuery({
+    queryKey: ['/api/regulation-revisions', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/regulation-revisions/${id}`);
+      if (!response.ok) throw new Error('改正詳細の取得に失敗しました');
+      return response.json() as RegulationRevision;
     }
-  ]
-};
-
-const revisionInfo = {
-  "r6-revision": {
-    version: "令和6年改正版",
-    title: "マンション標準管理規約（単棟型）令和6年改正",
-    revisionDate: "2024-03-01",
-    effectiveDate: "2024-04-01",
-    description: "マンション管理の適正化を図るため、外部専門家の活用や住宅宿泊事業への対応等について規定を整備"
-  }
-};
-
-export default function StandardRegulationDetail() {
-  const [match, params] = useRoute("/standard-regulations/:id");
-  const [comparisonMode, setComparisonMode] = useState<'side-by-side' | 'unified'>('side-by-side');
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-
-  const revisionId = params?.id || "";
-  const revision = revisionInfo[revisionId as keyof typeof revisionInfo];
-  const comparisons = revisionData[revisionId as keyof typeof revisionData] || [];
-
-  const filteredComparisons = comparisons.filter(comparison => {
-    const matchesSearch = searchTerm === "" || 
-      comparison.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comparison.articleNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comparison.rationale.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === "all" || comparison.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
   });
 
-  const categories = Array.from(new Set(comparisons.map(c => c.category)));
-
-  const getChangeTypeColor = (type: string) => {
-    switch (type) {
-      case 'addition': return 'bg-green-100 text-green-800 border-green-200';
-      case 'modification': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'deletion': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case '充電設備':
+        return <Car className="h-6 w-6 text-green-600" />;
+      case '宅配ボックス設置':
+        return <Package className="h-6 w-6 text-blue-600" />;
+      case '外部専門家活用':
+      case '外部専門家活用詳細':
+        return <Users className="h-6 w-6 text-purple-600" />;
+      case '役員欠格条項':
+      case '監事機能強化':
+        return <Shield className="h-6 w-6 text-red-600" />;
+      case '電磁的方法活用':
+      case '管理情報提供':
+      case '組合員名簿管理':
+        return <Monitor className="h-6 w-6 text-orange-600" />;
+      default:
+        return <FileText className="h-6 w-6 text-gray-600" />;
     }
   };
 
-  const getChangeTypeLabel = (type: string) => {
-    switch (type) {
-      case 'addition': return '追加';
-      case 'modification': return '修正';
-      case 'deletion': return '削除';
-      default: return '変更';
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case '充電設備':
+        return 'bg-green-100 text-green-800';
+      case '宅配ボックス設置':
+        return 'bg-blue-100 text-blue-800';
+      case '外部専門家活用':
+      case '外部専門家活用詳細':
+        return 'bg-purple-100 text-purple-800';
+      case '役員欠格条項':
+      case '監事機能強化':
+        return 'bg-red-100 text-red-800';
+      case '電磁的方法活用':
+      case '管理情報提供':
+      case '組合員名簿管理':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   if (!revision) {
     return (
       <div className="space-y-6">
-        <div className="text-center py-8">
-          <AlertCircle className="mx-auto mb-4 text-gray-400" size={48} />
-          <p className="text-gray-500">指定された改訂版が見つかりません</p>
-          <Link href="/standard-regulations">
-            <Button className="mt-4">一覧に戻る</Button>
-          </Link>
-        </div>
+        <Button
+          variant="outline"
+          onClick={() => setLocation('/standard-regulations')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          一覧に戻る
+        </Button>
+        <Card className="bg-white">
+          <CardContent className="text-center py-12">
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">改正情報が見つかりません</h3>
+            <p className="text-gray-600">指定された改正情報が存在しないか、削除された可能性があります。</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500">
-        <Link href="/standard-regulations" className="hover:text-gray-700">標準規約改訂版管理</Link>
-        <span className="mx-2">{'>'}</span>
-        <span>{revision.version}</span>
-      </nav>
+      {/* Navigation */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          onClick={() => setLocation('/standard-regulations')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          一覧に戻る
+        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Share className="h-4 w-4 mr-2" />
+            共有
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            出力
+          </Button>
+        </div>
+      </div>
 
-      {/* Header */}
+      {/* Header Card */}
       <Card className="bg-white">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center">
-                <Link href="/standard-regulations">
-                  <Button variant="ghost" size="sm" className="mr-2">
-                    <ArrowLeft size={16} />
-                  </Button>
-                </Link>
-                <FileText className="mr-2" size={24} />
-                {revision.version}
-              </CardTitle>
-              <p className="text-gray-600 mt-2">{revision.description}</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                size="sm"
-                variant={comparisonMode === 'side-by-side' ? 'default' : 'outline'}
-                onClick={() => setComparisonMode('side-by-side')}
-              >
-                左右比較
-              </Button>
-              <Button
-                size="sm"
-                variant={comparisonMode === 'unified' ? 'default' : 'outline'}
-                onClick={() => setComparisonMode('unified')}
-              >
-                統合表示
-              </Button>
-              <Button size="sm" variant="outline">
-                <Download className="mr-1" size={14} />
-                DL
-              </Button>
+          <div className="flex items-start gap-4">
+            {getCategoryIcon(revision.category)}
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <CardTitle className="text-2xl">{revision.title}</CardTitle>
+                <Badge className={getCategoryColor(revision.category)}>
+                  {revision.category}
+                </Badge>
+                <Badge variant="outline">
+                  {revision.change_type}
+                </Badge>
+              </div>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                {revision.change_description}
+              </p>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">改正日:</span>
-              <p className="font-medium">{new Date(revision.revisionDate).toLocaleDateString('ja-JP')}</p>
-            </div>
-            <div>
-              <span className="text-gray-600">施行日:</span>
-              <p className="font-medium">{new Date(revision.effectiveDate).toLocaleDateString('ja-JP')}</p>
-            </div>
-            <div>
-              <span className="text-gray-600">変更条文数:</span>
-              <p className="font-medium">{comparisons.length}箇所</p>
-            </div>
-          </div>
-        </CardContent>
       </Card>
 
-      {/* Filters */}
-      <Card className="bg-white">
-        <CardContent className="p-4">
-          <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                <Input
-                  placeholder="条文番号、タイトル、改正理由で検索..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Filter size={16} className="text-gray-600" />
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="border rounded px-3 py-2 text-sm"
-              >
-                <option value="all">全カテゴリ</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Comparison List */}
-      <div className="space-y-6">
-        {filteredComparisons.map((comparison, index) => (
-          <Card key={index} className="bg-white">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="flex items-center space-x-3">
-                    <span>{comparison.articleNumber}</span>
-                    <span>（{comparison.title}）</span>
-                    <Badge className={getChangeTypeColor(comparison.changeType)}>
-                      {getChangeTypeLabel(comparison.changeType)}
-                    </Badge>
-                    <Badge variant="outline">{comparison.category}</Badge>
-                  </CardTitle>
-                  <p className="text-sm text-gray-600 mt-2">{comparison.rationale}</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {comparisonMode === 'side-by-side' ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card className="bg-white border">
-                    <CardHeader className="bg-red-50 py-3">
-                      <CardTitle className="text-base text-red-900">改正前</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
-                        {comparison.before}
-                      </pre>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-white border">
-                    <CardHeader className="bg-green-50 py-3">
-                      <CardTitle className="text-base text-green-900">改正後</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
-                        {comparison.after}
-                      </pre>
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="bg-red-50 p-4 rounded border-l-4 border-red-500">
-                    <p className="text-sm font-medium text-red-900 mb-2">改正前</p>
-                    <pre className="whitespace-pre-wrap text-sm leading-relaxed text-red-800 font-sans">
-                      {comparison.before}
-                    </pre>
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <ArrowRight className="text-gray-400" size={20} />
-                  </div>
-                  <div className="bg-green-50 p-4 rounded border-l-4 border-green-500">
-                    <p className="text-sm font-medium text-green-900 mb-2">改正後</p>
-                    <pre className="whitespace-pre-wrap text-sm leading-relaxed text-green-800 font-sans">
-                      {comparison.after}
-                    </pre>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredComparisons.length === 0 && (
+      {/* Details Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Metadata */}
         <Card className="bg-white">
-          <CardContent className="p-8 text-center">
-            <AlertCircle className="mx-auto mb-4 text-gray-400" size={48} />
-            <p className="text-gray-500">検索条件に該当する改正内容が見つかりません</p>
+          <CardHeader>
+            <CardTitle className="text-lg">改正情報</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {revision.article_number && (
+              <div>
+                <h4 className="font-medium text-gray-900 mb-1">条文番号</h4>
+                <p className="text-gray-600">{revision.article_number}</p>
+              </div>
+            )}
+            {revision.reference_section && (
+              <div>
+                <h4 className="font-medium text-gray-900 mb-1">参照箇所</h4>
+                <p className="text-gray-600">{revision.reference_section}</p>
+              </div>
+            )}
+            <div>
+              <h4 className="font-medium text-gray-900 mb-1">改正種別</h4>
+              <p className="text-gray-600">{revision.change_type}</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 mb-1">登録日時</h4>
+              <p className="text-gray-600">
+                {new Date(revision.creation_date).toLocaleDateString('ja-JP', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
           </CardContent>
         </Card>
-      )}
+
+        {/* Content Comparison */}
+        <div className="lg:col-span-2 space-y-6">
+          {revision.before_text && revision.before_text !== '（新設）' && (
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-lg text-red-700">改正前</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-200">
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    {revision.before_text}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {revision.after_text && (
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-lg text-green-700">
+                  {revision.before_text === '（新設）' ? '新設内容' : '改正後'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-200">
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    {revision.after_text}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {revision.before_text === '（新設）' && (
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-lg text-blue-700">新設の背景</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+                  <p className="text-gray-800">
+                    この規定は令和6年改正において新たに追加された項目です。
+                    {revision.category === '充電設備' && 
+                      '電気自動車の普及に伴い、マンションにおける充電設備の設置需要の増加を受けて新設されました。'
+                    }
+                    {revision.category === '外部専門家活用' && 
+                      'マンション管理の専門性向上と適正化を図るため、外部の専門家を活用できる制度が導入されました。'
+                    }
+                    {revision.category === '組合員名簿管理' && 
+                      '管理組合の透明性向上と適切な管理業務の実施を目的として新設されました。'
+                    }
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -46,6 +46,9 @@ export interface IStorage {
   
   // Dashboard methods
   getDashboardStats(): Promise<any>;
+  
+  // Database query method
+  query(sql: string, params?: any[]): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -434,6 +437,12 @@ export class MemStorage implements IStorage {
     } else {
       return "1時間以内";
     }
+  }
+
+  async query(sql: string, params: any[] = []): Promise<any> {
+    // Mock implementation for demonstration
+    // In real implementation, this would connect to the actual database
+    throw new Error('Database query method not implemented in MemStorage');
   }
 }
 
