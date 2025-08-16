@@ -293,15 +293,15 @@ export default function RegulationAnalysis() {
                       {/* Analysis Flow Preview */}
                       <div>
                         <h4 className="font-medium mb-3">🔄 実行されるAI分析フロー</h4>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {analysisSteps.map((step, index) => (
-                            <div key={step.id} className="flex items-center space-x-3 p-2 bg-blue-50 rounded text-sm hover:bg-blue-100 transition-colors duration-200 transform hover:scale-102">
-                              <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:animate-pulse">
-                                {index + 1}
-                              </span>
-                              <div>
-                                <p className="font-medium">{step.name}</p>
-                                <p className="text-gray-600 text-xs">{step.description}</p>
+                            <div key={step.id} className="flex items-center space-x-3 p-3 rounded-lg border bg-gray-50 border-gray-200">
+                              <div className="w-4 h-4 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span className="text-xs text-white font-medium">{index + 1}</span>
+                              </div>
+                              <div className="flex-1">
+                                <span className="text-sm text-gray-500 font-medium">{step.name}</span>
+                                <p className="text-xs text-gray-600 mt-1">{step.description}</p>
                               </div>
                             </div>
                           ))}
@@ -332,12 +332,16 @@ export default function RegulationAnalysis() {
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                         </div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">規約改定分析実行中</h3>
-                        <div className="text-2xl font-bold text-blue-600 mb-2">{Math.round(analysisProgress)}%</div>
+                        <div className="text-2xl font-bold text-blue-600 mb-2">
+                          {Math.round((analysisSteps.filter(s => s.status === 'completed').length / analysisSteps.length) * 100)}%
+                        </div>
                         <Progress 
-                          value={analysisProgress} 
+                          value={(analysisSteps.filter(s => s.status === 'completed').length / analysisSteps.length) * 100} 
                           className="mt-2 transition-all duration-500 h-3 bg-gray-200"
                         />
-                        <p className="text-sm text-gray-700 mt-3 font-medium">{currentStep}を実行しています</p>
+                        <p className="text-sm text-gray-700 mt-3 font-medium">
+                          {analysisSteps.find(step => step.status === 'running')?.name || '規約改定分析'}を実行しています
+                        </p>
                       </div>
                       
                       <div className="space-y-3">
