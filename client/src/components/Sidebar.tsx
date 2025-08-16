@@ -18,16 +18,7 @@ import { useState } from "react";
 const menuItems = [
   { icon: LayoutDashboard, label: "ダッシュボード", path: "/" },
   { icon: Building, label: "マンション管理", path: "/condominiums" },
-  { 
-    icon: FileText, 
-    label: "規約管理", 
-    path: "/regulations",
-    hasSubmenu: true,
-    submenu: [
-      { label: "標準規約改訂版管理", path: "/standard-regulations" },
-      { label: "規約一覧", path: "/regulations" }
-    ]
-  },
+  { icon: FileText, label: "標準管理規約改正", path: "/standard-regulations" },
   { icon: ClipboardList, label: "議事録管理", path: "/minutes" },
   { icon: ScanLine, label: "OCR処理", path: "/ocr" },
   { icon: Bot, label: "AI分析", path: "/ai-analysis" },
@@ -47,9 +38,7 @@ export default function Sidebar() {
     );
   };
 
-  const isSubmenuActive = (submenu: any[]) => {
-    return submenu.some(subItem => location === subItem.path);
-  };
+
 
   return (
     <div className="sidebar-gradient text-white flex flex-col" style={{ width: "280px" }}>
@@ -64,54 +53,18 @@ export default function Sidebar() {
         <div className="space-y-0">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location === item.path;
-            const isExpanded = expandedMenus.includes(item.path);
-            const hasActiveSubmenu = item.submenu && isSubmenuActive(item.submenu);
+            const isActive = location === item.path || (item.path === "/standard-regulations" && location.startsWith("/standard-regulations"));
             
             return (
               <div key={item.path}>
-                {item.hasSubmenu ? (
-                  <>
-                    <div 
-                      className={`menu-item py-3 px-6 flex items-center justify-between cursor-pointer relative ${
-                        isActive || hasActiveSubmenu ? 'menu-item-active' : ''
-                      }`}
-                      onClick={() => toggleSubmenu(item.path)}
-                    >
-                      <div className="flex items-center">
-                        <Icon className="mr-3 text-sm" size={16} />
-                        <span className="font-inter text-sm font-medium">{item.label}</span>
-                      </div>
-                      {isExpanded ? (
-                        <ChevronDown size={14} />
-                      ) : (
-                        <ChevronRight size={14} />
-                      )}
-                    </div>
-                    {isExpanded && item.submenu && (
-                      <div className="bg-black bg-opacity-20">
-                        {item.submenu.map((subItem) => (
-                          <Link key={subItem.path} href={subItem.path}>
-                            <div className={`menu-item py-2 px-12 flex items-center cursor-pointer relative ${
-                              location === subItem.path ? 'menu-item-active' : ''
-                            }`}>
-                              <span className="font-inter text-sm font-medium">{subItem.label}</span>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link href={item.path}>
-                    <div className={`menu-item py-3 px-6 flex items-center cursor-pointer relative ${
-                      isActive ? 'menu-item-active' : ''
-                    }`}>
-                      <Icon className="mr-3 text-sm" size={16} />
-                      <span className="font-inter text-sm font-medium">{item.label}</span>
-                    </div>
-                  </Link>
-                )}
+                <Link href={item.path}>
+                  <div className={`menu-item py-3 px-6 flex items-center cursor-pointer relative ${
+                    isActive ? 'menu-item-active' : ''
+                  }`}>
+                    <Icon className="mr-3 text-sm" size={16} />
+                    <span className="font-inter text-sm font-medium">{item.label}</span>
+                  </div>
+                </Link>
               </div>
             );
           })}
