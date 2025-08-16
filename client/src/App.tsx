@@ -19,6 +19,8 @@ import StandardRegulations from "@/pages/StandardRegulations";
 import StandardRegulationVersions from "@/pages/StandardRegulationVersions";
 import StandardRegulationDetail from "@/pages/StandardRegulationDetail";
 import MinuteDetail from "@/pages/MinuteDetail";
+import AIAgentHistory from "@/pages/AIAgentHistory";
+import AIAgentExecutionDetail from "@/pages/AIAgentExecutionDetail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -35,6 +37,8 @@ function Router() {
         <Route path="/condominiums/:id/regulation-analysis/:revisionId" component={RegulationRevisionDetail} />
         <Route path="/condominiums/:id/analysis" component={RegulationAnalysis} />
         <Route path="/condominiums/:id/ai-revision" component={AIRevisionGeneration} />
+        <Route path="/condominiums/:id/ai-agent-history" component={AIAgentHistory} />
+        <Route path="/condominiums/:id/ai-agent-history/:executionId" component={AIAgentExecutionDetail} />
         <Route path="/condominiums/:id/knowledge" component={KnowledgeBaseStandalone} />
         <Route path="/condominiums/:id/wiki" component={RegulationWiki} />
         <Route path="/condominiums/:id/regulations/wiki" component={RegulationWiki} />

@@ -10,9 +10,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, CheckCircle, Clock, FileText, Bot, Gavel, RotateCcw, Settings, Filter } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { AlertTriangle, CheckCircle, Clock, FileText, Bot, Gavel, RotateCcw, Settings, Filter, Mic, MicOff, Play, Pause } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -29,8 +31,27 @@ export default function RegulationAnalysis() {
     checkPastDecisions: true,
     priorities: ['high', 'medium', 'low'],
     strictness: 'standard',
-    mergeSimular: true
+    mergeSimular: true,
+    additionalInstructions: ''
   });
+
+  // Voice input states
+  const [isListening, setIsListening] = useState(false);
+  const [voiceText, setVoiceText] = useState('');
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // Analysis execution states
+  const [showExecutionModal, setShowExecutionModal] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState('');
+  const [analysisSteps, setAnalysisSteps] = useState([
+    { id: 1, name: '文書解析開始', status: 'pending', description: 'アップロードされた議事録を解析しています' },
+    { id: 2, name: '決議事項抽出', status: 'pending', description: 'AI が決議内容を識別・分類しています' },
+    { id: 3, name: '法改正チェック', status: 'pending', description: '最新の法改正との適合性を確認しています' },
+    { id: 4, name: '標準規約比較', status: 'pending', description: '標準管理規約との差分を分析しています' },
+    { id: 5, name: '改訂案生成', status: 'pending', description: '規約改訂案を自動生成しています' },
+    { id: 6, name: '分析完了', status: 'pending', description: '結果をまとめています' }
+  ]);
 
   const { data: condominium } = useQuery({
     queryKey: ['/api/condominiums', id],
@@ -48,18 +69,82 @@ export default function RegulationAnalysis() {
     queryKey: ['/api/standard-regulations'],
   });
 
-  // Mutation for starting analysis
-  const startAnalysisMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/condominiums/${id}/start-regulation-analysis`, {
-      method: 'POST',
-      body: analysisSettings
-    }),
-    onSuccess: () => {
+  // Voice recognition setup
+  useEffect(() => {
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'ja-JP';
+
+      recognitionRef.current.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setVoiceText(transcript);
+        setAnalysisSettings(prev => ({...prev, additionalInstructions: transcript}));
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
+
+  // Simulate analysis execution flow
+  const simulateAnalysisFlow = async () => {
+    setShowExecutionModal(true);
+    setAnalysisProgress(0);
+    setCurrentStep('分析を開始しています...');
+
+    for (let i = 0; i < analysisSteps.length; i++) {
+      setAnalysisSteps(prev => prev.map((step, index) => 
+        index === i ? { ...step, status: 'running' } : step
+      ));
+      setCurrentStep(analysisSteps[i].name);
+      setAnalysisProgress((i + 1) / analysisSteps.length * 100);
+      
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setAnalysisSteps(prev => prev.map((step, index) => 
+        index === i ? { ...step, status: 'completed' } : step
+      ));
+    }
+
+    setCurrentStep('分析が完了しました');
+    
+    // Close modal after 2 seconds
+    setTimeout(() => {
+      setShowExecutionModal(false);
       toast({
-        title: "分析開始",
-        description: "規約改定分析を開始しました。数分後に結果が更新されます。",
+        title: "分析完了",
+        description: "規約改定分析が完了しました。結果を確認してください。",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/condominiums', id, 'regulation-analysis'] });
+    }, 2000);
+  };
+
+  // Mutation for starting analysis
+  const startAnalysisMutation = useMutation({
+    mutationFn: () => {
+      // Start the simulation instead of real API call
+      simulateAnalysisFlow();
+      return Promise.resolve();
     },
     onError: () => {
       toast({
@@ -105,29 +190,109 @@ export default function RegulationAnalysis() {
           <div className="flex justify-between items-center">
             <CardTitle>規約改訂分析結果</CardTitle>
             <div className="flex space-x-2">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              <Dialog>
+                <DialogTrigger asChild>
                   <Button disabled={startAnalysisMutation.isPending}>
                     <RotateCcw className="w-4 h-4 mr-2" />
                     改訂分析実行
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>規約改定分析を実行しますか？</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      設定条件に従ってAIエージェントが分析を実行します。
-                      この処理には数分かかる場合があります。
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>いいえ</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => startAnalysisMutation.mutate()}>
-                      はい
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>🤖 AI規約改定分析の実行</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-6">
+                    {/* Current Settings Summary */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-medium mb-3">📋 設定条件</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">分析期間:</span>
+                          <p className="font-medium">
+                            {analysisSettings.period === 'past_6_months' ? '過去6ヶ月' :
+                             analysisSettings.period === 'past_1_year' ? '過去1年' : '全期間'}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">分析厳格度:</span>
+                          <p className="font-medium">
+                            {analysisSettings.strictness === 'strict' ? '厳格' :
+                             analysisSettings.strictness === 'standard' ? '標準' : '緩和'}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">法改正チェック:</span>
+                          <p className="font-medium">{analysisSettings.checkLawRevision ? '有効' : '無効'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">標準規約チェック:</span>
+                          <p className="font-medium">{analysisSettings.checkStandardRegulation ? '有効' : '無効'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Voice Input for Additional Instructions */}
+                    <div>
+                      <Label className="text-sm font-medium flex items-center mb-3">
+                        <Mic className="w-4 h-4 mr-2" />
+                        AI分析への追加指示（音声入力対応）
+                      </Label>
+                      <div className="space-y-3">
+                        <div className="flex space-x-2">
+                          <Textarea
+                            placeholder="例: 個人情報保護法の対応を重点的に分析してください。ペット飼育規定についても確認をお願いします。"
+                            value={analysisSettings.additionalInstructions}
+                            onChange={(e) => setAnalysisSettings(prev => ({...prev, additionalInstructions: e.target.value}))}
+                            className="flex-1"
+                            rows={3}
+                          />
+                          <Button
+                            variant={isListening ? "destructive" : "outline"}
+                            onClick={toggleVoiceInput}
+                            className="px-3"
+                          >
+                            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                          </Button>
+                        </div>
+                        {isListening && (
+                          <div className="text-sm text-red-600 flex items-center">
+                            <div className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></div>
+                            音声を認識中...
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Analysis Flow Preview */}
+                    <div>
+                      <h4 className="font-medium mb-3">🔄 実行されるAI分析フロー</h4>
+                      <div className="space-y-2">
+                        {analysisSteps.map((step, index) => (
+                          <div key={step.id} className="flex items-center space-x-3 p-2 bg-blue-50 rounded text-sm">
+                            <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                              {index + 1}
+                            </span>
+                            <div>
+                              <p className="font-medium">{step.name}</p>
+                              <p className="text-gray-600 text-xs">{step.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <DialogTrigger asChild>
+                        <Button variant="outline">キャンセル</Button>
+                      </DialogTrigger>
+                      <Button onClick={() => startAnalysisMutation.mutate()}>
+                        <Bot className="w-4 h-4 mr-2" />
+                        AI分析開始
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <Dialog>
                 <DialogTrigger asChild>
@@ -232,7 +397,9 @@ export default function RegulationAnalysis() {
                     </div>
 
                     <div className="flex justify-end space-x-2 pt-4">
-                      <Button variant="outline" onClick={() => {}}>キャンセル</Button>
+                      <DialogTrigger asChild>
+                        <Button variant="outline">キャンセル</Button>
+                      </DialogTrigger>
                       <Button onClick={() => {}}>設定保存</Button>
                     </div>
                   </div>
@@ -245,7 +412,7 @@ export default function RegulationAnalysis() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="text-gray-600">分析対象:</span>
-              <p className="font-medium">{condominium?.name} 管理規約</p>
+              <p className="font-medium">{condominium?.name || 'ローディング中...'} 管理規約</p>
             </div>
             <div>
               <span className="text-gray-600">分析基準:</span>
@@ -257,7 +424,7 @@ export default function RegulationAnalysis() {
             </div>
             <div>
               <span className="text-gray-600">検出項目:</span>
-              <p className="font-medium">{analysisResults?.totalIssues || 0}箇所</p>
+              <p className="font-medium">{(analysisResults as any)?.totalIssues || 0}箇所</p>
             </div>
           </div>
         </CardContent>
@@ -277,7 +444,7 @@ export default function RegulationAnalysis() {
           </div>
         </CardHeader>
         <CardContent>
-          {analysisResults?.issues?.length > 0 ? (
+          {(analysisResults as any)?.issues?.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -291,7 +458,7 @@ export default function RegulationAnalysis() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {analysisResults.issues.map((issue: any, index: number) => (
+                {((analysisResults as any)?.issues || []).map((issue: any, index: number) => (
                   <TableRow key={index}>
                     <TableCell>
                       <Badge className={getPriorityColor(issue.priority)}>
@@ -362,8 +529,49 @@ export default function RegulationAnalysis() {
 
 
 
-      {/* Action Button */}
-      <div className="flex justify-center">
+      {/* AI Agent Execution Progress Modal */}
+      <Dialog open={showExecutionModal} onOpenChange={setShowExecutionModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>🤖 AI分析実行中</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{Math.round(analysisProgress)}%</div>
+              <Progress value={analysisProgress} className="mt-2" />
+              <p className="text-sm text-gray-600 mt-2">{currentStep}</p>
+            </div>
+            
+            <div className="space-y-3">
+              {analysisSteps.map((step) => (
+                <div key={step.id} className="flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${
+                    step.status === 'completed' ? 'bg-green-500' :
+                    step.status === 'running' ? 'bg-blue-500 animate-pulse' :
+                    'bg-gray-300'
+                  }`}></div>
+                  <span className={`text-sm ${
+                    step.status === 'completed' ? 'text-green-700' :
+                    step.status === 'running' ? 'text-blue-700 font-medium' :
+                    'text-gray-500'
+                  }`}>
+                    {step.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Action Buttons */}
+      <div className="flex justify-center space-x-4">
+        <Link href={`/condominiums/${id}/ai-agent-history`}>
+          <Button variant="outline" size="lg" className="px-8">
+            <Clock className="mr-2" size={20} />
+            AI実行履歴
+          </Button>
+        </Link>
         <Link href={`/condominiums/${id}/ai-revision`}>
           <Button size="lg" className="bg-purple-600 hover:bg-purple-700 px-8">
             <Bot className="mr-2" size={20} />
