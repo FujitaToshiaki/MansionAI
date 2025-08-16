@@ -441,14 +441,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return `${startHour}:${startMin.padStart(2, '0')}-${endHour}:${endMin.padStart(2, '0')}`;
           }
           
-          // Look for simpler pattern like "10:00～12:00"
-          const simpleTimeMatch = content.match(/(\d{1,2}):(\d{2})～(\d{1,2}):(\d{2})/);
-          if (simpleTimeMatch) {
-            const [, startHour, startMin, endHour, endMin] = simpleTimeMatch;
+          // Look for patterns like "10:15～12:10" (colon format)
+          const colonTimeMatch = content.match(/(\d{1,2}):(\d{2})～(\d{1,2}):(\d{2})/);
+          if (colonTimeMatch) {
+            const [, startHour, startMin, endHour, endMin] = colonTimeMatch;
             return `${startHour}:${startMin}-${endHour}:${endMin}`;
           }
           
-          return '10:00-12:30'; // fallback
+          // Fallback to searching for any time reference in tables
+          const tableTimeMatch = content.match(/\*\*<日時>\*\*\s*\|\s*[^|]*(\d{1,2}):(\d{2})[^|]*(\d{1,2}):(\d{2})/);
+          if (tableTimeMatch) {
+            const [, startHour, startMin, endHour, endMin] = tableTimeMatch;
+            return `${startHour}:${startMin}-${endHour}:${endMin}`;
+          }
+          
+          return '時間未取得'; // More accurate fallback
         };
 
         // Extract location from RAG content
@@ -457,16 +464,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (locationMatch) {
             return locationMatch[1].trim();
           }
+          // Try alternative format
+          const altLocationMatch = content.match(/<場所>\s*\|\s*([^|]+)\s*\|/);
+          if (altLocationMatch) {
+            return altLocationMatch[1].trim();
+          }
           return 'メゾンドオプテージ集会室'; // fallback
         };
 
+        // Extract date from content
+        const extractDateFromContent = (content: string): string => {
+          const dateMatch = content.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+          if (dateMatch) {
+            const [, year, month, day] = dateMatch;
+            return `${year}年${month}月${day}日`;
+          }
+          return foundMinute.date || '日付未取得';
+        };
+
         // Convert RAG data to detailed format for the frontend
+        const rawContent = foundMinute.content || foundMinute.originalContent || '';
         const detailedMinute = {
           id: foundMinute.id,
           title: foundMinute.title,
-          date: foundMinute.date || '2024年10月26日',
-          time: extractTimeFromContent(foundMinute.content || foundMinute.originalContent || ''),
-          location: extractLocationFromContent(foundMinute.content || foundMinute.originalContent || ''),
+          date: extractDateFromContent(rawContent),
+          time: extractTimeFromContent(rawContent),
+          location: extractLocationFromContent(rawContent),
           meetingType: foundMinute.meetingType || '通常総会',
           chairman: '田中一郎（理事長）',
           secretary: '佐藤花子（理事）',

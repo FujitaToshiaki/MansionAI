@@ -127,11 +127,18 @@ export default function MinuteDetail() {
       }
     }
     
+    // Remove RAG management text labels (---, ###, **)
+    cleanedContent = cleanedContent
+      .replace(/^---$/gm, '') // Remove standalone ---
+      .replace(/^\*\*$/gm, '') // Remove standalone **
+      .replace(/^#{1,6}\s*$/gm, '') // Remove standalone ### headers
+      .replace(/\n\s*\n/g, '\n') // Clean up extra empty lines
+    
     return cleanedContent.split('\n').map((line, index) => {
       const trimmedLine = line.trim();
       
-      // Skip completely empty lines with no spacing for tighter layout
-      if (!trimmedLine) {
+      // Skip completely empty lines and RAG management labels
+      if (!trimmedLine || trimmedLine === '---' || trimmedLine === '**' || trimmedLine.match(/^#{1,6}$/)) {
         return null;
       }
       
