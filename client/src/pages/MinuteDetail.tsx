@@ -104,33 +104,49 @@ export default function MinuteDetail() {
   const renderMarkdownContent = (content: string) => {
     if (!content) return null;
     
-    // First, clean up the content by removing excessive line breaks and carriage returns
-    const cleanedContent = content
+    // First, clean up the content and extract only the selected minute
+    let cleanedContent = content
       .replace(/\r\n/g, '\n')  // Normalize line breaks
       .replace(/\r/g, '\n')    // Convert remaining carriage returns
       .replace(/<br>/g, '\n')  // Replace HTML <br> tags with line breaks
       .replace(/<br\/>/g, '\n') // Replace self-closing <br/> tags
       .replace(/\n\s*\n\s*\n/g, '\n\n'); // Remove excessive empty lines (3+ becomes 2)
     
+    // Extract only the first section (stop at next ### header to show only selected minute)
+    const lines = cleanedContent.split('\n');
+    const firstHeaderIndex = lines.findIndex(line => line.trim().startsWith('### '));
+    if (firstHeaderIndex !== -1) {
+      // Find the next ### header after the first one
+      const secondHeaderIndex = lines.findIndex((line, index) => 
+        index > firstHeaderIndex + 1 && line.trim().startsWith('### ')
+      );
+      
+      if (secondHeaderIndex !== -1) {
+        // Only take content up to the second header to isolate selected minute
+        cleanedContent = lines.slice(0, secondHeaderIndex).join('\n');
+      }
+    }
+    
     return cleanedContent.split('\n').map((line, index) => {
       const trimmedLine = line.trim();
       
-      // Skip completely empty lines but add minimal spacing
+      // Skip completely empty lines with no spacing for tighter layout
       if (!trimmedLine) {
-        return <div key={index} className="h-1" />;
+        return null;
       }
       
       // Headers (### and ##)
       if (trimmedLine.startsWith('### ')) {
+        const headerText = trimmedLine.substring(4);
         return (
-          <h3 key={index} className="text-xl font-bold text-blue-700 mt-4 mb-2 border-b border-blue-200 pb-1">
-            {trimmedLine.substring(4)}
+          <h3 key={index} className="text-xl font-bold text-blue-700 mt-2 mb-2 border-b border-blue-200 pb-1">
+            {headerText}
           </h3>
         );
       }
       if (trimmedLine.startsWith('## ')) {
         return (
-          <h2 key={index} className="text-2xl font-bold text-blue-800 mt-5 mb-3 border-b-2 border-blue-300 pb-1">
+          <h2 key={index} className="text-2xl font-bold text-blue-800 mt-3 mb-2 border-b-2 border-blue-300 pb-1">
             {trimmedLine.substring(3)}
           </h2>
         );
@@ -200,7 +216,7 @@ export default function MinuteDetail() {
       if (trimmedLine.includes('**')) {
         const parts = trimmedLine.split('**');
         return (
-          <p key={index} className="mb-1 leading-normal">
+          <p key={index} className="mb-0.5 leading-tight">
             {parts.map((part, partIndex) => 
               partIndex % 2 === 1 ? 
                 <strong key={partIndex} className="font-semibold text-gray-900">{part}</strong> : 
@@ -214,7 +230,7 @@ export default function MinuteDetail() {
       if (trimmedLine.includes('*') && !trimmedLine.includes('**')) {
         const parts = trimmedLine.split('*');
         return (
-          <p key={index} className="mb-1 leading-normal text-gray-700">
+          <p key={index} className="mb-0.5 leading-tight text-gray-700">
             {parts.map((part, partIndex) => 
               partIndex % 2 === 1 ? 
                 <span key={partIndex} className="text-gray-600">{part}</span> : 
@@ -242,9 +258,9 @@ export default function MinuteDetail() {
         );
       }
       
-      // Regular text with reduced spacing
+      // Regular text with tighter spacing
       return (
-        <p key={index} className="mb-1 leading-normal text-gray-700">
+        <p key={index} className="mb-0.5 leading-tight text-gray-700">
           {trimmedLine}
         </p>
       );

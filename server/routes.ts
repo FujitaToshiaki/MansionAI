@@ -396,9 +396,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
               
-              // Extract the complete section including all content
+              // Extract only the specific section content, not including subsequent sections
               fullContent = documentLines.slice(startLine, endLine).join('\n');
-              console.log(`Extracted complete section (${fullContent.length} chars) for: ${minute.title}`);
+              console.log(`Extracted specific section (${fullContent.length} chars) for: ${minute.title}`);
             }
           }
           
