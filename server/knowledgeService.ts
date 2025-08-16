@@ -55,8 +55,8 @@ export class KnowledgeService {
 
   // Process document content into smaller chunks for RAG
   private async processDocumentIntoChunks(document: KnowledgeDocument): Promise<void> {
-    const chunkSize = 1000; // Characters per chunk
-    const overlap = 200; // Overlap between chunks
+    const chunkSize = 2000; // Increased chunk size to prevent data truncation
+    const overlap = 400; // Increased overlap between chunks
     
     const content = document.content;
     const chunks: InsertKnowledgeChunk[] = [];
@@ -237,6 +237,7 @@ export class KnowledgeService {
         id: `minute-${meetingCount}`,
         title: section.title,
         content: sectionContent,
+        originalContent: sectionContent, // Store complete original content
         date: this.extractDateFromContent(section.title, sectionLines.slice(0, 20)),
         meetingType: this.extractMeetingType(section.title),
         rawContent: section.title

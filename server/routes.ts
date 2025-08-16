@@ -378,13 +378,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract and find the specific minute by ID
       for (const doc of minutesDocs) {
         const extractedMinutes = await knowledgeService.extractMeetingMinutes(doc.content);
-        const enhancedMinutes = extractedMinutes.map((minute, index) => ({
-          ...minute,
-          id: `${doc.id}-minute-${index + 1}`,
-          originalContent: minute.content,
-          sourceDocument: doc.title,
-          createdAt: doc.uploadedAt
-        }));
+        const enhancedMinutes = extractedMinutes.map((minute, index) => {
+          // Extract complete section content directly from original document
+          let fullContent = minute.content;
+          
+          if (doc.content && minute.title) {
+            const documentLines = doc.content.split('\n');
+            const startLine = documentLines.findIndex(line => line.trim() === minute.title);
+            
+            if (startLine !== -1) {
+              // Find the next section or end of document
+              let endLine = documentLines.length;
+              for (let i = startLine + 1; i < documentLines.length; i++) {
+                if (documentLines[i].match(/^### 第\d+期.*?総会議事録$/)) {
+                  endLine = i;
+                  break;
+                }
+              }
+              
+              // Extract the complete section including all content
+              fullContent = documentLines.slice(startLine, endLine).join('\n');
+              console.log(`Extracted complete section (${fullContent.length} chars) for: ${minute.title}`);
+            }
+          }
+          
+          return {
+            ...minute,
+            id: `${doc.id}-minute-${index + 1}`,
+            content: fullContent, // Use complete extracted content
+            originalContent: fullContent, // Store as original content too
+            sourceDocument: doc.title,
+            createdAt: doc.uploadedAt
+          };
+        });
         
         // Look for the requested minute ID
         foundMinute = enhancedMinutes.find(m => m.id === minuteId);
@@ -420,7 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalUnits: foundMinute.totalUnits || 68,
           attendanceRate: foundMinute.attendanceRate || 66.2,
           quorum: true,
-          content: foundMinute.content || foundMinute.rawContent || foundMinute.originalContent, // Add the actual content
+          content: foundMinute.originalContent || foundMinute.content || foundMinute.rawContent, // Prioritize original content to avoid RAG truncation
           summary: foundMinute.summary || foundMinute.content?.slice(0, 200) + '...' || '議事録の概要',
           sourceDocument: foundMinute.sourceDocument,
           status: foundMinute.status || 'completed',
