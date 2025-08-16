@@ -10,6 +10,9 @@ import { Link } from "wouter";
 export default function AIAgentHistory() {
   const { id } = useParams();
 
+  // Debug: Log the current params
+  console.log("AIAgentHistory - params:", { id });
+
   // Check if we're in global view (no condominium ID) or condominium-specific view
   const isGlobalView = !id;
 
@@ -233,7 +236,7 @@ export default function AIAgentHistory() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Link href={`/condominiums/${id}/ai-agent-history/${execution.executionId}`}>
+                      <Link href={isGlobalView ? `/ai-agent-history/${execution.executionId}` : `/condominiums/${id}/ai-agent-history/${execution.executionId}`}>
                         <Button variant="ghost" size="sm">
                           <Eye className="w-4 h-4 mr-1" />
                           詳細
