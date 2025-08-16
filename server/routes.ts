@@ -432,13 +432,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (foundMinute) {
+        // Extract time information from RAG content
+        const extractTimeFromContent = (content: string): string => {
+          // Look for time patterns in the content like "10時15分～11時50分"
+          const timeMatch = content.match(/(\d{1,2})時(\d{1,2})分～(\d{1,2})時(\d{1,2})分/);
+          if (timeMatch) {
+            const [, startHour, startMin, endHour, endMin] = timeMatch;
+            return `${startHour}:${startMin.padStart(2, '0')}-${endHour}:${endMin.padStart(2, '0')}`;
+          }
+          
+          // Look for simpler pattern like "10:00～12:00"
+          const simpleTimeMatch = content.match(/(\d{1,2}):(\d{2})～(\d{1,2}):(\d{2})/);
+          if (simpleTimeMatch) {
+            const [, startHour, startMin, endHour, endMin] = simpleTimeMatch;
+            return `${startHour}:${startMin}-${endHour}:${endMin}`;
+          }
+          
+          return '10:00-12:30'; // fallback
+        };
+
+        // Extract location from RAG content
+        const extractLocationFromContent = (content: string): string => {
+          const locationMatch = content.match(/\*\*<場所>\*\*\s*\|\s*([^|]+)\s*\|/);
+          if (locationMatch) {
+            return locationMatch[1].trim();
+          }
+          return 'メゾンドオプテージ集会室'; // fallback
+        };
+
         // Convert RAG data to detailed format for the frontend
         const detailedMinute = {
           id: foundMinute.id,
           title: foundMinute.title,
           date: foundMinute.date || '2024年10月26日',
-          time: '10:00-12:30',
-          location: 'メゾンドオプテージ集会室',
+          time: extractTimeFromContent(foundMinute.content || foundMinute.originalContent || ''),
+          location: extractLocationFromContent(foundMinute.content || foundMinute.originalContent || ''),
           meetingType: foundMinute.meetingType || '通常総会',
           chairman: '田中一郎（理事長）',
           secretary: '佐藤花子（理事）',
