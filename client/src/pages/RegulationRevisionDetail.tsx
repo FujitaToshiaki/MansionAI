@@ -67,7 +67,9 @@ export default function RegulationRevisionDetail() {
       );
     });
     
-    // Sort by date (most recent first) and limit to 5 most relevant decisions
+    // For pet-related revisions, limit to 3 most relevant decisions
+    const maxDecisions = (revisionTitle.includes('ペット') || revisionTitle.includes('動物') || revisionTitle.includes('飼育')) ? 3 : 5;
+    
     return filteredDecisions.sort((a: any, b: any) => {
       // Parse dates like "2024年10月", "2024年8月", etc.
       const parseJapaneseDate = (dateStr: string) => {
@@ -81,7 +83,7 @@ export default function RegulationRevisionDetail() {
       const aDate = parseJapaneseDate(a.meetingDate || '1900年1月');
       const bDate = parseJapaneseDate(b.meetingDate || '1900年1月');
       return bDate.getTime() - aDate.getTime();
-    }).slice(0, 5);
+    }).slice(0, maxDecisions);
   };
 
   // Get revision-specific current text
