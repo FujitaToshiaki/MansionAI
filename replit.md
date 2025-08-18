@@ -2,13 +2,13 @@
 
 This is a Japanese condominium management regulation AI system designed for property management companies. The application helps automate the process of analyzing meeting minutes, extracting decisions, and generating regulation amendments using OCR technology and AI analysis. The system provides a complete workflow from document upload to final regulation output, with a focus on legal compliance and standardized regulation management.
 
-## Recent Changes (2025-08-16)
+## Recent Changes (2025-08-18)
 
-✓ **Standard Regulation Management Complete**: Implemented 3-tier navigation structure (Version List → Items List → Detail)
-✓ **RAG Integration Verified**: regulation_revisions table contains 15 改正項目, knowledge_documents has 5 documents with 160 chunks
-✓ **Navigation Structure Fixed**: Proper routing hierarchy from 改正版一覧 (令和6年度改訂, 令和3年度改訂, 平成29年度改訂) to detailed items
-✓ **API Error Resolution**: Fixed PostgreSQL parameter syntax and integer parsing for regulation revision endpoints
-✓ **Sidebar Simplification**: Removed complex submenu structure, consolidated to single "標準管理規約" menu item
+✓ **CRITICAL RAG SYSTEM REPAIR**: Fixed corrupted knowledge base - removed incorrect "区分所有法改正内容" documents
+✓ **Knowledge Base Restored**: Cleaned up 218 invalid chunks and 8 incorrect documents, restored to 371 proper Mezon d'Optage regulation chunks
+✓ **Menu Font Enhancement**: Increased sidebar menu font sizes for better readability (icons 16→20px, text sm→base)
+✓ **Active Menu Indicator Fixed**: Enhanced white label indicator with z-index and border-radius for proper visibility
+✓ **Navigation Structure Maintained**: 3-tier structure (Version List → Items List → Detail) working with clean RAG data
 
 # User Preferences
 
