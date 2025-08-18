@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, FileText, Calendar, Target, Database, Lightbulb, Languages } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, Target, Database, Lightbulb, Languages, Clock, Users } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
 
@@ -28,6 +28,61 @@ export default function RegulationRevisionDetail() {
   const { data: revisionDetail } = useQuery({
     queryKey: ['/api/condominiums', id, 'regulation-analysis', revisionId],
   });
+
+  // Get related decisions from decision history
+  const { data: decisions } = useQuery({
+    queryKey: ['/api/condominiums', id, 'decisions'],
+  });
+
+  // Get related decisions based on revision type
+  const getRelatedDecisions = () => {
+    if (!decisions || !revisionDetail) return [];
+    
+    // Define keywords based on revision title
+    let keywords: string[] = [];
+    const revisionTitle = revisionDetail?.title?.toLowerCase() || '';
+    
+    if (revisionTitle.includes('ペット') || revisionTitle.includes('動物') || revisionTitle.includes('飼育')) {
+      keywords = ['動物', 'ペット', '飼育', '犬', '猫', 'バイク', '自転車', '駐車', '駐輪'];
+    } else if (revisionTitle.includes('個人情報') || revisionTitle.includes('プライバシー')) {
+      keywords = ['個人情報', 'プライバシー', '情報保護', '情報管理', '管理規約'];
+    } else if (revisionTitle.includes('駐車') || revisionTitle.includes('車庫')) {
+      keywords = ['駐車', '車庫', '自動車', '駐車場', 'バイク', 'オートバイ'];
+    } else if (revisionTitle.includes('看板') || revisionTitle.includes('広告')) {
+      keywords = ['看板', '広告', '表示', '掲示', '管理規約'];
+    } else {
+      // General keywords for any regulation revision
+      keywords = ['管理規約', '規約', '改正', '改訂', '変更', '修正'];
+    }
+    
+    const filteredDecisions = decisions.filter((decision: any) => {
+      const agenda = decision.agenda?.toLowerCase() || '';
+      const category = decision.category?.toLowerCase() || '';
+      const relatedArticle = decision.relatedArticle?.toLowerCase() || '';
+      
+      return keywords.some(keyword => 
+        agenda.includes(keyword) || 
+        category.includes(keyword) || 
+        relatedArticle.includes(keyword)
+      );
+    });
+    
+    // Sort by date (most recent first) and limit to 5 most relevant decisions
+    return filteredDecisions.sort((a: any, b: any) => {
+      // Parse dates like "2024年10月", "2024年8月", etc.
+      const parseJapaneseDate = (dateStr: string) => {
+        const match = dateStr.match(/(\d{4})年(\d{1,2})月/);
+        if (match) {
+          return new Date(parseInt(match[1]), parseInt(match[2]) - 1);
+        }
+        return new Date('1900-01-01');
+      };
+      
+      const aDate = parseJapaneseDate(a.meetingDate || '1900年1月');
+      const bDate = parseJapaneseDate(b.meetingDate || '1900年1月');
+      return bDate.getTime() - aDate.getTime();
+    }).slice(0, 5);
+  };
 
   // Translation function
   const translateText = async (text: string, targetLanguage: string): Promise<string> => {
@@ -533,6 +588,78 @@ export default function RegulationRevisionDetail() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Related Decision History Timeline */}
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Clock className="w-5 h-5 mr-2" />
+            関連する過去の決議履歴
+          </CardTitle>
+          <p className="text-gray-600 text-sm mt-1">
+            この改訂項目に関連する過去の議論と決議の流れをご確認いただけます
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {getRelatedDecisions().map((decision, index) => (
+              <div key={decision.id} className="relative">
+                {/* Timeline line */}
+                {index < getRelatedDecisions().length - 1 && (
+                  <div className="absolute left-6 top-16 w-0.5 h-12 bg-gray-200"></div>
+                )}
+                
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Users className="w-6 h-6 text-blue-600" />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            {decision.meetingType}
+                          </Badge>
+                          <span className="text-sm text-gray-600">{decision.meetingDate}</span>
+                        </div>
+                        <Badge variant={decision.category === '管理規約改定' ? 'default' : 'secondary'} className="text-xs">
+                          {decision.category}
+                        </Badge>
+                      </div>
+                      
+                      <h4 className="font-medium text-gray-900 mb-2 leading-relaxed">
+                        {decision.agenda}
+                      </h4>
+                      
+                      {decision.decision && (
+                        <p className="text-sm text-gray-700 mb-2">
+                          <span className="font-medium">決議内容：</span>{decision.decision}
+                        </p>
+                      )}
+                      
+                      {decision.relatedArticle && (
+                        <p className="text-xs text-gray-600">
+                          <span className="font-medium">関連条文：</span>{decision.relatedArticle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {getRelatedDecisions().length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>関連する過去の決議履歴はありません</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
