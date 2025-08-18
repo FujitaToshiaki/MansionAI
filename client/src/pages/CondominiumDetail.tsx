@@ -331,17 +331,10 @@ export default function CondominiumDetail() {
               {knowledgeDocuments && knowledgeDocuments.filter((doc: any) => doc.type === 'current_regulation').length > 0 ? (
                 <div className="space-y-4">
                   <div className="text-sm text-gray-600 mb-4">
-                    規約文書: {knowledgeDocuments
-                      .filter((doc: any) => doc.type === 'current_regulation')
-                      .filter((doc: any, index: number, self: any[]) => 
-                        self.findIndex((d: any) => d.title === doc.title) === index
-                      ).length}件
+                    規約文書: {knowledgeDocuments.filter((doc: any) => doc.type === 'current_regulation').length}件
                   </div>
                   {knowledgeDocuments
                     .filter((doc: any) => doc.type === 'current_regulation')
-                    .filter((doc: any, index: number, self: any[]) => 
-                      self.findIndex((d: any) => d.title === doc.title) === index
-                    )
                     .map((doc: any) => (
                     <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50">
                       <div className="flex items-start justify-between">
@@ -349,10 +342,7 @@ export default function CondominiumDetail() {
                           <div className="flex items-center space-x-3 mb-2">
                             <FileText className="text-blue-500" size={20} />
                             <Link href={`/condominiums/${id}/regulations/wiki`}>
-                              <h4 className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">
-                                {doc.title.includes('全期間議事録データ') || doc.title.includes('議事録') ? 
-                                  'メゾンドオプテージ管理規約 現行規約 最新' : doc.title}
-                              </h4>
+                              <h4 className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{doc.title}</h4>
                             </Link>
                             <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                               {doc.type === 'current_regulation' ? '現行規約' : 
