@@ -43,7 +43,7 @@ export default function RegulationRevisionDetail() {
     const revisionTitle = revisionDetail?.title?.toLowerCase() || '';
     
     if (revisionTitle.includes('ペット') || revisionTitle.includes('動物') || revisionTitle.includes('飼育')) {
-      keywords = ['動物', 'ペット', '飼育', '犬', '猫', 'バイク', '自転車', '駐車', '駐輪'];
+      keywords = ['動物', 'ペット', '飼育', '犬', '猫'];
     } else if (revisionTitle.includes('個人情報') || revisionTitle.includes('プライバシー')) {
       keywords = ['個人情報', 'プライバシー', '情報保護', '情報管理', '管理規約'];
     } else if (revisionTitle.includes('駐車') || revisionTitle.includes('車庫')) {
@@ -106,7 +106,7 @@ export default function RegulationRevisionDetail() {
     const titleLower = title?.toLowerCase() || '';
     
     if (titleLower.includes('ペット') || titleLower.includes('動物') || titleLower.includes('飼育')) {
-      return '第18条 専有部分における動物の飼育は、理事会の承認を得た場合に限り認める。ただし、小型犬・猫に限定し、1戸につき1匹までとし、共用部分での放し飼いは禁止する。また、他の居住者の迷惑となる鳴き声、臭気等を発生させてはならない。';
+      return '第18条 専有部分における動物の飼育は、理事会の承認を得た場合に限り認める。ただし、犬は体重10kg以下、猫は体重8kg以下に限定し、共用部分での放し飼いは禁止する。また、他の居住者の迷惑となる鳴き声、臭気等を発生させてはならない。';
     } else if (titleLower.includes('個人情報')) {
       return '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。管理組合は、個人情報保護に関する基本方針を定め、適切な安全管理措置を講ずるものとする。';
     } else if (titleLower.includes('駐車') || titleLower.includes('車庫')) {
