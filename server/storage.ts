@@ -173,37 +173,6 @@ export class MemStorage implements IStorage {
 
     // Create mock documents
     const mockDocuments: Document[] = [
-      // 議事録
-      {
-        id: randomUUID(),
-        condominiumId: firstCondoId,
-        title: "第40期通常総会議事録",
-        type: "minutes",
-        filePath: "/uploads/40th_general_meeting_2024.pdf",
-        originalFileName: "40th_general_meeting_2024.pdf",
-        fileSize: 1950000,
-        mimeType: "application/pdf",
-        ocrStatus: "completed",
-        ocrAccuracy: 96.8,
-        ocrText: "第40期通常総会議事録　開催日時：令和6年10月15日　出席組合員数：87名（委任状含む）　議題第1号：管理規約改正の件（承認）　議題第2号：長期修繕計画見直しの件（承認）　議題第3号：管理費・修繕積立金改定の件（承認）",
-        uploadedAt: new Date(Date.now() - 86400000),
-        processedAt: new Date(Date.now() - 82800000)
-      },
-      {
-        id: randomUUID(),
-        condominiumId: firstCondoId,
-        title: "第25回理事会議事録",
-        type: "minutes",
-        filePath: "/uploads/25th_board_meeting_2024.pdf",
-        originalFileName: "25th_board_meeting_2024.pdf",
-        fileSize: 1200000,
-        mimeType: "application/pdf",
-        ocrStatus: "completed",
-        ocrAccuracy: 94.2,
-        ocrText: "第25回理事会議事録　開催日時：令和6年8月20日　出席理事：5名　議題：エレベーター保守契約更新について、防犯カメラ増設について、騒音苦情対応について　決議：全議題承認",
-        uploadedAt: new Date(Date.now() - 172800000),
-        processedAt: new Date(Date.now() - 169200000)
-      },
       // 図面・建築関連資料
       {
         id: randomUUID(),
