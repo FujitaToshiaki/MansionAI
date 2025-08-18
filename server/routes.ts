@@ -371,6 +371,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
             votingResults: null,
             relatedArticle: '駐車場使用細則第2条、5条、6条'
           },
+          // ペット関連決議を追加
+          {
+            id: 'decision-pet-1',
+            meetingDate: '2024年6月',
+            meetingType: '第40期臨時総会',
+            category: 'ペット飼育',
+            agenda: '管理規約第一部改訂正旨びペット飼育規制規則定款の件',
+            decision: '決議内容：管理規約一部改訂正旨びペット飼育規制制度を承認',
+            result: 'approved',
+            votingResults: null,
+            relatedArticle: '管理規約第20条、ペット飼育規制規則NO.34-38'
+          },
+          {
+            id: 'decision-pet-2',
+            meetingDate: '2023年8月',
+            meetingType: '第39期臨時総会',
+            category: 'ペット飼育',
+            agenda: 'ペット飼育規則改定の件',
+            decision: '小型犬・猫に限定したペット飼育を条件付きで許可',
+            result: 'approved',
+            votingResults: null,
+            relatedArticle: '管理規約第18条、ペット飼育規則'
+          },
+          {
+            id: 'decision-pet-3',
+            meetingDate: '2022年6月',
+            meetingType: '第38期臨時総会',
+            category: '動物飼育',
+            agenda: '専有部分での動物飼育に関する規約改定の件',
+            decision: '理事会承認制による動物飼育規則を制定',
+            result: 'approved',
+            votingResults: null,
+            relatedArticle: '管理規約第18条、動物飼育細則'
+          },
           {
             id: 'decision-11',
             meetingDate: '2015年9月',

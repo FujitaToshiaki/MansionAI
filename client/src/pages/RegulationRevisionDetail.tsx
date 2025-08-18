@@ -43,7 +43,7 @@ export default function RegulationRevisionDetail() {
     const revisionTitle = revisionDetail?.title?.toLowerCase() || '';
     
     if (revisionTitle.includes('ペット') || revisionTitle.includes('動物') || revisionTitle.includes('飼育')) {
-      keywords = ['動物', 'ペット', '飼育', '犬', '猫'];
+      keywords = ['動物', 'ペット', '飼育', '犬', '猫', '小動物', 'バイク', 'オートバイ', '自転車'];
     } else if (revisionTitle.includes('個人情報') || revisionTitle.includes('プライバシー')) {
       keywords = ['個人情報', 'プライバシー', '情報保護', '情報管理', '管理規約'];
     } else if (revisionTitle.includes('駐車') || revisionTitle.includes('車庫')) {
