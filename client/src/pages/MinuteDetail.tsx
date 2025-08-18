@@ -148,7 +148,7 @@ export default function MinuteDetail() {
       }
       if (trimmedLine.startsWith('## ')) {
         return (
-          <h2 key={index} className="text-2xl font-bold text-blue-800 mt-3 mb-2 border-b-2 border-blue-300 pb-1">
+          <h2 key={index} className="text-lg font-bold text-blue-800 mt-2 mb-1 border-b border-blue-300 pb-1">
             {trimmedLine.substring(3)}
           </h2>
         );
@@ -165,7 +165,7 @@ export default function MinuteDetail() {
         
         if (cells.length > 1) {
           return (
-            <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-3">
+            <div key={index} className="bg-white rounded border border-gray-200 overflow-hidden mb-2">
               <div className={`grid ${cells.length === 2 ? 'grid-cols-2' : cells.length === 3 ? 'grid-cols-3' : 'grid-cols-1'}`}>
                 {cells.map((cell, cellIndex) => {
                   // Process bold/italic text within cells
@@ -173,8 +173,8 @@ export default function MinuteDetail() {
                   
                   const isHeader = cellIndex === 0;
                   const cellClass = isHeader 
-                    ? "bg-blue-50 font-semibold text-gray-900 p-3 border-r border-gray-200" 
-                    : "text-gray-700 p-3";
+                    ? "bg-blue-50 font-semibold text-gray-900 p-2 border-r border-gray-200 text-sm" 
+                    : "text-gray-700 p-2 text-sm";
                   
                   if (processedCell.includes('**')) {
                     const parts = processedCell.split('**');
@@ -218,7 +218,7 @@ export default function MinuteDetail() {
       if (trimmedLine.includes('**')) {
         const parts = trimmedLine.split('**');
         return (
-          <p key={index} className="mb-0.5 leading-tight">
+          <p key={index} className="mb-0.5 leading-tight text-sm">
             {parts.map((part, partIndex) => 
               partIndex % 2 === 1 ? 
                 <strong key={partIndex} className="font-semibold text-gray-900">{part}</strong> : 
@@ -232,7 +232,7 @@ export default function MinuteDetail() {
       if (trimmedLine.includes('*') && !trimmedLine.includes('**')) {
         const parts = trimmedLine.split('*');
         return (
-          <p key={index} className="mb-0.5 leading-tight text-gray-700">
+          <p key={index} className="mb-0.5 leading-tight text-gray-700 text-sm">
             {parts.map((part, partIndex) => 
               partIndex % 2 === 1 ? 
                 <span key={partIndex} className="text-gray-600">{part}</span> : 
@@ -245,8 +245,8 @@ export default function MinuteDetail() {
       // Special handling for dates and key info
       if (trimmedLine.match(/^\d{4}年\d{1,2}月\d{1,2}日/)) {
         return (
-          <div key={index} className="bg-blue-50 px-3 py-1 rounded-md mb-2 border-l-4 border-blue-400">
-            <p className="text-blue-800 font-medium">{trimmedLine}</p>
+          <div key={index} className="bg-blue-50 px-2 py-1 rounded mb-1 border-l-2 border-blue-400">
+            <p className="text-blue-800 font-medium text-sm">{trimmedLine}</p>
           </div>
         );
       }
@@ -254,15 +254,15 @@ export default function MinuteDetail() {
       // Organization names
       if (trimmedLine.includes('管理組合') && trimmedLine.length < 50) {
         return (
-          <div key={index} className="text-center mb-3">
-            <p className="text-lg font-semibold text-blue-700">{trimmedLine}</p>
+          <div key={index} className="text-center mb-2">
+            <p className="text-base font-semibold text-blue-700">{trimmedLine}</p>
           </div>
         );
       }
       
       // Regular text with tighter spacing
       return (
-        <p key={index} className="mb-0.5 leading-tight text-gray-700">
+        <p key={index} className="mb-0.5 leading-tight text-gray-700 text-sm">
           {trimmedLine}
         </p>
       );
@@ -270,7 +270,7 @@ export default function MinuteDetail() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button variant="outline" onClick={handleBack}>
@@ -282,34 +282,34 @@ export default function MinuteDetail() {
         </Badge>
       </div>
 
-      {/* Meeting Info */}
+      {/* Meeting Info - Compact Layout */}
       <Card className="bg-white">
-        <CardHeader>
-          <CardTitle className="text-2xl text-blue-700">{minute.title}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-xl text-blue-700">{minute.title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-gray-600" />
+              <Calendar className="w-3 h-3 text-gray-600" />
               <span><strong>開催日時:</strong> {minute.date} {minute.time || ''}</span>
             </div>
             <div className="flex items-center space-x-2">
-              <MapPin className="w-4 h-4 text-gray-600" />
+              <MapPin className="w-3 h-3 text-gray-600" />
               <span><strong>開催場所:</strong> {minute.location || 'メゾンドオプテージ 集会室'}</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Users className="w-4 h-4 text-gray-600" />
+              <Users className="w-3 h-3 text-gray-600" />
               <span><strong>出席者:</strong> {minute.attendees}名 / {minute.totalUnits}戸 ({minute.attendanceRate ? minute.attendanceRate.toFixed(1) : '0.0'}%)</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-gray-600" />
+              <Clock className="w-3 h-3 text-gray-600" />
               <span><strong>成立:</strong> {minute.quorum !== false ? '成立' : '不成立'}</span>
             </div>
           </div>
           
           <Separator />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <div>
               <strong>議長:</strong> {minute.chairman || '田中一郎 (理事長)'}
             </div>
@@ -320,13 +320,13 @@ export default function MinuteDetail() {
         </CardContent>
       </Card>
 
-      {/* Main Content - Markdown Rendered */}
+      {/* Main Content - Markdown Rendered with Compact Layout */}
       <Card className="bg-white">
-        <CardHeader>
-          <CardTitle>議事録詳細</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">議事録詳細</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-lg max-w-none prose-headings:text-blue-700 prose-h2:text-blue-800 prose-h3:text-blue-600 prose-strong:text-gray-900 prose-p:text-gray-700 prose-em:text-gray-600">
+          <div className="max-w-none text-sm leading-relaxed">
             {minute.content ? renderMarkdownContent(minute.content) : (
               <p className="text-gray-500">議事録の内容が見つかりません。</p>
             )}
