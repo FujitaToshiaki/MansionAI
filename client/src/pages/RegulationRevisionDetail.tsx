@@ -84,6 +84,40 @@ export default function RegulationRevisionDetail() {
     }).slice(0, 5);
   };
 
+  // Get revision-specific current text
+  const getRevisionSpecificCurrentText = (title: string | undefined) => {
+    const titleLower = title?.toLowerCase() || '';
+    
+    if (titleLower.includes('ペット') || titleLower.includes('動物') || titleLower.includes('飼育')) {
+      return '第18条 専有部分における動物の飼育は禁止する。';
+    } else if (titleLower.includes('個人情報')) {
+      return '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。';
+    } else if (titleLower.includes('駐車') || titleLower.includes('車庫')) {
+      return '第20条 敷地内の駐車場使用については、理事会が別に定める使用細則によるものとする。';
+    } else if (titleLower.includes('看板') || titleLower.includes('広告')) {
+      return '第25条 共用部分への看板等の設置は、管理組合の承認を得なければならない。';
+    }
+    
+    return '第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。';
+  };
+
+  // Get revision-specific proposed text
+  const getRevisionSpecificProposedText = (title: string | undefined) => {
+    const titleLower = title?.toLowerCase() || '';
+    
+    if (titleLower.includes('ペット') || titleLower.includes('動物') || titleLower.includes('飼育')) {
+      return '第18条 専有部分における動物の飼育は、理事会の承認を得た場合に限り認める。ただし、小型犬・猫に限定し、1戸につき1匹までとし、共用部分での放し飼いは禁止する。また、他の居住者の迷惑となる鳴き声、臭気等を発生させてはならない。';
+    } else if (titleLower.includes('個人情報')) {
+      return '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。管理組合は、個人情報保護に関する基本方針を定め、適切な安全管理措置を講ずるものとする。';
+    } else if (titleLower.includes('駐車') || titleLower.includes('車庫')) {
+      return '第20条 敷地内の駐車場使用については、理事会が定める使用細則によるものとする。駐車場の使用権は区分所有者に限定し、月額使用料は理事会が決定する。また、電気自動車の充電設備設置についても、理事会の承認を必要とする。';
+    } else if (titleLower.includes('看板') || titleLower.includes('広告')) {
+      return '第25条 共用部分への看板、広告等の設置・表示については、事前に管理組合の書面による承認を得なければならない。承認にあたっては、景観への配慮、安全性の確保、近隣住民への配慮を総合的に判断するものとする。';
+    }
+    
+    return '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。';
+  };
+
   // Translation function
   const translateText = async (text: string, targetLanguage: string): Promise<string> => {
     if (targetLanguage === 'ja') return text;
@@ -400,7 +434,7 @@ export default function RegulationRevisionDetail() {
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-sm leading-relaxed mb-3">
-                    {getTranslatedText(revisionDetail?.currentText || `第15条 管理組合は、区分所有者および居住者の個人情報を適切に管理し、必要な場合にのみ利用するものとする。`)}
+                    {getTranslatedText(revisionDetail?.currentText || getRevisionSpecificCurrentText(revisionDetail?.title))}
                   </p>
                   <div className="text-sm text-red-600">
                     ⚠️ {getTranslatedText('法的根拠が不明確')}
@@ -414,7 +448,7 @@ export default function RegulationRevisionDetail() {
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-sm leading-relaxed mb-3">
-                    {getTranslatedText(revisionDetail?.proposedText || `第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。`)}
+                    {getTranslatedText(revisionDetail?.proposedText || getRevisionSpecificProposedText(revisionDetail?.title))}
                   </p>
                   <div className="text-sm text-green-600">
                     ✅ {getTranslatedText('法的要件を完全満足')}
@@ -434,6 +468,78 @@ export default function RegulationRevisionDetail() {
             </div>
           </div>
         </CardHeader>
+      </Card>
+
+      {/* Related Decision History Timeline - 2段目に配置 */}
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Clock className="w-5 h-5 mr-2" />
+            関連する過去の決議履歴
+          </CardTitle>
+          <p className="text-gray-600 text-sm mt-1">
+            この改訂項目に関連する過去の議論と決議の流れをご確認いただけます
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {getRelatedDecisions().map((decision, index) => (
+              <div key={decision.id} className="relative">
+                {/* Timeline line */}
+                {index < getRelatedDecisions().length - 1 && (
+                  <div className="absolute left-6 top-16 w-0.5 h-12 bg-gray-200"></div>
+                )}
+                
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Users className="w-6 h-6 text-blue-600" />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            {decision.meetingType}
+                          </Badge>
+                          <span className="text-sm text-gray-600">{decision.meetingDate}</span>
+                        </div>
+                        <Badge variant={decision.category === '管理規約改定' ? 'default' : 'secondary'} className="text-xs">
+                          {decision.category}
+                        </Badge>
+                      </div>
+                      
+                      <h4 className="font-medium text-gray-900 mb-2 leading-relaxed">
+                        {decision.agenda}
+                      </h4>
+                      
+                      {decision.decision && (
+                        <p className="text-sm text-gray-700 mb-2">
+                          <span className="font-medium">決議内容：</span>{decision.decision}
+                        </p>
+                      )}
+                      
+                      {decision.relatedArticle && (
+                        <p className="text-xs text-gray-600">
+                          <span className="font-medium">関連条文：</span>{decision.relatedArticle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {getRelatedDecisions().length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>関連する過去の決議履歴はありません</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
       </Card>
 
       {/* 実施手順とスケジュール */}
@@ -589,77 +695,6 @@ export default function RegulationRevisionDetail() {
         </Card>
       </div>
 
-      {/* Related Decision History Timeline */}
-      <Card className="bg-white">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Clock className="w-5 h-5 mr-2" />
-            関連する過去の決議履歴
-          </CardTitle>
-          <p className="text-gray-600 text-sm mt-1">
-            この改訂項目に関連する過去の議論と決議の流れをご確認いただけます
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {getRelatedDecisions().map((decision, index) => (
-              <div key={decision.id} className="relative">
-                {/* Timeline line */}
-                {index < getRelatedDecisions().length - 1 && (
-                  <div className="absolute left-6 top-16 w-0.5 h-12 bg-gray-200"></div>
-                )}
-                
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Users className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                            {decision.meetingType}
-                          </Badge>
-                          <span className="text-sm text-gray-600">{decision.meetingDate}</span>
-                        </div>
-                        <Badge variant={decision.category === '管理規約改定' ? 'default' : 'secondary'} className="text-xs">
-                          {decision.category}
-                        </Badge>
-                      </div>
-                      
-                      <h4 className="font-medium text-gray-900 mb-2 leading-relaxed">
-                        {decision.agenda}
-                      </h4>
-                      
-                      {decision.decision && (
-                        <p className="text-sm text-gray-700 mb-2">
-                          <span className="font-medium">決議内容：</span>{decision.decision}
-                        </p>
-                      )}
-                      
-                      {decision.relatedArticle && (
-                        <p className="text-xs text-gray-600">
-                          <span className="font-medium">関連条文：</span>{decision.relatedArticle}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {getRelatedDecisions().length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p>関連する過去の決議履歴はありません</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
