@@ -238,6 +238,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/condominiums/:id/decisions", async (req, res) => {
     const { id } = req.params;
     
+    // Set UTF-8 encoding for Japanese text
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    
     try {
       
       // Get decision history documents

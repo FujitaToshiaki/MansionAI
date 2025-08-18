@@ -31,6 +31,9 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
+      headers: {
+        "Accept": "application/json; charset=utf-8"
+      }
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
@@ -38,7 +41,8 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
-    return await res.json();
+    const text = await res.text();
+    return JSON.parse(text);
   };
 
 export const queryClient = new QueryClient({
