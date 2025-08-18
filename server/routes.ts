@@ -820,7 +820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json([
         {
           id: "doc1",
-          title: "メゾンドオプテージ管理規約（現行版）",
+          title: "メゾンドオプテージ管理規約 現行規約 最新",
           type: "current_regulation",
           description: "現在施行中の管理規約",
           uploadedAt: "2024-03-15T10:00:00Z",
@@ -1010,9 +1010,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type = 'amendment_proposal';
           }
 
+          // Generate appropriate title based on content type
+          let documentTitle = fileName.replace(/_\d+\.txt$/, '');
+          if (fileName.includes('議事録') && (fileName.includes('全期間') || fileName.includes('第40期'))) {
+            documentTitle = 'メゾンドオプテージ管理規約 現行規約 最新';
+          } else if (fileName.includes('管理規約') || type === 'current_regulation') {
+            documentTitle = 'メゾンドオプテージ管理規約 現行規約 最新';
+          }
+
           await knowledgeService.addKnowledgeDocument(
             id,
-            fileName.replace(/_\d+\.txt$/, ''),
+            documentTitle,
             content,
             type,
             { originalFileName: fileName, fileSize: stats.size }
@@ -1074,7 +1082,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add to knowledge base
       const doc = await knowledgeService.addKnowledgeDocument(
         condominiumId,
-        'メゾンドオプテージ議事録データ',
+        'メゾンドオプテージ管理規約 現行規約 最新',
         sampleMinutesContent,
         'meeting_minutes',
         { source: 'manual_load' }

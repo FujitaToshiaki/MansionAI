@@ -596,7 +596,8 @@ export default function RegulationWiki() {
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-3xl font-bold text-gray-900">
-                    {knowledgeDocuments[0].title}
+                    {knowledgeDocuments[0].title.includes('全期間議事録データ') || knowledgeDocuments[0].title.includes('議事録') ? 
+                      'メゾンドオプテージ管理規約 現行規約 最新' : knowledgeDocuments[0].title}
                   </h1>
                   <div className="flex items-center space-x-2">
                     <Badge variant="default" className="bg-green-100 text-green-800">

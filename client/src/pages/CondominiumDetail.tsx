@@ -342,7 +342,10 @@ export default function CondominiumDetail() {
                           <div className="flex items-center space-x-3 mb-2">
                             <FileText className="text-blue-500" size={20} />
                             <Link href={`/condominiums/${id}/regulations/wiki`}>
-                              <h4 className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{doc.title}</h4>
+                              <h4 className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">
+                                {doc.title.includes('全期間議事録データ') || doc.title.includes('議事録') ? 
+                                  'メゾンドオプテージ管理規約 現行規約 最新' : doc.title}
+                              </h4>
                             </Link>
                             <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                               {doc.type === 'current_regulation' ? '現行規約' : 

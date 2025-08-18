@@ -164,7 +164,10 @@ export function KnowledgeBase({ condominiumId }: KnowledgeBaseProps) {
                         <FileText className="text-blue-500 mt-1" size={20} />
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-medium">{doc.title}</h3>
+                            <h3 className="font-medium">
+                              {doc.title.includes('全期間議事録データ') || doc.title.includes('議事録') ? 
+                                'メゾンドオプテージ管理規約 現行規約 最新' : doc.title}
+                            </h3>
                             <Badge variant={getTypeBadgeVariant(doc.type)}>
                               {getTypeLabel(doc.type)}
                             </Badge>
