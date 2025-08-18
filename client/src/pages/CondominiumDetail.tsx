@@ -331,10 +331,17 @@ export default function CondominiumDetail() {
               {knowledgeDocuments && knowledgeDocuments.filter((doc: any) => doc.type === 'current_regulation').length > 0 ? (
                 <div className="space-y-4">
                   <div className="text-sm text-gray-600 mb-4">
-                    規約文書: {knowledgeDocuments.filter((doc: any) => doc.type === 'current_regulation').length}件
+                    規約文書: {knowledgeDocuments
+                      .filter((doc: any) => doc.type === 'current_regulation')
+                      .filter((doc: any, index: number, self: any[]) => 
+                        self.findIndex((d: any) => d.title === doc.title) === index
+                      ).length}件
                   </div>
                   {knowledgeDocuments
                     .filter((doc: any) => doc.type === 'current_regulation')
+                    .filter((doc: any, index: number, self: any[]) => 
+                      self.findIndex((d: any) => d.title === doc.title) === index
+                    )
                     .map((doc: any) => (
                     <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50">
                       <div className="flex items-start justify-between">
