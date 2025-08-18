@@ -37,8 +37,8 @@ export default function Sidebar() {
     <div className="sidebar-gradient text-white flex flex-col" style={{ width: "280px" }}>
       {/* Logo Area */}
       <div className="flex items-center px-5" style={{ height: "100px" }}>
-        <Cog className="text-white text-xl mr-3" size={20} />
-        <span className="text-white font-inter font-semibold text-lg">管理規約AI</span>
+        <Cog className="text-white text-xl mr-3" size={24} />
+        <span className="text-white font-inter font-semibold text-xl">管理規約AI</span>
       </div>
       
       {/* Navigation Menu */}
@@ -54,8 +54,8 @@ export default function Sidebar() {
                   <div className={`menu-item py-3 px-6 flex items-center cursor-pointer relative ${
                     isActive ? 'menu-item-active' : ''
                   }`}>
-                    <Icon className="mr-3 text-sm" size={16} />
-                    <span className="font-inter text-sm font-medium">{item.label}</span>
+                    <Icon className="mr-3" size={20} />
+                    <span className="font-inter text-base font-medium">{item.label}</span>
                   </div>
                 </Link>
               </div>
@@ -67,8 +67,8 @@ export default function Sidebar() {
       {/* Upgrade Banner */}
       <div className="p-4">
         <div className="bg-white bg-opacity-10 p-4 rounded-lg text-center">
-          <p className="text-sm mb-3">プレミアムプランで<br />全機能をご利用ください</p>
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full">
+          <p className="text-base mb-3">プレミアムプランで<br />全機能をご利用ください</p>
+          <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-base font-medium transition-colors w-full">
             アップグレード
           </button>
         </div>
