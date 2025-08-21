@@ -93,46 +93,15 @@ JSONフォーマットで以下を返してください:
     const rawJson = response.text;
     console.log(`Gemini OCR Raw JSON: ${rawJson}`);
 
-    if (!rawJson || rawJson.trim() === '') {
-      console.error('Empty response from Gemini model, retrying with simpler prompt...');
-      
-      // Retry with a simpler prompt for difficult images
-      const simpleResponse = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        contents: [
-          {
-            inlineData: {
-              data: base64Image,
-              mimeType: mimeType,
-            },
-          },
-          "この画像に含まれるすべてのテキストを正確に読み取って、そのまま文字として出力してください。"
-        ],
-      });
-
-      const simpleText = simpleResponse.text || '';
-      return {
-        text: simpleText,
-        accuracy: simpleText ? 85 : 0,
-        lowConfidenceRegions: []
-      };
-    }
-
-    try {
+    if (rawJson) {
       const result: OCRResult = JSON.parse(rawJson);
       return {
         text: result.text || '',
         accuracy: Math.max(80, Math.min(100, result.accuracy || 90)),
         lowConfidenceRegions: result.lowConfidenceRegions || []
       };
-    } catch (parseError) {
-      console.error('Failed to parse JSON response, using raw text:', parseError);
-      // If JSON parsing fails, use the raw response as text
-      return {
-        text: rawJson,
-        accuracy: 75,
-        lowConfidenceRegions: []
-      };
+    } else {
+      throw new Error("Empty response from Gemini model");
     }
 
   } catch (error) {
@@ -152,27 +121,16 @@ export async function extractTextFromMultipleImages(imageBuffers: Array<{buffer:
       
       // Add a small delay to avoid rate limiting
       if (i < imageBuffers.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     } catch (error) {
       console.error(`Error processing image ${i + 1} with Gemini:`, error);
-      
-      // Try a simple retry for failed images
-      try {
-        console.log(`Retrying image ${i + 1} with basic OCR...`);
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait longer before retry
-        
-        const retryResult = await extractTextFromImage(imageBuffers[i].buffer, imageBuffers[i].mimeType);
-        results.push(retryResult);
-      } catch (retryError) {
-        console.error(`Retry failed for image ${i + 1}:`, retryError);
-        // Provide fallback result for failed OCR
-        results.push({
-          text: `[画像 ${i + 1}: OCR処理に失敗しました。手動でテキストを入力してください]`,
-          accuracy: 0,
-          lowConfidenceRegions: []
-        });
-      }
+      // Provide fallback result for failed OCR
+      results.push({
+        text: `[Gemini OCR処理エラー: ページ ${i + 1}]`,
+        accuracy: 0,
+        lowConfidenceRegions: []
+      });
     }
   }
   
