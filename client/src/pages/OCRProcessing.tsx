@@ -38,6 +38,9 @@ export default function OCRProcessing() {
   const [documentTitle, setDocumentTitle] = useState<string>('');
   const [meetingDate, setMeetingDate] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Check if this is a standalone OCR processing page (from menu)
+  const isStandalone = !id || id === 'ocr-processing';
 
   const { data: condominiums } = useQuery({
     queryKey: ['/api/condominiums'],
@@ -211,9 +214,19 @@ export default function OCRProcessing() {
     return (
       <div className="space-y-6">
         <nav className="text-sm text-gray-500">
-          <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
-          <span className="mx-2">{'>'}</span>
-          <span>データ取込</span>
+          {isStandalone ? (
+            <>
+              <Link href="/" className="hover:text-gray-700">ダッシュボード</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+            </>
+          ) : (
+            <>
+              <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+            </>
+          )}
         </nav>
 
         <Card>
@@ -255,11 +268,23 @@ export default function OCRProcessing() {
     return (
       <div className="space-y-6">
         <nav className="text-sm text-gray-500">
-          <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
-          <span className="mx-2">{'>'}</span>
-          <span>データ取込</span>
-          <span className="mx-2">{'>'}</span>
-          <span>プレビュー確認</span>
+          {isStandalone ? (
+            <>
+              <Link href="/" className="hover:text-gray-700">ダッシュボード</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+              <span className="mx-2">{'>'}</span>
+              <span>プレビュー確認</span>
+            </>
+          ) : (
+            <>
+              <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+              <span className="mx-2">{'>'}</span>
+              <span>プレビュー確認</span>
+            </>
+          )}
         </nav>
 
         <Card>
@@ -322,11 +347,23 @@ export default function OCRProcessing() {
     return (
       <div className="space-y-6">
         <nav className="text-sm text-gray-500">
-          <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
-          <span className="mx-2">{'>'}</span>
-          <span>データ取込</span>
-          <span className="mx-2">{'>'}</span>
-          <span>OCR処理中</span>
+          {isStandalone ? (
+            <>
+              <Link href="/" className="hover:text-gray-700">ダッシュボード</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+              <span className="mx-2">{'>'}</span>
+              <span>OCR処理中</span>
+            </>
+          ) : (
+            <>
+              <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+              <span className="mx-2">{'>'}</span>
+              <span>OCR処理中</span>
+            </>
+          )}
         </nav>
 
         <Card>
@@ -354,11 +391,23 @@ export default function OCRProcessing() {
     return (
       <div className="space-y-6">
         <nav className="text-sm text-gray-500">
-          <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
-          <span className="mx-2">{'>'}</span>
-          <span>データ取込</span>
-          <span className="mx-2">{'>'}</span>
-          <span>OCR結果確認</span>
+          {isStandalone ? (
+            <>
+              <Link href="/" className="hover:text-gray-700">ダッシュボード</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+              <span className="mx-2">{'>'}</span>
+              <span>OCR結果確認</span>
+            </>
+          ) : (
+            <>
+              <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+              <span className="mx-2">{'>'}</span>
+              <span>OCR結果確認</span>
+            </>
+          )}
         </nav>
 
         <Card>
@@ -498,11 +547,23 @@ export default function OCRProcessing() {
     return (
       <div className="space-y-6">
         <nav className="text-sm text-gray-500">
-          <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
-          <span className="mx-2">{'>'}</span>
-          <span>データ取込</span>
-          <span className="mx-2">{'>'}</span>
-          <span>登録完了</span>
+          {isStandalone ? (
+            <>
+              <Link href="/" className="hover:text-gray-700">ダッシュボード</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+              <span className="mx-2">{'>'}</span>
+              <span>登録完了</span>
+            </>
+          ) : (
+            <>
+              <Link href="/condominiums" className="hover:text-gray-700">マンション一覧</Link>
+              <span className="mx-2">{'>'}</span>
+              <span>データ取込</span>
+              <span className="mx-2">{'>'}</span>
+              <span>登録完了</span>
+            </>
+          )}
         </nav>
 
         <Card>
@@ -521,16 +582,33 @@ export default function OCRProcessing() {
               </p>
               
               <div className="flex gap-4 justify-center">
-                <Link href="/condominiums">
-                  <Button variant="outline">
-                    マンション一覧に戻る
-                  </Button>
-                </Link>
-                <Link href={`/condominiums/${selectedCondominium}`}>
-                  <Button>
-                    マンション詳細を確認
-                  </Button>
-                </Link>
+                {isStandalone ? (
+                  <>
+                    <Link href="/">
+                      <Button variant="outline">
+                        ダッシュボードに戻る
+                      </Button>
+                    </Link>
+                    <Link href="/minutes">
+                      <Button>
+                        議事録管理を確認
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/condominiums">
+                      <Button variant="outline">
+                        マンション一覧に戻る
+                      </Button>
+                    </Link>
+                    <Link href={`/condominiums/${selectedCondominium}`}>
+                      <Button>
+                        マンション詳細を確認
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>
