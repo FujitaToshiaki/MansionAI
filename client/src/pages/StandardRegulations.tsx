@@ -334,26 +334,43 @@ export default function StandardRegulations() {
                 )}
               </div>
 
+              {/* 規約の変更内容 - 横並びレイアウト */}
               {(revision.before_text || revision.after_text) && (
-                <div className="space-y-3">
-                  {revision.before_text && revision.before_text !== '（新設）' && (
+                <div className="space-y-4">
+                  <h5 className="font-medium text-gray-900">規約の変更内容</h5>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
-                      <h5 className="font-medium text-red-700 mb-1">改正前</h5>
-                      <p className="text-sm text-gray-700 bg-red-50 p-3 rounded border-l-4 border-red-200">
-                        {revision.before_text}
-                      </p>
+                      <div className="flex items-center mb-2">
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium mr-2">改訂案</span>
+                        <h6 className="text-sm font-medium text-gray-700">新しい規約条文</h6>
+                      </div>
+                      <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                        <p className="text-xs leading-relaxed">
+                          {revision.after_text || '（新設）'}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                  {revision.after_text && (
                     <div>
-                      <h5 className="font-medium text-green-700 mb-1">
-                        {revision.before_text === '（新設）' ? '新設内容' : '改正後'}
-                      </h5>
-                      <p className="text-sm text-gray-700 bg-green-50 p-3 rounded border-l-4 border-green-200">
-                        {revision.after_text}
-                      </p>
+                      <div className="flex items-center mb-2">
+                        <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium mr-2">現行</span>
+                        <h6 className="text-sm font-medium text-gray-700">現在の規約条文</h6>
+                      </div>
+                      <div className="border border-gray-200 rounded-lg p-3">
+                        <p className="text-xs leading-relaxed">
+                          {revision.before_text || '（規定なし）'}
+                        </p>
+                      </div>
                     </div>
-                  )}
+                  </div>
+
+                  {/* 改訂理由 - 横並び下に配置 */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h6 className="text-sm font-medium text-gray-900 mb-2">改訂理由</h6>
+                    <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      {getTranslatedText(revision.change_description)}
+                    </p>
+                  </div>
                 </div>
               )}
 
