@@ -78,6 +78,68 @@ export default function StandardRegulationDetail() {
       .trim();
   };
 
+  // 類似度計算関数
+  const calculateSimilarity = (str1: string, str2: string): number => {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    
+    if (longer.length === 0) return 1.0;
+    
+    const distance = levenshteinDistance(longer, shorter);
+    return (longer.length - distance) / longer.length;
+  };
+
+  // レーベンシュタイン距離計算
+  const levenshteinDistance = (str1: string, str2: string): number => {
+    const matrix = [];
+    
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    
+    return matrix[str2.length][str1.length];
+  };
+
+  // 単語レベルでの差分ハイライト
+  const highlightWordDifferences = (beforeLine: string, afterLine: string): string => {
+    const beforeWords = beforeLine.split(/(\s+)/);
+    const afterWords = afterLine.split(/(\s+)/);
+    
+    const result: string[] = [];
+    let i = 0, j = 0;
+    
+    while (j < afterWords.length) {
+      if (i < beforeWords.length && beforeWords[i] === afterWords[j]) {
+        result.push(afterWords[j]);
+        i++; j++;
+      } else {
+        result.push(`<span style="color: #dc2626; font-weight: 600;">${afterWords[j]}</span>`);
+        j++;
+        if (i < beforeWords.length) i++;
+      }
+    }
+    
+    return result.join('');
+  };
+
   // 差分をハイライトする関数（改訂案中心の表示）
   const highlightDifferences = (beforeText: string, afterText: string, isAfter: boolean = false) => {
     // 改訂前テキストが存在しない場合は、改訂案をそのまま表示（新設項目）
@@ -105,28 +167,57 @@ export default function StandardRegulationDetail() {
         const before = formatRegulationText(beforeText);
         const after = formatRegulationText(afterText);
         
-        // 単語レベルでの差分検出（より精密な比較）
-        const beforeWords = before.split(/(\s+|。|、|「|」|（|）)/);
-        const afterWords = after.split(/(\s+|。|、|「|」|（|）)/);
+        // 行レベルでの比較を行い、より精密な差分検出
+        const beforeLines = before.split('\n');
+        const afterLines = after.split('\n');
         
-        // シンプルな差分検出
         const result: string[] = [];
         let i = 0, j = 0;
         
-        while (j < afterWords.length) {
-          if (i < beforeWords.length && beforeWords[i] === afterWords[j]) {
-            result.push(afterWords[j]);
-            i++; j++;
-          } else {
-            // 変更または追加された部分を赤字に
-            result.push(`<span style="color: #dc2626; font-weight: 600;">${afterWords[j]}</span>`);
-            j++;
-            // 対応する原文の単語をスキップ
-            if (i < beforeWords.length) i++;
+        while (j < afterLines.length) {
+          let found = false;
+          
+          // 現在の改訂案の行が原文のどこかに存在するかチェック
+          for (let k = i; k < beforeLines.length; k++) {
+            if (beforeLines[k].trim() === afterLines[j].trim()) {
+              // 完全一致した場合は通常表示
+              result.push(afterLines[j]);
+              i = k + 1;
+              found = true;
+              break;
+            }
           }
+          
+          if (!found) {
+            // 一致しない場合は、部分的な変更かチェック
+            let partialMatch = false;
+            
+            if (i < beforeLines.length) {
+              const beforeLine = beforeLines[i].trim();
+              const afterLine = afterLines[j].trim();
+              
+              // 50%以上が一致する場合は部分変更とみなす
+              const similarity = calculateSimilarity(beforeLine, afterLine);
+              
+              if (similarity > 0.5) {
+                // 単語レベルで差分をハイライト
+                const highlightedLine = highlightWordDifferences(beforeLine, afterLine);
+                result.push(highlightedLine);
+                i++;
+                partialMatch = true;
+              }
+            }
+            
+            if (!partialMatch) {
+              // 新規追加された行は赤字に
+              result.push(`<span style="color: #dc2626; font-weight: 600;">${afterLines[j]}</span>`);
+            }
+          }
+          
+          j++;
         }
         
-        return result.join('');
+        return result.join('\n');
       } else {
         // 現行は正確な原文をそのまま表示
         return formatRegulationText(beforeText);
