@@ -37,8 +37,22 @@ export const documents = pgTable("documents", {
   ocrStatus: text("ocr_status").default("pending"), // pending, processing, completed, failed
   ocrAccuracy: integer("ocr_accuracy"),
   ocrText: text("ocr_text"),
+  meetingDate: timestamp("meeting_date"), // 議事録の開催日
+  pageCount: integer("page_count").default(1), // ページ数
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   processedAt: timestamp("processed_at")
+});
+
+// OCR処理された各ページの情報
+export const document_pages = pgTable("document_pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  documentId: varchar("document_id").references(() => documents.id).notNull(),
+  pageNumber: integer("page_number").notNull(),
+  imagePath: text("image_path").notNull(), // 画像ファイルのパス
+  ocrText: text("ocr_text"), // このページのOCRテキスト
+  ocrAccuracy: integer("ocr_accuracy"), // このページの精度（0-100）
+  lowConfidenceRegions: jsonb("low_confidence_regions"), // 精度が低い領域の座標とテキスト
+  createdAt: timestamp("created_at").defaultNow()
 });
 
 export const decisions = pgTable("decisions", {

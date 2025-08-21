@@ -24,7 +24,7 @@ const menuItems: MenuItem[] = [
   { icon: Building, label: "マンション管理", path: "/condominiums" },
   { icon: FileText, label: "標準管理規約", path: "/standard-regulations" },
   { icon: ClipboardList, label: "議事録管理", path: "/minutes" },
-  { icon: ScanLine, label: "データ取込", path: "/ocr" },
+  { icon: ScanLine, label: "データ取込", path: "/condominiums/ocr-processing" },
   { icon: Bot, label: "AI分析", path: "/ai-agent-history" },
   { icon: BarChart3, label: "レポート", path: "/reports" },
   { icon: Settings, label: "設定", path: "/settings" },

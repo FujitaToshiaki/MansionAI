@@ -29,7 +29,7 @@ export interface IStorage {
   // Document methods
   getDocumentsByCondominiumId(condominiumId: string): Promise<Document[]>;
   getDocumentById(id: string): Promise<Document | undefined>;
-  createDocument(document: InsertDocument): Promise<Document>;
+  createDocument(document: any): Promise<Document>;
   updateDocumentOCRStatus(id: string, status: string, ocrData?: { ocrText?: string; ocrAccuracy?: number }): Promise<void>;
   
   // Decision methods
