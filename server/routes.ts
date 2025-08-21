@@ -9,7 +9,7 @@ import { db } from "./db";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
-import { extractTextFromMultipleImages } from "./openai";
+import { extractTextFromMultipleImages } from "./gemini";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
