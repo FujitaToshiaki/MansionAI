@@ -38,6 +38,7 @@ export default function OCRProcessing() {
   const [documentTitle, setDocumentTitle] = useState<string>('');
   const [meetingDate, setMeetingDate] = useState<string>('');
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  const [highlightLowConfidence, setHighlightLowConfidence] = useState<boolean>(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Check if this is a standalone OCR processing page (from menu)
@@ -203,6 +204,29 @@ export default function OCRProcessing() {
         coordinates: { x: 300, y: 150, width: 60, height: 18 }
       }
     ];
+  };
+
+  const highlightText = (text: string, lowConfidenceRegions: any[]) => {
+    if (!lowConfidenceRegions || lowConfidenceRegions.length === 0) {
+      return text.replace(/\n/g, '<br>');
+    }
+
+    let highlightedText = text;
+    
+    // Sort regions by text length (longest first) to avoid partial replacements
+    const sortedRegions = [...lowConfidenceRegions].sort((a, b) => b.text.length - a.text.length);
+    
+    sortedRegions.forEach(region => {
+      const escapedText = region.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedText})`, 'g');
+      const confidenceColor = region.confidence < 70 ? 'bg-red-200' : 'bg-yellow-200';
+      highlightedText = highlightedText.replace(
+        regex, 
+        `<mark class="${confidenceColor} px-1 rounded" title="信頼度: ${region.confidence}%">$1</mark>`
+      );
+    });
+    
+    return highlightedText.replace(/\n/g, '<br>');
   };
 
   const loadDemoFiles = async () => {
@@ -537,17 +561,57 @@ export default function OCRProcessing() {
                     </div>
                     
                     <div className="flex flex-col h-full lg:col-span-2">
-                      <Label className="text-sm font-medium mb-2 block">抽出テキスト</Label>
-                      <Textarea
-                        value={result.text}
-                        onChange={(e) => {
-                          const newResults = [...ocrResults];
-                          newResults[index].text = e.target.value;
-                          setOcrResults(newResults);
-                        }}
-                        className="flex-1 min-h-[500px] font-mono text-sm resize-none whitespace-pre-wrap"
-                        style={{ whiteSpace: 'pre-wrap' }}
-                      />
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm font-medium block">抽出テキスト</Label>
+                        {result.lowConfidenceRegions.length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-800">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              {result.lowConfidenceRegions.length}箇所要確認
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setHighlightLowConfidence(!highlightLowConfidence)}
+                              className="text-xs"
+                            >
+                              {highlightLowConfidence ? 'ハイライト解除' : 'ハイライト表示'}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {highlightLowConfidence && result.lowConfidenceRegions.length > 0 ? (
+                        <div className="relative">
+                          <div 
+                            className="flex-1 min-h-[500px] font-mono text-sm p-3 border rounded-md bg-white"
+                            dangerouslySetInnerHTML={{
+                              __html: highlightText(result.text, result.lowConfidenceRegions)
+                            }}
+                          />
+                          <Textarea
+                            value={result.text}
+                            onChange={(e) => {
+                              const newResults = [...ocrResults];
+                              newResults[index].text = e.target.value;
+                              setOcrResults(newResults);
+                            }}
+                            className="absolute inset-0 flex-1 min-h-[500px] font-mono text-sm resize-none whitespace-pre-wrap bg-transparent opacity-0"
+                            style={{ whiteSpace: 'pre-wrap' }}
+                          />
+                        </div>
+                      ) : (
+                        <Textarea
+                          value={result.text}
+                          onChange={(e) => {
+                            const newResults = [...ocrResults];
+                            newResults[index].text = e.target.value;
+                            setOcrResults(newResults);
+                          }}
+                          className="flex-1 min-h-[500px] font-mono text-sm resize-none whitespace-pre-wrap"
+                          style={{ whiteSpace: 'pre-wrap' }}
+                        />
+                      )}
                       
                       {result.lowConfidenceRegions.length > 0 && (
                         <div className="mt-4">
