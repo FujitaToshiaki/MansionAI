@@ -286,6 +286,16 @@ export default function OCRProcessing() {
               <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <p className="text-lg font-medium mb-2">議事録画像をアップロードしてください</p>
               <p className="text-gray-500 mb-4">JPG、PNG形式の画像ファイルをサポートしています（複数ページ対応）</p>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-left">
+                <h4 className="font-medium text-blue-900 mb-2">✨ Gemini 2.5 Flash AI OCR機能</h4>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• 手書き文字を含む日本語議事録の高精度認識</li>
+                  <li>• 元の文書レイアウトと改行を完全保持</li>
+                  <li>• 表形式やインデント構造の維持</li>
+                  <li>• 読み取り困難箇所の自動検出と表示</li>
+                </ul>
+              </div>
               <div className="flex gap-4 justify-center">
                 <Button onClick={() => fileInputRef.current?.click()}>
                   ファイルを選択
@@ -422,9 +432,31 @@ export default function OCRProcessing() {
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-lg font-medium mb-2">議事録を解析しています...</p>
-              <p className="text-gray-500">
+              <p className="text-gray-500 mb-4">
                 アップロードされた {uploadedFiles.length} ページの画像からテキストを抽出しています
               </p>
+              
+              <div className="space-y-2 mt-6">
+                <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
+                  <div className="animate-pulse">🤖</div>
+                  <span className="animate-pulse">Gemini AI が画像を解析中</span>
+                  <div className="flex gap-1">
+                    <span className="animate-ping inline-block w-1 h-1 bg-blue-600 rounded-full"></span>
+                    <span className="animate-ping inline-block w-1 h-1 bg-blue-600 rounded-full" style={{animationDelay: '0.2s'}}></span>
+                    <span className="animate-ping inline-block w-1 h-1 bg-blue-600 rounded-full" style={{animationDelay: '0.4s'}}></span>
+                  </div>
+                </div>
+                
+                <div className="text-xs text-gray-400 space-y-1">
+                  <div className="animate-pulse">• 手書き文字を認識中...</div>
+                  <div className="animate-pulse" style={{animationDelay: '0.5s'}}>• レイアウト構造を解析中...</div>
+                  <div className="animate-pulse" style={{animationDelay: '1s'}}>• テキストを抽出中...</div>
+                </div>
+                
+                <div className="mt-4 text-xs text-gray-500">
+                  高精度な処理のため1-2分程度お待ちください
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
