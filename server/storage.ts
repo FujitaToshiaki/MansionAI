@@ -10,11 +10,7 @@ import {
   type Regulation,
   type InsertRegulation,
   type Activity,
-  type InsertActivity,
-  type RevisionGroup,
-  type InsertRevisionGroup,
-  type RegulationRevision,
-  type InsertRegulationRevision
+  type InsertActivity
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -43,20 +39,6 @@ export interface IStorage {
   // Regulation methods
   getRegulationsByCondominiumId(condominiumId: string): Promise<Regulation[]>;
   createRegulation(regulation: InsertRegulation): Promise<Regulation>;
-  
-  // Revision Group methods
-  getAllRevisionGroups(): Promise<RevisionGroup[]>;
-  getRevisionGroupById(id: string): Promise<RevisionGroup | undefined>;
-  getRevisionGroupByVersion(version: string): Promise<RevisionGroup | undefined>;
-  createRevisionGroup(group: InsertRevisionGroup): Promise<RevisionGroup>;
-  updateRevisionGroup(id: string, updates: Partial<RevisionGroup>): Promise<RevisionGroup>;
-  
-  // Regulation Revision methods
-  getRegulationRevisions(): Promise<RegulationRevision[]>;
-  getRegulationRevisionsByGroup(groupId: string): Promise<RegulationRevision[]>;
-  getRegulationRevisionById(id: string): Promise<RegulationRevision | undefined>;
-  createRegulationRevision(revision: InsertRegulationRevision): Promise<RegulationRevision>;
-  updateRegulationRevision(id: string, updates: Partial<RegulationRevision>): Promise<RegulationRevision>;
   
   // Activity methods
   getRecentActivities(limit?: number): Promise<Activity[]>;

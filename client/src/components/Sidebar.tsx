@@ -10,8 +10,7 @@ import {
   BarChart3, 
   Settings,
   Cog,
-  History,
-  FolderKanban
+  History
 } from "lucide-react";
 
 interface MenuItem {
@@ -24,7 +23,6 @@ const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "ダッシュボード", path: "/" },
   { icon: Building, label: "マンション管理", path: "/condominiums" },
   { icon: FileText, label: "標準管理規約", path: "/standard-regulations" },
-  { icon: FolderKanban, label: "改訂必要箇所一覧", path: "/revision-groups" },
   { icon: ClipboardList, label: "議事録管理", path: "/minutes" },
   { icon: ScanLine, label: "OCR処理", path: "/ocr" },
   { icon: Bot, label: "AI分析", path: "/ai-agent-history" },
@@ -48,9 +46,7 @@ export default function Sidebar() {
         <div className="space-y-0">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location === item.path || 
-              (item.path === "/standard-regulations" && location.startsWith("/standard-regulations")) ||
-              (item.path === "/revision-groups" && location.startsWith("/revision-groups"));
+            const isActive = location === item.path || (item.path === "/standard-regulations" && location.startsWith("/standard-regulations"));
             
             return (
               <div key={item.path}>

@@ -95,7 +95,13 @@ export default function StandardRegulations() {
       return getNum(a.article_number) - getNum(b.article_number);
     });
 
-
+  // デバッグ用：別添項目の判定を確認
+  console.log('別添項目の判定:', annexRevisions.map(r => ({ 
+    id: r.id, 
+    title: r.title, 
+    category: r.category, 
+    article_number: r.article_number 
+  })));
 
   // 条の目次を作成
   const createArticleIndex = (revisions: RegulationRevision[]) => {
