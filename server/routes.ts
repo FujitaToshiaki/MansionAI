@@ -82,14 +82,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use raw SQL query to avoid PostgreSQL parameter issues
       const query = `
         SELECT *, 
-          CASE 
-            WHEN status IS NULL THEN 'completed'
-            ELSE status 
-          END as status,
-          CASE 
-            WHEN revision_year IS NULL THEN '2024年'
-            ELSE revision_year 
-          END as revision_year
+          'completed' as status,
+          '2024年' as revision_year
         FROM regulation_analysis_results 
         WHERE condominium_id = '${req.params.id}'
         ORDER BY 
@@ -102,14 +96,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         LIMIT 3
       `;
       const result = await db.execute(query);
-      
-      // Update existing records to have completed status
-      const statusUpdateQuery = `
-        UPDATE regulation_analysis_results 
-        SET status = 'completed', revision_year = '2024年'
-        WHERE condominium_id = '${req.params.id}' AND status IS NULL
-      `;
-      await db.execute(statusUpdateQuery);
       
       res.json({
         totalIssues: result.rows.length,
