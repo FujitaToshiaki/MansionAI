@@ -158,124 +158,97 @@ export default function StandardRegulationDetail() {
       {/* Header Card */}
       <Card className="bg-white">
         <CardHeader>
-          <div className="flex items-start gap-4">
-            {getCategoryIcon(revision.category)}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <CardTitle className="text-2xl">{revision.title}</CardTitle>
-                <Badge className={getCategoryColor(revision.category)}>
-                  {revision.category}
-                </Badge>
-                <Badge variant="outline">
-                  {revision.change_type}
-                </Badge>
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              {getCategoryIcon(revision.category)}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <CardTitle className="text-xl">{revision.title}</CardTitle>
+                  <Badge className={getCategoryColor(revision.category)}>
+                    {revision.category}
+                  </Badge>
+                  <Badge variant="outline">
+                    {revision.change_type}
+                  </Badge>
+                  {revision.article_number && (
+                    <Badge variant="outline">
+                      {revision.article_number}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-gray-600 mt-1">
+                  改正詳細 - {revision.reference_section || ''}
+                </p>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed">
+            </div>
+          </div>
+          
+          {/* 規約の変更内容 */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="font-medium mb-6">規約の変更内容</h3>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div>
+                <div className="flex items-center mb-3">
+                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-medium mr-3">改訂案</span>
+                  <h4 className="font-medium text-gray-700">新しい規約条文</h4>
+                </div>
+                <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                  <p className="text-sm leading-relaxed">
+                    {revision.after_text || '（新設）'}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center mb-3">
+                  <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium mr-3">現行</span>
+                  <h4 className="font-medium text-gray-700">現在の規約条文</h4>
+                </div>
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <p className="text-sm leading-relaxed">
+                    {revision.before_text || '（規定なし）'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 改訂理由セクション - 改訂案・現行の下に配置 */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h4 className="font-medium mb-3">改訂理由</h4>
+              <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
                 {revision.change_description}
               </p>
+            </div>
+
+            {/* 改正情報 - 最下段に配置 */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h4 className="font-medium mb-3">改正情報</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-700">改正種別：</span>
+                  <span className="text-gray-600">{revision.change_type}</span>
+                </div>
+                {revision.reference_section && (
+                  <div>
+                    <span className="font-medium text-gray-700">参照箇所：</span>
+                    <span className="text-gray-600">{revision.reference_section}</span>
+                  </div>
+                )}
+                <div>
+                  <span className="font-medium text-gray-700">登録日時：</span>
+                  <span className="text-gray-600">
+                    {new Date(revision.creation_date).toLocaleDateString('ja-JP', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </CardHeader>
       </Card>
-
-      {/* Details Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Metadata */}
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle className="text-lg">改正情報</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {revision.article_number && (
-              <div>
-                <h4 className="font-medium text-gray-900 mb-1">条文番号</h4>
-                <p className="text-gray-600">{revision.article_number}</p>
-              </div>
-            )}
-            {revision.reference_section && (
-              <div>
-                <h4 className="font-medium text-gray-900 mb-1">参照箇所</h4>
-                <p className="text-gray-600">{revision.reference_section}</p>
-              </div>
-            )}
-            <div>
-              <h4 className="font-medium text-gray-900 mb-1">改正種別</h4>
-              <p className="text-gray-600">{revision.change_type}</p>
-            </div>
-            <div>
-              <h4 className="font-medium text-gray-900 mb-1">登録日時</h4>
-              <p className="text-gray-600">
-                {new Date(revision.creation_date).toLocaleDateString('ja-JP', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Content Comparison */}
-        <div className="lg:col-span-2 space-y-6">
-          {revision.before_text && revision.before_text !== '（新設）' && (
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="text-lg text-red-700">改正前</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-200">
-                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
-                    {revision.before_text}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {revision.after_text && (
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="text-lg text-green-700">
-                  {revision.before_text === '（新設）' ? '新設内容' : '改正後'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-200">
-                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
-                    {revision.after_text}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {revision.before_text === '（新設）' && (
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="text-lg text-blue-700">新設の背景</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
-                  <p className="text-gray-800">
-                    この規定は令和6年改正において新たに追加された項目です。
-                    {revision.category === '充電設備' && 
-                      '電気自動車の普及に伴い、マンションにおける充電設備の設置需要の増加を受けて新設されました。'
-                    }
-                    {revision.category === '外部専門家活用' && 
-                      'マンション管理の専門性向上と適正化を図るため、外部の専門家を活用できる制度が導入されました。'
-                    }
-                    {revision.category === '組合員名簿管理' && 
-                      '管理組合の透明性向上と適切な管理業務の実施を目的として新設されました。'
-                    }
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
