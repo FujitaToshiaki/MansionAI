@@ -53,15 +53,24 @@ export default function RevisionYearDetail() {
 
   const updateRevisionMutation = useMutation({
     mutationFn: async ({ revisionId, proposedText }: { revisionId: number, proposedText: string }) => {
-      return apiRequest(`/api/regulation-revisions/${revisionId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ proposed_text: proposedText }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await apiRequest(
+        'PATCH',
+        `/api/regulation-revisions/${revisionId}`,
+        { proposed_text: proposedText }
+      );
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      console.log('Successfully saved revision:', data);
+      
+      // Remove from editing mode
+      setEditingRevisions(prev => ({ ...prev, [variables.revisionId]: false }));
+      
       // Invalidate and refetch the data
       queryClient.invalidateQueries({ queryKey: ['/api/revision-headers', id] });
+    },
+    onError: (error) => {
+      console.error('Failed to save revision:', error);
     }
   });
 
@@ -234,25 +243,10 @@ export default function RevisionYearDetail() {
     const newText = editedTexts[revisionId];
     if (!newText) return;
 
-    try {
-      await updateRevisionMutation.mutateAsync({
-        revisionId,
-        proposedText: newText
-      });
-      
-      setEditingRevisions(prev => ({ ...prev, [revisionId]: false }));
-      
-      // Update local data immediately for better UX
-      if (data) {
-        const updatedRevisions = data.revisions.map(rev => 
-          rev.id === revisionId ? { ...rev, proposed_text: newText } : rev
-        );
-        // This is a local update - the queryClient invalidation will refetch from server
-      }
-    } catch (error) {
-      console.error('Failed to save revision:', error);
-      // You could add a toast notification here
-    }
+    updateRevisionMutation.mutate({
+      revisionId,
+      proposedText: newText
+    });
   };
 
   const cancelEdit = (revisionId: number) => {
@@ -449,9 +443,14 @@ export default function RevisionYearDetail() {
                                           size="sm"
                                           variant="outline"
                                           onClick={() => saveEdit(revision.id)}
+                                          disabled={updateRevisionMutation.isPending}
                                           className="h-7 w-7 p-0"
                                         >
-                                          <Save className="w-3 h-3" />
+                                          {updateRevisionMutation.isPending ? (
+                                            <div className="w-3 h-3 border border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                                          ) : (
+                                            <Save className="w-3 h-3" />
+                                          )}
                                         </Button>
                                         <Button
                                           size="sm"
