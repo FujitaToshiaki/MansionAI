@@ -99,6 +99,71 @@ export default function RevisionYearDetail() {
     }
   };
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'IT・デジタル化':
+        return <Monitor className="w-4 h-4 text-blue-600" />;
+      case '住宅宿泊事業':
+        return <Package className="w-4 h-4 text-purple-600" />;
+      case '総会関連':
+        return <Users className="w-4 h-4 text-green-600" />;
+      case '駐車場関連':
+        return <Car className="w-4 h-4 text-orange-600" />;
+      case '電子システム':
+        return <Monitor className="w-4 h-4 text-blue-600" />;
+      case '議事録管理':
+        return <FileText className="w-4 h-4 text-gray-600" />;
+      case '建替え関連':
+        return <AlertCircle className="w-4 h-4 text-red-600" />;
+      case '反社会的勢力排除':
+        return <Shield className="w-4 h-4 text-red-600" />;
+      case '区分所有者関連':
+        return <Users className="w-4 h-4 text-indigo-600" />;
+      case '損害保険':
+        return <Shield className="w-4 h-4 text-blue-600" />;
+      case '修繕積立金':
+        return <Package className="w-4 h-4 text-green-600" />;
+      case '管理人制度':
+        return <Users className="w-4 h-4 text-purple-600" />;
+      case 'AI・自動化':
+        return <Monitor className="w-4 h-4 text-cyan-600" />;
+      case '防火・防災':
+        return <AlertCircle className="w-4 h-4 text-red-600" />;
+      case 'データ管理':
+        return <FileText className="w-4 h-4 text-gray-600" />;
+      case '外部専門家活用詳細':
+        return <Users className="w-4 h-4 text-purple-600" />;
+      default:
+        return <FileText className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'default' as const;
+      case 'in_progress':
+        return 'secondary' as const;
+      case 'pending':
+        return 'outline' as const;
+      default:
+        return 'outline' as const;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return '完了';
+      case 'in_progress':
+        return '進行中';
+      case 'pending':
+        return '保留';
+      default:
+        return '未設定';
+    }
+  };
+
   const progressPercentage = header.total_items > 0 ? (header.completed_items / header.total_items) * 100 : 0;
 
   // Group revisions by category for table of contents
