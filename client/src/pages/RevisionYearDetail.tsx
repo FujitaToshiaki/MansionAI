@@ -333,11 +333,11 @@ export default function RevisionYearDetail() {
                             <h3 className="text-lg font-semibold text-gray-900">{revision.title}</h3>
                             <Badge className="bg-red-100 text-red-800">緊急度：高</Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-3">改訂詳細 - 第{revision.article_number}</p>
+                          <p className="text-sm text-gray-600 mb-3">改訂詳細 - {revision.article_number}</p>
                           
                           <div className="flex items-center space-x-4">
                             <Badge variant="outline" className="bg-white">
-                              第{revision.article_number}
+                              {revision.article_number}
                             </Badge>
                             <Badge variant="secondary">{revision.category}</Badge>
                             {revision.status && getStatusBadge(revision.status)}
