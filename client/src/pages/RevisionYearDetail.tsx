@@ -55,23 +55,23 @@ export default function RevisionYearDetail() {
       <tr>
         <td style="border: 1px solid #000; padding: 12px; vertical-align: top; width: 50%;">
           <div style="margin-bottom: 8px;">
-            <strong style="color: #1e40af;">${revision.title}</strong>
+            <strong>${revision.title}</strong>
           </div>
           <div style="margin-bottom: 8px;">
             <strong>${revision.article_number}</strong>
           </div>
-          <div style="background-color: #f9f9f9; padding: 8px; border-radius: 4px; font-size: 11px; line-height: 1.5;">
+          <div style="border: 1px solid #ccc; padding: 8px; font-size: 11px; line-height: 1.5;">
             ${revision.current_text || '現行規約の内容が設定されていません'}
           </div>
         </td>
         <td style="border: 1px solid #000; padding: 12px; vertical-align: top; width: 50%;">
           <div style="margin-bottom: 8px;">
-            <strong style="color: #059669;">${revision.title}</strong>
+            <strong>${revision.title}</strong>
           </div>
           <div style="margin-bottom: 8px;">
             <strong>${revision.article_number}</strong>
           </div>
-          <div style="background-color: #f0fdf4; padding: 8px; border-radius: 4px; font-size: 11px; line-height: 1.5;">
+          <div style="border: 1px solid #ccc; padding: 8px; font-size: 11px; line-height: 1.5;">
             ${revision.proposed_text || '改正案が設定されていません'}
           </div>
         </td>
@@ -102,9 +102,7 @@ export default function RevisionYearDetail() {
             text-align: center; 
             border: 2px solid #000; 
             padding: 20px; 
-            margin-bottom: 30px; 
-            background-color: #f8f9fa;
-            border-radius: 8px;
+            margin-bottom: 30px;
           }
           .header h2 {
             margin: 0;
@@ -132,7 +130,6 @@ export default function RevisionYearDetail() {
             vertical-align: top; 
           }
           .table th { 
-            background-color: #e5e7eb; 
             font-weight: bold; 
             text-align: center;
             font-size: 12px;
@@ -368,7 +365,7 @@ export default function RevisionYearDetail() {
     }
   };
 
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: string | undefined) => {
     switch (status) {
       case 'completed':
         return 'default' as const;
@@ -381,7 +378,7 @@ export default function RevisionYearDetail() {
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string | undefined) => {
     switch (status) {
       case 'completed':
         return '完了';
