@@ -144,6 +144,9 @@ export default function RegulationAnalysis() {
     queryKey: ['/api/condominiums', id, 'regulation-analysis'],
   });
 
+  // Track analysis completion status for R7 revision display
+  const [analysisCompleted, setAnalysisCompleted] = useState(false);
+
   const { data: currentRegulations } = useQuery({
     queryKey: ['/api/condominiums', id, 'regulations'],
   });
@@ -221,6 +224,7 @@ export default function RegulationAnalysis() {
       setCurrentStep('');
       setAnalysisSteps(prev => prev.map(step => ({ ...step, status: 'pending' })));
       setShowAnalysisModal(false);
+      setAnalysisCompleted(true); // Show R7 revision management after analysis completion
       toast({
         title: "分析完了",
         description: "規約改定分析が完了しました。結果を確認してください。",
@@ -606,33 +610,35 @@ export default function RegulationAnalysis() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">令和7年度</TableCell>
-                  <TableCell>令和7年度改訂対応</TableCell>
-                  <TableCell>
-                    <Badge className="bg-blue-100 text-blue-800">
-                      <Clock className="w-3 h-3 mr-1" />
-                      進行中
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                {analysisCompleted && (
+                  <TableRow>
+                    <TableCell className="font-medium">令和7年度</TableCell>
+                    <TableCell>令和7年度改訂対応</TableCell>
+                    <TableCell>
+                      <Badge className="bg-blue-100 text-blue-800">
+                        <Clock className="w-3 h-3 mr-1" />
+                        進行中
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-16 bg-gray-200 rounded-full h-2">
+                          <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                        </div>
+                        <span className="text-sm text-gray-600">6/8項目</span>
                       </div>
-                      <span className="text-sm text-gray-600">6/8項目</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>田中太郎</TableCell>
-                  <TableCell>
-                    <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
-                      <Button variant="outline" size="sm">
-                        <FileText className="w-3 h-3 mr-1" />
-                        詳細
-                      </Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                    <TableCell>田中太郎</TableCell>
+                    <TableCell>
+                      <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
+                        <Button variant="outline" size="sm">
+                          <FileText className="w-3 h-3 mr-1" />
+                          詳細
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                )}
                 <TableRow>
                   <TableCell className="font-medium">令和6年度</TableCell>
                   <TableCell>令和6年度改訂対応</TableCell>
@@ -696,7 +702,7 @@ export default function RegulationAnalysis() {
           <div className="relative flex justify-between items-center">
             <CardTitle className="flex items-center group">
               <FileText className="w-5 h-5 mr-2 text-green-600 group-hover:animate-pulse" />
-              改訂必要箇所一覧
+              個別改訂一覧
             </CardTitle>
             <div className="flex space-x-2">
               <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
