@@ -175,7 +175,7 @@ export default function RevisionYearDetail() {
             {/* Header Section */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                <Link to="/revision-years">
+                <Link to="/condominiums/a7af9126-67ff-47d9-9c24-cf4054aeb63c/regulation-analysis">
                   <Button variant="outline" size="sm">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     一覧に戻る
@@ -200,7 +200,7 @@ export default function RevisionYearDetail() {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <Card>
+              <Card className="bg-white">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-2">
                     <FileText className="w-5 h-5 text-blue-600" />
@@ -212,7 +212,7 @@ export default function RevisionYearDetail() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-white">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="w-5 h-5 text-green-600" />
@@ -224,7 +224,7 @@ export default function RevisionYearDetail() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-white">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-2">
                     <BarChart3 className="w-5 h-5 text-purple-600" />
@@ -236,7 +236,7 @@ export default function RevisionYearDetail() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-white">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-2">
                     <User className="w-5 h-5 text-orange-600" />
@@ -256,9 +256,9 @@ export default function RevisionYearDetail() {
                   <Card 
                     key={revision.id} 
                     id={`revision-${revision.id}`}
-                    className="hover:shadow-lg transition-all duration-200"
+                    className="bg-white hover:shadow-lg transition-all duration-200"
                   >
-                    <CardHeader className="bg-gradient-to-r from-gray-50 to-white">
+                    <CardHeader className="bg-white">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
