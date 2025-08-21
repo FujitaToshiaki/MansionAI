@@ -48,25 +48,37 @@ export default function RevisionYearDetail() {
   const [showProposalModal, setShowProposalModal] = useState(false);
   const queryClient = useQueryClient();
 
-  // Function to generate PDF download with all revision items
+  // Function to generate actual PDF download
   const handlePDFDownload = () => {
     // Prepare content for all revision items
     const revisionContent = sortedRevisions.map(revision => `
       <tr>
-        <td style="border: 1px solid #000; padding: 8px; vertical-align: top;">
-          <strong>${revision.title}</strong><br>
-          <strong>${revision.article_number}</strong><br><br>
-          ${revision.current_text || '現行規約の内容が設定されていません'}
+        <td style="border: 1px solid #000; padding: 12px; vertical-align: top; width: 50%;">
+          <div style="margin-bottom: 8px;">
+            <strong style="color: #1e40af;">${revision.title}</strong>
+          </div>
+          <div style="margin-bottom: 8px;">
+            <strong>${revision.article_number}</strong>
+          </div>
+          <div style="background-color: #f9f9f9; padding: 8px; border-radius: 4px; font-size: 11px; line-height: 1.5;">
+            ${revision.current_text || '現行規約の内容が設定されていません'}
+          </div>
         </td>
-        <td style="border: 1px solid #000; padding: 8px; vertical-align: top;">
-          <strong>${revision.title}</strong><br>
-          <strong>${revision.article_number}</strong><br><br>
-          ${revision.proposed_text || '改正案が設定されていません'}
+        <td style="border: 1px solid #000; padding: 12px; vertical-align: top; width: 50%;">
+          <div style="margin-bottom: 8px;">
+            <strong style="color: #059669;">${revision.title}</strong>
+          </div>
+          <div style="margin-bottom: 8px;">
+            <strong>${revision.article_number}</strong>
+          </div>
+          <div style="background-color: #f0fdf4; padding: 8px; border-radius: 4px; font-size: 11px; line-height: 1.5;">
+            ${revision.proposed_text || '改正案が設定されていません'}
+          </div>
         </td>
       </tr>
     `).join('');
 
-    // Create blob for PDF download
+    // Create the complete HTML content for PDF
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -74,17 +86,76 @@ export default function RevisionYearDetail() {
         <title>第1号議案 管理規約変更の件【特別決議】</title>
         <meta charset="UTF-8">
         <style>
-          body { font-family: 'Noto Sans JP', 'Yu Gothic', 'Hiragino Sans', sans-serif; margin: 20px; line-height: 1.6; font-size: 12px; }
-          .header { text-align: center; border: 2px solid #000; padding: 15px; margin-bottom: 30px; background-color: #f9f9f9; }
-          .content { margin: 20px 0; text-align: justify; }
-          .content p { margin-bottom: 15px; }
-          .table { width: 100%; border-collapse: collapse; margin: 30px 0; }
-          .table th, .table td { border: 1px solid #000; padding: 12px; text-align: left; vertical-align: top; }
-          .table th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+          @page {
+            size: A4;
+            margin: 15mm;
+          }
+          body { 
+            font-family: 'Noto Sans JP', 'Yu Gothic', 'Hiragino Sans', sans-serif; 
+            margin: 0; 
+            padding: 20px;
+            line-height: 1.6; 
+            font-size: 11px;
+            color: #333;
+          }
+          .header { 
+            text-align: center; 
+            border: 2px solid #000; 
+            padding: 20px; 
+            margin-bottom: 30px; 
+            background-color: #f8f9fa;
+            border-radius: 8px;
+          }
+          .header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+          }
+          .content { 
+            margin: 20px 0; 
+            text-align: justify; 
+          }
+          .content p { 
+            margin-bottom: 16px; 
+            line-height: 1.7;
+          }
+          .table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 30px 0; 
+            font-size: 10px;
+          }
+          .table th, .table td { 
+            border: 1px solid #000; 
+            padding: 12px; 
+            text-align: left; 
+            vertical-align: top; 
+          }
+          .table th { 
+            background-color: #e5e7eb; 
+            font-weight: bold; 
+            text-align: center;
+            font-size: 12px;
+          }
+          .signature {
+            text-align: right;
+            margin-top: 30px;
+            font-weight: 500;
+          }
           @media print { 
-            body { margin: 0; font-size: 11px; } 
-            .table { page-break-inside: avoid; }
-            tr { page-break-inside: avoid; }
+            body { 
+              margin: 0; 
+              padding: 15mm;
+            }
+            .table { 
+              page-break-inside: auto; 
+            }
+            tr { 
+              page-break-inside: avoid; 
+            }
+            .header {
+              page-break-after: avoid;
+            }
           }
         </style>
       </head>
@@ -118,16 +189,16 @@ export default function RevisionYearDetail() {
             つきましては、下記の改正案について、建物の区分所有等に関する法律第31条第1項の規定に基づく特別決議により、ご承認を賜りたく提案申し上げます。
           </p>
           
-          <p style="text-align: right; margin-top: 30px;">
+          <div class="signature">
             以上、趣旨ご理解の上、ご承認の程よろしくお願いいたします。
-          </p>
+          </div>
         </div>
 
         <table class="table">
           <thead>
             <tr>
-              <th style="width: 50%;">変更前</th>
-              <th style="width: 50%;">変更後</th>
+              <th>変更前</th>
+              <th>変更後</th>
             </tr>
           </thead>
           <tbody>
@@ -138,16 +209,21 @@ export default function RevisionYearDetail() {
       </html>
     `;
 
-    // Create and download PDF
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `第1号議案_管理規約変更の件_${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    // Create a new window and generate PDF
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then print
+      printWindow.onload = () => {
+        printWindow.print();
+        // Close the window after printing dialog appears
+        setTimeout(() => {
+          printWindow.close();
+        }, 1000);
+      };
+    }
   };
 
   const { data, isLoading, error } = useQuery<RevisionYearDetailData>({
