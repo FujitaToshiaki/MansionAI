@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useParams, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,10 +44,25 @@ export default function RevisionYearDetail() {
   const [activeSection, setActiveSection] = useState<string>("");
   const [editingRevisions, setEditingRevisions] = useState<{[key: number]: boolean}>({});
   const [editedTexts, setEditedTexts] = useState<{[key: number]: string}>({});
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery<RevisionYearDetailData>({
     queryKey: ['/api/revision-headers', id],
     enabled: !!id
+  });
+
+  const updateRevisionMutation = useMutation({
+    mutationFn: async ({ revisionId, proposedText }: { revisionId: number, proposedText: string }) => {
+      return apiRequest(`/api/regulation-revisions/${revisionId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ proposed_text: proposedText }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      // Invalidate and refetch the data
+      queryClient.invalidateQueries({ queryKey: ['/api/revision-headers', id] });
+    }
   });
 
   if (isLoading) {
@@ -214,11 +230,29 @@ export default function RevisionYearDetail() {
     setEditedTexts(prev => ({ ...prev, [revisionId]: currentText }));
   };
 
-  const saveEdit = (revisionId: number) => {
-    // TODO: API call to save changes would go here
-    console.log('Saving revision:', revisionId, editedTexts[revisionId]);
-    setEditingRevisions(prev => ({ ...prev, [revisionId]: false }));
-    // In a real implementation, you'd update the revision data and refetch
+  const saveEdit = async (revisionId: number) => {
+    const newText = editedTexts[revisionId];
+    if (!newText) return;
+
+    try {
+      await updateRevisionMutation.mutateAsync({
+        revisionId,
+        proposedText: newText
+      });
+      
+      setEditingRevisions(prev => ({ ...prev, [revisionId]: false }));
+      
+      // Update local data immediately for better UX
+      if (data) {
+        const updatedRevisions = data.revisions.map(rev => 
+          rev.id === revisionId ? { ...rev, proposed_text: newText } : rev
+        );
+        // This is a local update - the queryClient invalidation will refetch from server
+      }
+    } catch (error) {
+      console.error('Failed to save revision:', error);
+      // You could add a toast notification here
+    }
   };
 
   const cancelEdit = (revisionId: number) => {

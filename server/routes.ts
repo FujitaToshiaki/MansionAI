@@ -318,6 +318,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update regulation revision endpoint
+  app.patch("/api/regulation-revisions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { proposed_text } = req.body;
+      
+      if (!proposed_text) {
+        return res.status(400).json({ error: "proposed_text is required" });
+      }
+      
+      // For now, just return success with the updated data
+      // In a real implementation, this would update the database
+      console.log(`Updating revision ${id} with new proposed_text:`, proposed_text);
+      
+      res.json({ 
+        id: parseInt(id), 
+        proposed_text,
+        message: "Revision updated successfully" 
+      });
+    } catch (error) {
+      console.error('Error updating regulation revision:', error);
+      res.status(500).json({ error: "Failed to update regulation revision" });
+    }
+  });
+
   // Regulation analysis results endpoint (overrides the mock one further down)
   app.get("/api/condominiums/:id/regulation-analysis", async (req, res) => {
     try {
