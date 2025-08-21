@@ -85,6 +85,10 @@ export default function RevisionYearDetail() {
   }
 
   const { header, revisions } = data;
+  
+  // Debug: Log revisions data
+  console.log('Total revisions:', revisions.length);
+  console.log('Revisions data:', revisions.map(r => ({ id: r.id, title: r.title, article: r.article_number })));
 
   const getStatusBadge = (status: string) => {
     switch (status) {
