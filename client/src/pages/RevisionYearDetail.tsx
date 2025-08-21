@@ -86,9 +86,19 @@ export default function RevisionYearDetail() {
 
   const { header, revisions } = data;
   
-  // Debug: Log revisions data
-  console.log('Total revisions:', revisions.length);
-  console.log('Revisions data:', revisions.map(r => ({ id: r.id, title: r.title, article: r.article_number })));
+  // Sort revisions by article number
+  const sortedRevisions = [...revisions].sort((a, b) => {
+    // Extract numeric part from article number for sorting
+    const getArticleNumber = (articleStr: string) => {
+      const match = articleStr.match(/\d+/);
+      return match ? parseInt(match[0]) : 0;
+    };
+    
+    const aNum = getArticleNumber(a.article_number);
+    const bNum = getArticleNumber(b.article_number);
+    
+    return aNum - bNum;
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -170,8 +180,8 @@ export default function RevisionYearDetail() {
 
   const progressPercentage = header.total_items > 0 ? (header.completed_items / header.total_items) * 100 : 0;
 
-  // Group revisions by category for table of contents
-  const groupedRevisions = revisions.reduce((acc, revision) => {
+  // Group sorted revisions by category for table of contents
+  const groupedRevisions = sortedRevisions.reduce((acc, revision) => {
     const category = revision.category || 'その他';
     if (!acc[category]) {
       acc[category] = [];
@@ -203,7 +213,7 @@ export default function RevisionYearDetail() {
           
           <ScrollArea className="h-[calc(100vh-120px)]">
             <div className="p-4 space-y-1">
-              {revisions.map((revision) => (
+              {sortedRevisions.map((revision) => (
                 <button
                   key={revision.id}
                   onClick={() => scrollToSection(`revision-${revision.id}`)}
@@ -323,8 +333,8 @@ export default function RevisionYearDetail() {
 
             {/* Revision Cards */}
             <div className="space-y-6">
-              {revisions.length > 0 ? (
-                revisions.map((revision) => (
+              {sortedRevisions.length > 0 ? (
+                sortedRevisions.map((revision) => (
                   <Card 
                     key={revision.id} 
                     id={`revision-${revision.id}`}
