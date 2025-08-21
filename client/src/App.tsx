@@ -51,7 +51,6 @@ function Router() {
         <Route path="/standard-regulations/:versionId/:id" component={StandardRegulationDetail} />
         <Route path="/revision-groups" component={RevisionGroups} />
         <Route path="/revision-groups/:id" component={RevisionGroupDetail} />
-        <Route path="/regulation-revisions/:id" component={RegulationRevisionDetail} />
         <Route path="/condominiums/:condominiumId/minutes/:minuteId" component={MinuteDetail} />
         <Route component={NotFound} />
       </Switch>

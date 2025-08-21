@@ -50,7 +50,7 @@ export default function Sidebar() {
             const Icon = item.icon;
             const isActive = location === item.path || 
               (item.path === "/standard-regulations" && location.startsWith("/standard-regulations")) ||
-              (item.path === "/revision-groups" && (location.startsWith("/revision-groups") || location.startsWith("/regulation-revisions")));
+              (item.path === "/revision-groups" && location.startsWith("/revision-groups"));
             
             return (
               <div key={item.path}>

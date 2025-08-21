@@ -173,6 +173,17 @@ export default function RevisionGroupDetail() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={() => {
+              const element = document.getElementById('table-of-contents');
+              element?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <Filter className="h-4 w-4" />
+            目次へ
+          </Button>
           <Button variant="outline" className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             一括出力
@@ -265,22 +276,50 @@ export default function RevisionGroupDetail() {
         </CardContent>
       </Card>
 
-      {/* 改訂項目一覧 */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">
-          改訂項目一覧 ({filteredRevisions.length} 件)
-        </h2>
-        
-        {filteredRevisions.map((revision) => (
+      {/* 目次 */}
+      <Card id="table-of-contents">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            改訂項目目次 ({filteredRevisions.length} 件)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {filteredRevisions.map((revision, index) => (
+              <button
+                key={revision.id}
+                onClick={() => {
+                  const element = document.getElementById(`revision-${revision.id}`);
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="text-left p-2 hover:bg-gray-100 rounded text-sm flex items-center gap-2"
+              >
+                <span className="text-gray-500 font-mono">第{index + 1}条</span>
+                <span className="text-blue-600 hover:text-blue-800 truncate">
+                  {revision.title}
+                </span>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 改訂項目詳細一覧 */}
+      <div className="space-y-8">
+        {filteredRevisions.map((revision, index) => (
           <Card 
             key={revision.id} 
-            className="hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => setLocation(`/regulation-revisions/${revision.id}`)}
+            id={`revision-${revision.id}`}
+            className="scroll-mt-6"
           >
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
+            <CardHeader className="border-b border-gray-200">
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                      第{index + 1}条
+                    </div>
                     <Badge className={getChangeTypeColor(revision.change_type)}>
                       {revision.change_type}
                     </Badge>
@@ -292,29 +331,73 @@ export default function RevisionGroupDetail() {
                     )}
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <CardTitle className="text-xl font-bold text-gray-900">
                     {revision.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed mb-3">
-                    {revision.change_description}
-                  </p>
+                  </CardTitle>
                   
                   {revision.reference_section && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-gray-600 mt-1">
                       参照: {revision.reference_section}
                     </p>
                   )}
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
                   {revision.creation_date && (
-                    <span className="text-xs text-gray-500">
-                      {new Date(revision.creation_date).toLocaleDateString('ja-JP')}
-                    </span>
+                    <span>{new Date(revision.creation_date).toLocaleDateString('ja-JP')}</span>
                   )}
-                  <ChevronRight className="h-5 w-5 text-gray-400" />
                 </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="pt-6">
+              {/* 変更理由 */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-900 mb-2">改訂理由</h4>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 p-3 rounded">
+                  {revision.change_description}
+                </p>
+              </div>
+
+              {/* 変更前後比較 */}
+              {(revision.before_text || revision.after_text) && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* 変更前 */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <h4 className="font-semibold text-gray-900">改訂前</h4>
+                    </div>
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
+                        {revision.before_text || '改訂前の内容は記録されていません'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 変更後 */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <h4 className="font-semibold text-gray-900">現在の条文</h4>
+                    </div>
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+                      <p className="text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
+                        {revision.after_text || '改訂後の内容は記録されていません'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* アクションボタン */}
+              <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-200">
+                <Button variant="outline" size="sm">
+                  詳細を表示
+                </Button>
+                <Button variant="outline" size="sm">
+                  履歴を確認
+                </Button>
               </div>
             </CardContent>
           </Card>
