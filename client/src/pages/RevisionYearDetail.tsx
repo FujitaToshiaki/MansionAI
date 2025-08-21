@@ -258,7 +258,7 @@ export default function RevisionYearDetail() {
                     id={`revision-${revision.id}`}
                     className="bg-white hover:shadow-lg transition-all duration-200"
                   >
-                    <CardHeader className="bg-white">
+                    <CardHeader className="bg-white rounded-t-lg">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
