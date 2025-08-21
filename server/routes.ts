@@ -9,6 +9,7 @@ import { db } from "./db";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { extractTextFromMultipleImages } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
@@ -77,7 +78,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // OCR document upload endpoint
+  // Real-time OCR processing endpoint
+  app.post("/api/documents/process-ocr", upload.array('files'), async (req, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: "ファイルがアップロードされていません" });
+      }
+
+      // Prepare image buffers for OpenAI processing
+      const imageBuffers = files.map(file => ({
+        buffer: file.buffer,
+        mimeType: file.mimetype
+      }));
+
+      // Process OCR using OpenAI
+      const ocrResults = await extractTextFromMultipleImages(imageBuffers);
+
+      // Format results for frontend
+      const formattedResults = ocrResults.map((result, index) => ({
+        pageNumber: index + 1,
+        text: result.text,
+        accuracy: result.accuracy,
+        lowConfidenceRegions: result.lowConfidenceRegions
+      }));
+
+      res.json({
+        success: true,
+        results: formattedResults
+      });
+
+    } catch (error) {
+      console.error('Real-time OCR error:', error);
+      res.status(500).json({ 
+        error: "OCR処理中にエラーが発生しました",
+        details: (error as Error).message 
+      });
+    }
+  });
+
+  // OCR document upload endpoint (save results)
   app.post("/api/documents/ocr-upload", upload.array('files'), async (req, res) => {
     try {
       const { condominiumId, title, meetingDate, ocrResults } = req.body;
@@ -116,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Move file to permanent location
         const permanentPath = `uploads/${document.id}_page_${i + 1}_${file.originalname}`;
-        await fs.rename(file.path, permanentPath);
+        await fs.writeFile(permanentPath, file.buffer);
 
         const pageData = {
           id: crypto.randomUUID(),

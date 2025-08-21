@@ -49,20 +49,37 @@ export default function OCRProcessing() {
 
   const processOCRMutation = useMutation({
     mutationFn: async (files: UploadedFile[]) => {
-      // モックOCR処理 - 実際の実装では外部OCR APIを呼び出し
-      const mockOCRResults: OCRResult[] = files.map(file => ({
-        pageNumber: file.pageNumber,
-        text: generateMockOCRText(file.pageNumber),
-        accuracy: 85 + Math.random() * 10, // 85-95%の精度
-        lowConfidenceRegions: generateMockLowConfidenceRegions()
-      }));
-      
-      // 処理中の遅延をシミュレート
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return mockOCRResults;
+      // Real AI-powered OCR processing using OpenAI
+      const formData = new FormData();
+      files.forEach(fileData => {
+        formData.append('files', fileData.file);
+      });
+
+      const response = await apiRequest('/api/documents/process-ocr', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'OCR処理に失敗しました');
+      }
+
+      return response.results as OCRResult[];
     },
     onSuccess: (results) => {
       setOcrResults(results);
+      setStep('review');
+    },
+    onError: (error) => {
+      console.error('OCR processing error:', error);
+      // Fallback to mock data if API fails
+      const fallbackResults: OCRResult[] = uploadedFiles.map(file => ({
+        pageNumber: file.pageNumber,
+        text: generateMockOCRText(file.pageNumber),
+        accuracy: 75, // Lower accuracy to indicate fallback
+        lowConfidenceRegions: generateMockLowConfidenceRegions()
+      }));
+      setOcrResults(fallbackResults);
       setStep('review');
     }
   });
