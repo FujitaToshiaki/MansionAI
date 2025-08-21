@@ -86,8 +86,16 @@ export default function RevisionYearDetail() {
 
   const { header, revisions } = data;
   
-  // Sort revisions by article number
+  // Sort revisions by article number, with 別添 items at the end
   const sortedRevisions = [...revisions].sort((a, b) => {
+    // Check if items contain 別添 (appendix) - these should come last
+    const aIsAppendix = a.article_number.includes('別添');
+    const bIsAppendix = b.article_number.includes('別添');
+    
+    if (aIsAppendix && !bIsAppendix) return 1; // a comes after b
+    if (!aIsAppendix && bIsAppendix) return -1; // a comes before b
+    if (aIsAppendix && bIsAppendix) return 0; // both appendix, keep original order
+    
     // Extract numeric part from article number for sorting
     const getArticleNumber = (articleStr: string) => {
       const match = articleStr.match(/\d+/);
@@ -367,20 +375,7 @@ export default function RevisionYearDetail() {
                           <h4 className="text-lg font-semibold text-gray-900 mb-3">規約の変更内容</h4>
                           
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Current Text */}
-                            <div>
-                              <div className="flex items-center space-x-2 mb-3">
-                                <Badge variant="outline">現行</Badge>
-                                <span className="text-sm font-medium">現在の規約条文</span>
-                              </div>
-                              <div className="bg-gray-50 border-l-4 border-gray-400 p-4 rounded-r-lg">
-                                <p className="text-sm text-gray-700 leading-relaxed">
-                                  {revision.current_text || '現行規約の内容が設定されていません'}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            {/* Proposed Text */}
+                            {/* Proposed Text - Left Side */}
                             {revision.proposed_text && (
                               <div>
                                 <div className="flex items-center space-x-2 mb-3">
@@ -398,6 +393,19 @@ export default function RevisionYearDetail() {
                                 </div>
                               </div>
                             )}
+                            
+                            {/* Current Text - Right Side */}
+                            <div>
+                              <div className="flex items-center space-x-2 mb-3">
+                                <Badge variant="outline">現行</Badge>
+                                <span className="text-sm font-medium">現在の規約条文</span>
+                              </div>
+                              <div className="bg-gray-50 border-l-4 border-gray-400 p-4 rounded-r-lg">
+                                <p className="text-sm text-gray-700 leading-relaxed">
+                                  {revision.current_text || '現行規約の内容が設定されていません'}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
 
