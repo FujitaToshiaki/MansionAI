@@ -34,12 +34,12 @@ export default function Header() {
         {/* User Profile */}
         <div className="flex items-center space-x-2 cursor-pointer">
           <Avatar className="w-8 h-8">
-            <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&w=40&h=40&fit=crop&crop=face" alt="田中太郎" />
+            <AvatarImage src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&w=40&h=40&fit=crop&crop=face" alt="修繕未来" />
             <AvatarFallback>
               <User size={16} />
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-gray-700">田中太郎</span>
+          <span className="text-sm font-medium text-gray-700">修繕 未来</span>
           <ChevronDown className="text-gray-500" size={12} />
         </div>
       </div>

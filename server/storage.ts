@@ -84,7 +84,7 @@ export class MemStorage implements IStorage {
         currentRegulationVersion: "5.0",
         lawRevisionStatus: "completed",
         lastActivity: new Date(),
-        assignedManager: "田中太郎",
+        assignedManager: "修繕 未来",
         createdAt: new Date()
       },
       {

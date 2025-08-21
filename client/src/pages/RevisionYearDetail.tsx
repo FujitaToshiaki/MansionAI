@@ -60,7 +60,7 @@ export default function RevisionYearDetail() {
           <div style="margin-bottom: 8px;">
             <strong>${revision.article_number}</strong>
           </div>
-          <div style="border: 1px solid #ccc; padding: 8px; font-size: 11px; line-height: 1.5;">
+          <div style="padding: 8px; font-size: 11px; line-height: 1.5;">
             ${revision.current_text || '現行規約の内容が設定されていません'}
           </div>
         </td>
@@ -71,7 +71,7 @@ export default function RevisionYearDetail() {
           <div style="margin-bottom: 8px;">
             <strong>${revision.article_number}</strong>
           </div>
-          <div style="border: 1px solid #ccc; padding: 8px; font-size: 11px; line-height: 1.5;">
+          <div style="padding: 8px; font-size: 11px; line-height: 1.5;">
             ${revision.proposed_text || '改正案が設定されていません'}
           </div>
         </td>
@@ -825,7 +825,7 @@ export default function RevisionYearDetail() {
                             <div className="font-semibold text-gray-800">
                               {revision.article_number}
                             </div>
-                            <div className="text-sm text-gray-700 leading-relaxed border border-gray-200 p-2 rounded">
+                            <div className="text-sm text-gray-700 leading-relaxed p-2">
                               {revision.current_text || '現行規約の内容が設定されていません'}
                             </div>
                           </div>
@@ -838,7 +838,7 @@ export default function RevisionYearDetail() {
                             <div className="font-semibold text-gray-800">
                               {revision.article_number}
                             </div>
-                            <div className="text-sm text-gray-700 leading-relaxed border border-gray-200 p-2 rounded">
+                            <div className="text-sm text-gray-700 leading-relaxed p-2">
                               {revision.proposed_text || '改正案が設定されていません'}
                             </div>
                           </div>
