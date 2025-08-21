@@ -48,81 +48,106 @@ export default function RevisionYearDetail() {
   const [showProposalModal, setShowProposalModal] = useState(false);
   const queryClient = useQueryClient();
 
-  // Function to generate PDF download
+  // Function to generate PDF download with all revision items
   const handlePDFDownload = () => {
-    // Create a new window with the proposal content for printing/PDF
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>第1号議案 管理規約変更の件【特別決議】</title>
-          <style>
-            body { font-family: 'Noto Sans JP', sans-serif; margin: 20px; line-height: 1.6; }
-            .header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; }
-            .content { margin: 20px 0; }
-            .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            .table th, .table td { border: 1px solid #000; padding: 8px; text-align: left; }
-            .table th { background-color: #f5f5f5; }
-            @media print { body { margin: 0; } }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h2>第1号議案 管理規約変更の件【特別決議】</h2>
-          </div>
-          
-          <div class="content">
-            <p>現在、1階店舗兼事務所(A)の売却について、管理組合と後継会社にて協議を行っております。協議を行う中で、管理規約上「しきり相互銀行」の名称が残っており、現況との乖離があることを改編する必要があると判断しました。なお、これまでの経緯で、「東日本銀行」へ読み替える旨は決議されておりますが、今後も区分所有者の変更の可能性があることを鑑みて、名称自体を削除することとしております。</p>
-            
-            <p>本来であれば、全文見直しを行い、現況に即した内容に改編する必要があるものの、1階店舗兼事務所(A)については、売却を行う必要があるため、先んじて変更することとしました。</p>
-            
-            <p>上記を受けて、以下の規約部分を変更することを提案申し上げます。</p>
-            
-            <p>主旨ご理解の上、ご承認の程宜しくお願いいたします。</p>
-          </div>
+    // Prepare content for all revision items
+    const revisionContent = sortedRevisions.map(revision => `
+      <tr>
+        <td style="border: 1px solid #000; padding: 8px; vertical-align: top;">
+          <strong>${revision.title}</strong><br>
+          <strong>${revision.article_number}</strong><br><br>
+          ${revision.current_text || '現行規約の内容が設定されていません'}
+        </td>
+        <td style="border: 1px solid #000; padding: 8px; vertical-align: top;">
+          <strong>${revision.title}</strong><br>
+          <strong>${revision.article_number}</strong><br><br>
+          ${revision.proposed_text || '改正案が設定されていません'}
+        </td>
+      </tr>
+    `).join('');
 
-          <table class="table">
-            <thead>
-              <tr>
-                <th style="width: 50%;">変更前</th>
-                <th style="width: 50%;">変更後</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <strong>(駐車場の専用使用権と専用使用)</strong><br>
-                  <strong>第15条</strong> 区分所有者は別添の図に示す駐車場施設(台数14台)について、1階店舗兼事務所(A)区分所有者である「しきり相互銀行」が4台分(指定位置No.1～No.4)について確定的に専用使用権を有し、又、残余については他の特定の区分所有者が、管理組合と駐車場使用契約締結のうえ、夫々、専用使用することを承認する。<br>
-                  (以下略)
-                </td>
-                <td>
-                  <strong>(駐車場の専用使用権と専用使用)</strong><br>
-                  <strong>第15条</strong> 区分所有者は別添の図に示す駐車場施設(台数14台)について、1階店舗兼事務所(A)区分所有者が4台分(指定位置No.1～No.4)について確定的に専用使用権を有し、又、残余については他の特定の区分所有者が、管理組合と駐車場使用契約締結のうえ、夫々、専用使用することを承認する。<br>
-                  (以下略)
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>(自転車置場の専用使用権と専用使用)</strong><br>
-                  <strong>第16条</strong> 区分所有者は別添の図に示す自転車置場(台数146台)について1階店舗兼事務所(A)の区分所有者である「しきり相互銀行」が18台分(本マンション建物の北側非常階段寄りの18台収容部分)<br>
-                  について、確定的に専用使用権を有し、残余
-                </td>
-                <td>
-                  <strong>(自転車置場の専用使用権と専用使用)</strong><br>
-                  <strong>第16条</strong> 区分所有者は別添の図に示す自転車置場(台数146台)について1階店舗兼事務所(A)の区分所有者が18台分(本マンション建物の北側非常階段寄りの18台収容部分)<br>
-                  について、確定的に専用使用権を有し、残余
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    }
+    // Create blob for PDF download
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>第1号議案 管理規約変更の件【特別決議】</title>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Noto Sans JP', 'Yu Gothic', 'Hiragino Sans', sans-serif; margin: 20px; line-height: 1.6; font-size: 12px; }
+          .header { text-align: center; border: 2px solid #000; padding: 15px; margin-bottom: 30px; background-color: #f9f9f9; }
+          .content { margin: 20px 0; text-align: justify; }
+          .content p { margin-bottom: 15px; }
+          .table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+          .table th, .table td { border: 1px solid #000; padding: 12px; text-align: left; vertical-align: top; }
+          .table th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+          @media print { 
+            body { margin: 0; font-size: 11px; } 
+            .table { page-break-inside: avoid; }
+            tr { page-break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>第1号議案　管理規約変更の件【特別決議】</h2>
+        </div>
+        
+        <div class="content">
+          <p>
+            令和7年4月1日に施行される改正建物の区分所有等に関する法律（区分所有法）及び関連法令の改正に伴い、当マンションの管理規約についても法的要件への適合を図るため、所要の改正を行う必要があります。
+          </p>
+          
+          <p>
+            今般の法改正では、デジタル化対応の推進、住宅宿泊事業への適切な対応、管理組合の透明性向上、外部専門家の活用促進等が盛り込まれており、これらの趣旨を踏まえた管理規約の改正が求められております。
+          </p>
+          
+          <p>
+            また、現行の管理規約には時代の変化に対応していない条項や、実態との乖離が見られる部分があることから、この機会に包括的な見直しを行い、より実効性のある管理規約とすることを目指します。
+          </p>
+          
+          <p>
+            特に、IT・デジタル化への対応、総会運営の効率化、住宅宿泊事業に関する適切な規制、反社会的勢力の排除規定の明確化等について、法改正の趣旨に沿った改正を行うものです。
+          </p>
+          
+          <p>
+            なお、改正内容については、国土交通省が示すマンション標準管理規約（令和7年度改訂版）を参考とし、当マンションの実情に応じた適切な内容としております。
+          </p>
+          
+          <p>
+            つきましては、下記の改正案について、建物の区分所有等に関する法律第31条第1項の規定に基づく特別決議により、ご承認を賜りたく提案申し上げます。
+          </p>
+          
+          <p style="text-align: right; margin-top: 30px;">
+            以上、趣旨ご理解の上、ご承認の程よろしくお願いいたします。
+          </p>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 50%;">変更前</th>
+              <th style="width: 50%;">変更後</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${revisionContent}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    // Create and download PDF
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `第1号議案_管理規約変更の件_${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const { data, isLoading, error } = useQuery<RevisionYearDetailData>({
@@ -647,8 +672,8 @@ export default function RevisionYearDetail() {
 
       {/* Proposal Creation Modal */}
       <Dialog open={showProposalModal} onOpenChange={setShowProposalModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
-          <DialogHeader className="flex flex-row items-center justify-between">
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden">
+          <DialogHeader className="flex flex-row items-center justify-between border-b border-gray-200 pb-4">
             <DialogTitle className="text-xl font-bold">第1号議案 管理規約変更の件【特別決議】</DialogTitle>
             <div className="flex gap-2">
               <Button 
@@ -657,7 +682,7 @@ export default function RevisionYearDetail() {
                 size="sm"
               >
                 <Download className="w-4 h-4 mr-2" />
-                PDF出力
+                ダウンロード
               </Button>
               <Button
                 variant="outline"
@@ -669,7 +694,7 @@ export default function RevisionYearDetail() {
             </div>
           </DialogHeader>
           
-          <div className="overflow-y-auto max-h-[calc(90vh-120px)] pr-4">
+          <div className="overflow-y-auto max-h-[calc(95vh-140px)] pr-2" style={{ scrollbarWidth: 'thin' }}>
             <div className="space-y-6 text-sm leading-relaxed">
               {/* Header Section */}
               <div className="text-center border-2 border-black p-4 bg-gray-50">
@@ -679,78 +704,74 @@ export default function RevisionYearDetail() {
               {/* Content */}
               <div className="space-y-4">
                 <p>
-                  現在、1階店舗兼事務所(A)の売却について、管理組合と後継会社にて協議を行っております。協議を行う中で、管理規約上「しきり相互銀行」の名称が残っており、現況との乖離があることを改編する必要があると判断しました。なお、これまでの経緯で、「東日本銀行」へ読み替える旨は決議されておりますが、今後も区分所有者の変更の可能性があることを鑑みて、名称自体を削除することとしております。
+                  令和7年4月1日に施行される改正建物の区分所有等に関する法律（区分所有法）及び関連法令の改正に伴い、当マンションの管理規約についても法的要件への適合を図るため、所要の改正を行う必要があります。
                 </p>
                 
                 <p>
-                  本来であれば、全文見直しを行い、現況に即した内容に改編する必要があるものの、1階店舗兼事務所(A)については、売却を行う必要があるため、先んじて変更することとしました。
+                  今般の法改正では、デジタル化対応の推進、住宅宿泊事業への適切な対応、管理組合の透明性向上、外部専門家の活用促進等が盛り込まれており、これらの趣旨を踏まえた管理規約の改正が求められております。
                 </p>
                 
                 <p>
-                  上記を受けて、以下の規約部分を変更することを提案申し上げます。
+                  また、現行の管理規約には時代の変化に対応していない条項や、実態との乖離が見られる部分があることから、この機会に包括的な見直しを行い、より実効性のある管理規約とすることを目指します。
                 </p>
                 
                 <p>
-                  主旨ご理解の上、ご承認の程宜しくお願いいたします。
+                  特に、IT・デジタル化への対応、総会運営の効率化、住宅宿泊事業に関する適切な規制、反社会的勢力の排除規定の明確化等について、法改正の趣旨に沿った改正を行うものです。
+                </p>
+                
+                <p>
+                  なお、改正内容については、国土交通省が示すマンション標準管理規約（令和7年度改訂版）を参考とし、当マンションの実情に応じた適切な内容としております。
+                </p>
+                
+                <p>
+                  つきましては、下記の改正案について、建物の区分所有等に関する法律第31条第1項の規定に基づく特別決議により、ご承認を賜りたく提案申し上げます。
+                </p>
+                
+                <p className="text-right mt-6">
+                  以上、趣旨ご理解の上、ご承認の程よろしくお願いいたします。
                 </p>
               </div>
 
-              {/* Comparison Table */}
+              {/* Comparison Table - All Revision Items */}
               <div className="border border-gray-300 rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="border border-gray-300 p-3 text-left font-bold w-1/2">変更前</th>
-                      <th className="border border-gray-300 p-3 text-left font-bold w-1/2">変更後</th>
+                      <th className="border border-gray-300 p-3 text-center font-bold w-1/2">変更前</th>
+                      <th className="border border-gray-300 p-3 text-center font-bold w-1/2">変更後</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td className="border border-gray-300 p-3 align-top">
-                        <div className="space-y-2">
-                          <div>
-                            <strong>(駐車場の専用使用権と専用使用)</strong>
+                    {sortedRevisions.map((revision, index) => (
+                      <tr key={revision.id || index}>
+                        <td className="border border-gray-300 p-3 align-top">
+                          <div className="space-y-2">
+                            <div className="font-bold text-blue-700">
+                              {revision.title}
+                            </div>
+                            <div className="font-semibold text-gray-800">
+                              {revision.article_number}
+                            </div>
+                            <div className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-2 rounded">
+                              {revision.current_text || '現行規約の内容が設定されていません'}
+                            </div>
                           </div>
-                          <div>
-                            <strong>第15条</strong> 区分所有者は別添の図に示す駐車場施設(台数14台)について、1階店舗兼事務所(A)区分所有者である「<span className="bg-red-200">しきり相互銀行</span>」が4台分(指定位置No.1～No.4)について確定的に専用使用権を有し、又、残余については他の特定の区分所有者が、管理組合と駐車場使用契約締結のうえ、夫々、専用使用することを承認する。
+                        </td>
+                        <td className="border border-gray-300 p-3 align-top">
+                          <div className="space-y-2">
+                            <div className="font-bold text-green-700">
+                              {revision.title}
+                            </div>
+                            <div className="font-semibold text-gray-800">
+                              {revision.article_number}
+                            </div>
+                            <div className="text-sm text-gray-700 leading-relaxed bg-green-50 p-2 rounded">
+                              {revision.proposed_text || '改正案が設定されていません'}
+                            </div>
                           </div>
-                          <div className="text-gray-600">(以下略)</div>
-                        </div>
-                      </td>
-                      <td className="border border-gray-300 p-3 align-top">
-                        <div className="space-y-2">
-                          <div>
-                            <strong>(駐車場の専用使用権と専用使用)</strong>
-                          </div>
-                          <div>
-                            <strong>第15条</strong> 区分所有者は別添の図に示す駐車場施設(台数14台)について、1階店舗兼事務所(A)区分所有者が4台分(指定位置No.1～No.4)について確定的に専用使用権を有し、又、残余については他の特定の区分所有者が、管理組合と駐車場使用契約締結のうえ、夫々、専用使用することを承認する。
-                          </div>
-                          <div className="text-gray-600">(以下略)</div>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 p-3 align-top">
-                        <div className="space-y-2">
-                          <div>
-                            <strong>(自転車置場の専用使用権と専用使用)</strong>
-                          </div>
-                          <div>
-                            <strong>第16条</strong> 区分所有者は別添の図に示す自転車置場(台数146台)について1階店舗兼事務所(A)の区分所有者である「<span className="bg-red-200">しきり相互銀行</span>」が18台分(本マンション建物の北側非常階段寄りの18台収容部分)について、確定的に専用使用権を有し、残余
-                          </div>
-                        </div>
-                      </td>
-                      <td className="border border-gray-300 p-3 align-top">
-                        <div className="space-y-2">
-                          <div>
-                            <strong>(自転車置場の専用使用権と専用使用)</strong>
-                          </div>
-                          <div>
-                            <strong>第16条</strong> 区分所有者は別添の図に示す自転車置場(台数146台)について1階店舗兼事務所(A)の区分所有者が18台分(本マンション建物の北側非常階段寄りの18台収容部分)について、確定的に専用使用権を有し、残余
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
