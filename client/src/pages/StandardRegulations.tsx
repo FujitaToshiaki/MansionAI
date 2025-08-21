@@ -48,6 +48,7 @@ export default function StandardRegulations() {
   const versionId = params.versionId;
   const [currentLanguage, setCurrentLanguage] = useState<keyof typeof languages>('ja');
   const [translatedContent, setTranslatedContent] = useState<Record<string, string>>({});
+  const [showIndex, setShowIndex] = useState(false);
 
   const { data: revisions = [], isLoading } = useQuery<RegulationRevision[]>({
     queryKey: ['/api/regulation-revisions', versionId],
@@ -71,8 +72,17 @@ export default function StandardRegulations() {
     return getArticleNum(a.article_number) - getArticleNum(b.article_number);
   };
 
-  // 条番号順に並び替えた改正項目
+  // 改正項目を分類・並び替え
   const sortedRevisions = [...revisions].sort(sortByArticleNumber);
+  
+  // 別添項目と通常項目を分離
+  const regularRevisions = sortedRevisions.filter(revision => 
+    !revision.title.includes('別添') && !revision.category.includes('別添')
+  );
+  
+  const annexRevisions = sortedRevisions.filter(revision => 
+    revision.title.includes('別添') || revision.category.includes('別添')
+  );
 
   // 条の目次を作成
   const createArticleIndex = (revisions: RegulationRevision[]) => {
@@ -98,7 +108,7 @@ export default function StandardRegulations() {
       });
   };
 
-  const articleIndex = createArticleIndex(sortedRevisions);
+  const articleIndex = createArticleIndex(regularRevisions);
 
   // Translation function
   const translateText = async (text: string, targetLanguage: string): Promise<string> => {
@@ -607,7 +617,7 @@ export default function StandardRegulations() {
           <p className="text-gray-600 mt-2">この改正版における全ての変更項目と新設規定</p>
         </div>
         
-        {/* Language Selector and Export Button */}
+        {/* Language Selector, Index Toggle, and Export Button */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <Languages className="w-4 h-4 text-gray-500" />
@@ -626,6 +636,14 @@ export default function StandardRegulations() {
               </SelectContent>
             </Select>
           </div>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowIndex(!showIndex)}
+            className="flex items-center gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            目次
+          </Button>
           <Button className="bg-blue-600 hover:bg-blue-700">
             <Download className="h-4 w-4 mr-2" />
             改正項目をエクスポート
@@ -633,48 +651,52 @@ export default function StandardRegulations() {
         </div>
       </div>
 
-      {/* 条の目次 */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            条番号別改正項目目次
-          </CardTitle>
-          <p className="text-gray-600 text-sm">各条文の改正内容を番号順にまとめました</p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {articleIndex.map(([articleNum, revisions], index) => (
-              <div key={articleNum} className="flex items-center justify-between bg-white p-3 rounded-lg border hover:bg-blue-50 cursor-pointer transition-colors" onClick={() => {
-                const element = document.getElementById(`article-${articleNum.replace(/[^0-9]/g, '')}`);
-                element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}>
-                <div className="flex items-center gap-2">
-                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
-                    {articleNum}
-                  </span>
-                  <span className="text-sm text-gray-700 font-medium">
-                    {revisions[0]?.title || '条文改正'}
-                  </span>
+      {/* 条の目次 - 折り畳み式 */}
+      {showIndex && (
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              条番号別改正項目目次
+            </CardTitle>
+            <p className="text-gray-600 text-sm">各条文の改正内容を番号順にまとめました</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {articleIndex.map(([articleNum, revisions], index) => (
+                <div key={articleNum} className="flex items-center justify-between bg-white p-3 rounded-lg border hover:bg-blue-50 cursor-pointer transition-colors" onClick={() => {
+                  const element = document.getElementById(`article-${articleNum.replace(/[^0-9]/g, '')}`);
+                  element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  setShowIndex(false); // 目次を閉じる
+                }}>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
+                      {articleNum}
+                    </span>
+                    <span className="text-sm text-gray-700 font-medium">
+                      {revisions[0]?.title || '条文改正'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Badge variant="outline" className="text-xs">
+                      {revisions.length}項目
+                    </Badge>
+                    <Eye className="h-3 w-3 text-gray-400" />
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Badge variant="outline" className="text-xs">
-                    {revisions.length}項目
-                  </Badge>
-                  <Eye className="h-3 w-3 text-gray-400" />
-                </div>
-              </div>
-            ))}
-          </div>
-          {articleIndex.length === 0 && (
-            <p className="text-gray-500 text-center py-4">条番号が設定された改正項目がありません</p>
-          )}
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+            {articleIndex.length === 0 && (
+              <p className="text-gray-500 text-center py-4">条番号が設定された改正項目がありません</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
+      {/* 通常の改正項目 */}
       <div className="grid gap-4">
-        {sortedRevisions.map((revision, index) => {
-          const isNewArticle = index === 0 || revision.article_number !== sortedRevisions[index - 1]?.article_number;
+        {regularRevisions.map((revision, index) => {
+          const isNewArticle = index === 0 || revision.article_number !== regularRevisions[index - 1]?.article_number;
           const articleId = revision.article_number ? `article-${revision.article_number.replace(/[^0-9]/g, '')}` : undefined;
           
           return (
@@ -795,6 +817,123 @@ export default function StandardRegulations() {
           );
         })}
       </div>
+
+      {/* 別添項目 */}
+      {annexRevisions.length > 0 && (
+        <>
+          <div className="flex items-center gap-3 mt-8 pt-6">
+            <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 py-2 rounded-lg font-semibold">
+              別添
+            </div>
+            <div className="flex-1 border-t border-gray-300"></div>
+            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+              {annexRevisions.length}項目
+            </Badge>
+          </div>
+
+          <div className="grid gap-4">
+            {annexRevisions.map((revision) => (
+              <Card key={revision.id} className="bg-white hover:shadow-lg transition-shadow border-l-4 border-l-amber-400">
+                <CardHeader className="pb-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        {getCategoryIcon(revision.category)}
+                        <CardTitle className="text-lg">{getTranslatedText(revision.title)}</CardTitle>
+                        <Badge className="bg-amber-100 text-amber-800">
+                          {getTranslatedText(revision.category)}
+                        </Badge>
+                        <Badge variant="outline" className="flex items-center gap-1">
+                          {getChangeTypeIcon(revision.change_type)}
+                          {revision.change_type}
+                        </Badge>
+                      </div>
+                      <p className="text-gray-600 text-sm">{getTranslatedText(revision.change_description)}</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    {revision.article_number && (
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-600">条文: {revision.article_number}</span>
+                      </div>
+                    )}
+                    {revision.reference_section && (
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-600">参照: {revision.reference_section}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 規約の変更内容 - 横並びレイアウト */}
+                  {(revision.before_text || revision.after_text) && (
+                    <div className="space-y-4">
+                      <h5 className="font-medium text-gray-900">規約の変更内容</h5>
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                          <div className="flex items-center mb-2">
+                            <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-medium mr-2">改訂案</span>
+                            <h6 className="text-sm font-medium text-gray-700">新しい規約条文</h6>
+                          </div>
+                          <div className="border border-amber-200 rounded-lg p-3 bg-amber-50">
+                            <div 
+                              className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
+                              dangerouslySetInnerHTML={{
+                                __html: highlightDifferences(revision.before_text || '', revision.after_text || '（新設）', true)
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center mb-2">
+                            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium mr-2">現行</span>
+                            <h6 className="text-sm font-medium text-gray-700">現在の規約条文</h6>
+                          </div>
+                          <div className="border border-gray-200 rounded-lg p-3">
+                            <div 
+                              className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
+                              dangerouslySetInnerHTML={{
+                                __html: highlightDifferences(revision.before_text || '（規定なし）', revision.after_text || '', false)
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 改訂理由 - 横並び下に配置 */}
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <h6 className="text-sm font-medium text-gray-900 mb-2">改訂理由</h6>
+                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                          <pre className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+                            {formatRegulationText(getTranslatedText(revision.change_description))}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-4 border-t">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setLocation(`/standard-regulations/${versionId}/${revision.id}`)}
+                      className="flex items-center gap-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      詳細を表示
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
