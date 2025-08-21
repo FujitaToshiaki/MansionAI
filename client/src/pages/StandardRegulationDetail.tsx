@@ -45,6 +45,8 @@ export default function StandardRegulationDetail() {
 
   const getVersionName = (versionId: string) => {
     switch (versionId) {
+      case 'r7':
+        return '令和7年度改訂';
       case 'r6':
         return '令和6年度改訂';
       case 'r3':
@@ -54,6 +56,26 @@ export default function StandardRegulationDetail() {
       default:
         return '不明な改正版';
     }
+  };
+
+  // 条文テキストを箇条書き形式にフォーマットする関数
+  const formatRegulationText = (text: string): string => {
+    if (!text) return text;
+    
+    return text
+      // 条文番号の後に改行を追加
+      .replace(/(第\d+条(?:の\d+)?)\s+/g, '$1\n')
+      // 項目番号（一、二、三...）の前に改行と適切なインデントを追加
+      .replace(/([。\n])\s*(一|二|三|四|五|六|七|八|九|十)\s+/g, '$1\n　$2 ')
+      // アラビア数字項目（1、2、3...）の前に改行とインデントを追加
+      .replace(/([。\n])\s*([1-9]\d*)\s+/g, '$1\n　$2 ')
+      // サブ項目（①、②、③...）の前に改行とさらなるインデントを追加
+      .replace(/([。\n])\s*(①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩)\s+/g, '$1\n　　$2 ')
+      // 【コメント】セクションの前に改行を追加
+      .replace(/\s*【コメント】/g, '\n\n【コメント】')
+      // 連続する改行を整理
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
   };
 
   const getCategoryIcon = (category: string) => {
@@ -194,9 +216,9 @@ export default function StandardRegulationDetail() {
                   <h4 className="font-medium text-gray-700">新しい規約条文</h4>
                 </div>
                 <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
-                  <p className="text-sm leading-relaxed">
-                    {revision.after_text || '（新設）'}
-                  </p>
+                  <pre className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                    {formatRegulationText(revision.after_text || '（新設）')}
+                  </pre>
                 </div>
               </div>
               <div>
@@ -205,9 +227,9 @@ export default function StandardRegulationDetail() {
                   <h4 className="font-medium text-gray-700">現在の規約条文</h4>
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm leading-relaxed">
-                    {revision.before_text || '（規定なし）'}
-                  </p>
+                  <pre className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                    {formatRegulationText(revision.before_text || '（規定なし）')}
+                  </pre>
                 </div>
               </div>
             </div>
@@ -215,9 +237,11 @@ export default function StandardRegulationDetail() {
             {/* 改訂理由セクション - 改訂案・現行の下に配置 */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <h4 className="font-medium mb-3">改訂理由</h4>
-              <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
-                {revision.change_description}
-              </p>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <pre className="text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+                  {formatRegulationText(revision.change_description)}
+                </pre>
+              </div>
             </div>
 
             {/* 改正情報 - 最下段に配置 */}

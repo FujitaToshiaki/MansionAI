@@ -120,6 +120,30 @@ export default function RegulationRevisionDetail() {
     return '第15条 管理組合は、個人情報の保護に関する法律（平成15年法律第57号）に基づき、区分所有者および居住者の個人情報を適正に取り扱い、本人の同意を得た場合または法令に基づく場合を除き、目的外利用を行ってはならない。';
   };
 
+  // 条文テキストを箇条書き形式にフォーマットする関数
+  const formatRegulationText = (text: string): string => {
+    if (!text) return text;
+    
+    return text
+      // 条文番号の後に改行を追加
+      .replace(/(第\d+条(?:の\d+)?)\s+/g, '$1\n')
+      // 項目番号（一、二、三...）の前に改行と適切なインデントを追加
+      .replace(/([。\n])\s*(一|二|三|四|五|六|七|八|九|十)\s+/g, '$1\n　$2 ')
+      // アラビア数字項目（1、2、3...）の前に改行とインデントを追加
+      .replace(/([。\n])\s*([1-9]\d*)\s+/g, '$1\n　$2 ')
+      // サブ項目（①、②、③...）の前に改行とさらなるインデントを追加
+      .replace(/([。\n])\s*(①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩)\s+/g, '$1\n　　$2 ')
+      // 「ただし」を新しい行に
+      .replace(/。\s*ただし/g, '。\nただし')
+      // 「また」を新しい行に
+      .replace(/。\s*また/g, '。\nまた')
+      // 【コメント】セクションの前に改行を追加
+      .replace(/\s*【コメント】/g, '\n\n【コメント】')
+      // 連続する改行を整理
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  };
+
   // Translation function
   const translateText = async (text: string, targetLanguage: string): Promise<string> => {
     if (targetLanguage === 'ja') return text;
@@ -427,9 +451,9 @@ export default function RegulationRevisionDetail() {
                   <h4 className="font-medium text-gray-700">{getTranslatedText('新しい規約条文')}</h4>
                 </div>
                 <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
-                  <p className="text-sm leading-relaxed mb-3">
-                    {getTranslatedText(revisionDetail?.proposedText || getRevisionSpecificProposedText(revisionDetail?.title))}
-                  </p>
+                  <pre className="text-sm leading-relaxed whitespace-pre-wrap font-sans mb-3">
+                    {formatRegulationText(getTranslatedText(revisionDetail?.proposedText || getRevisionSpecificProposedText(revisionDetail?.title)))}
+                  </pre>
                   <div className="text-sm text-green-600">
                     ✅ {getTranslatedText('法的要件を完全満足')}
                   </div>
@@ -441,9 +465,9 @@ export default function RegulationRevisionDetail() {
                   <h4 className="font-medium text-gray-700">{getTranslatedText('現在の規約条文')}</h4>
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm leading-relaxed mb-3">
-                    {getTranslatedText(revisionDetail?.currentText || getRevisionSpecificCurrentText(revisionDetail?.title))}
-                  </p>
+                  <pre className="text-sm leading-relaxed whitespace-pre-wrap font-sans mb-3">
+                    {formatRegulationText(getTranslatedText(revisionDetail?.currentText || getRevisionSpecificCurrentText(revisionDetail?.title)))}
+                  </pre>
                   <div className="text-sm text-red-600">
                     ⚠️ {getTranslatedText('法的根拠が不明確')}
                   </div>
@@ -454,9 +478,11 @@ export default function RegulationRevisionDetail() {
             {/* 改訂理由セクション - 改訂案・現行の下に配置 */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <h4 className="font-medium mb-3">{getTranslatedText('改訂理由')}</h4>
-              <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
-                {getTranslatedText(revisionDetail?.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。')}
-              </p>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <pre className="text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+                  {formatRegulationText(getTranslatedText(revisionDetail?.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。'))}
+                </pre>
+              </div>
             </div>
 
             {/* 変更のポイント - 最下段に配置 */}

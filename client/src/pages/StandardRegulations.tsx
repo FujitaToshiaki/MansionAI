@@ -134,6 +134,26 @@ export default function StandardRegulations() {
     return translatedContent[text] || text;
   };
 
+  // 条文テキストを箇条書き形式にフォーマットする関数
+  const formatRegulationText = (text: string): string => {
+    if (!text) return text;
+    
+    return text
+      // 条文番号の後に改行を追加
+      .replace(/(第\d+条(?:の\d+)?)\s+/g, '$1\n')
+      // 項目番号（一、二、三...）の前に改行と適切なインデントを追加
+      .replace(/([。\n])\s*(一|二|三|四|五|六|七|八|九|十)\s+/g, '$1\n　$2 ')
+      // アラビア数字項目（1、2、3...）の前に改行とインデントを追加
+      .replace(/([。\n])\s*([1-9]\d*)\s+/g, '$1\n　$2 ')
+      // サブ項目（①、②、③...）の前に改行とさらなるインデントを追加
+      .replace(/([。\n])\s*(①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩)\s+/g, '$1\n　　$2 ')
+      // 【コメント】セクションの前に改行を追加
+      .replace(/\s*【コメント】/g, '\n\n【コメント】')
+      // 連続する改行を整理
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  };
+
   // Update translations when language changes
   useEffect(() => {
     if (currentLanguage === 'ja') return;
@@ -390,9 +410,9 @@ export default function StandardRegulations() {
                         <h6 className="text-sm font-medium text-gray-700">新しい規約条文</h6>
                       </div>
                       <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
-                        <p className="text-xs leading-relaxed">
-                          {revision.after_text || '（新設）'}
-                        </p>
+                        <pre className="text-xs leading-relaxed whitespace-pre-wrap font-sans">
+                          {formatRegulationText(revision.after_text || '（新設）')}
+                        </pre>
                       </div>
                     </div>
                     <div>
@@ -401,9 +421,9 @@ export default function StandardRegulations() {
                         <h6 className="text-sm font-medium text-gray-700">現在の規約条文</h6>
                       </div>
                       <div className="border border-gray-200 rounded-lg p-3">
-                        <p className="text-xs leading-relaxed">
-                          {revision.before_text || '（規定なし）'}
-                        </p>
+                        <pre className="text-xs leading-relaxed whitespace-pre-wrap font-sans">
+                          {formatRegulationText(revision.before_text || '（規定なし）')}
+                        </pre>
                       </div>
                     </div>
                   </div>
@@ -411,9 +431,11 @@ export default function StandardRegulations() {
                   {/* 改訂理由 - 横並び下に配置 */}
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <h6 className="text-sm font-medium text-gray-900 mb-2">改訂理由</h6>
-                    <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-200">
-                      {getTranslatedText(revision.change_description)}
-                    </p>
+                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      <pre className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+                        {formatRegulationText(getTranslatedText(revision.change_description))}
+                      </pre>
+                    </div>
                   </div>
                 </div>
               )}

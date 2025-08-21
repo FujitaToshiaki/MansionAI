@@ -23,6 +23,30 @@ export default function RegulationAnalysis() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // 条文テキストを箇条書き形式にフォーマットする関数
+  const formatRegulationText = (text: string): string => {
+    if (!text) return text;
+    
+    return text
+      // 条文番号の後に改行を追加
+      .replace(/(第\d+条(?:の\d+)?)\s+/g, '$1\n')
+      // 項目番号（一、二、三...）の前に改行と適切なインデントを追加
+      .replace(/([。\n])\s*(一|二|三|四|五|六|七|八|九|十)\s+/g, '$1\n　$2 ')
+      // アラビア数字項目（1、2、3...）の前に改行とインデントを追加
+      .replace(/([。\n])\s*([1-9]\d*)\s+/g, '$1\n　$2 ')
+      // サブ項目（①、②、③...）の前に改行とさらなるインデントを追加
+      .replace(/([。\n])\s*(①|②|③|④|⑤|⑥|⑦|⑧|⑨|⑩)\s+/g, '$1\n　　$2 ')
+      // 「ただし」を新しい行に
+      .replace(/。\s*ただし/g, '。\nただし')
+      // 「また」を新しい行に
+      .replace(/。\s*また/g, '。\nまた')
+      // 【コメント】セクションの前に改行を追加
+      .replace(/\s*【コメント】/g, '\n\n【コメント】')
+      // 連続する改行を整理
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  };
+
   // Utility functions
   const getPriorityColor = (priority: string) => {
     switch (priority) {
