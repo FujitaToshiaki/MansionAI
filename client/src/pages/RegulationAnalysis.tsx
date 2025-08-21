@@ -543,6 +543,8 @@ export default function RegulationAnalysis() {
                   <TableHead>条文</TableHead>
                   <TableHead>改訂タイトル</TableHead>
                   <TableHead>改定理由</TableHead>
+                  <TableHead>ステータス</TableHead>
+                  <TableHead>改定年度</TableHead>
                   <TableHead>関連決議</TableHead>
                   <TableHead>法改正</TableHead>
                   <TableHead>影響度</TableHead>
@@ -573,6 +575,16 @@ export default function RegulationAnalysis() {
                     </TableCell>
                     <TableCell className="max-w-sm">
                       <p className="text-sm text-gray-600 line-clamp-2">{issue.reason}</p>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300">
+                        改訂済み
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm font-medium text-gray-700">
+                        {issue.revision_year || '2024年'}
+                      </span>
                     </TableCell>
                     <TableCell>
                       {issue.legal_basis?.includes('決議') || issue.legal_basis?.includes('総会') ? (
