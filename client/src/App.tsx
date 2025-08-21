@@ -18,6 +18,8 @@ import RegulationWiki from "@/pages/RegulationWiki";
 import StandardRegulations from "@/pages/StandardRegulations";
 import StandardRegulationVersions from "@/pages/StandardRegulationVersions";
 import StandardRegulationDetail from "@/pages/StandardRegulationDetail";
+import RevisionGroups from "@/pages/RevisionGroups";
+import RevisionGroupDetail from "@/pages/RevisionGroupDetail";
 import MinuteDetail from "@/pages/MinuteDetail";
 import AIAgentHistory from "@/pages/AIAgentHistory";
 import AIAgentExecutionDetail from "@/pages/AIAgentExecutionDetail";
@@ -47,6 +49,9 @@ function Router() {
         <Route path="/standard-regulations" component={StandardRegulationVersions} />
         <Route path="/standard-regulations/:versionId" component={StandardRegulations} />
         <Route path="/standard-regulations/:versionId/:id" component={StandardRegulationDetail} />
+        <Route path="/revision-groups" component={RevisionGroups} />
+        <Route path="/revision-groups/:id" component={RevisionGroupDetail} />
+        <Route path="/regulation-revisions/:id" component={RegulationRevisionDetail} />
         <Route path="/condominiums/:condominiumId/minutes/:minuteId" component={MinuteDetail} />
         <Route component={NotFound} />
       </Switch>

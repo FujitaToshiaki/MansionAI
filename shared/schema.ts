@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, serial, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -116,11 +116,58 @@ export const aiSearchHistory = pgTable("ai_search_history", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
+// Revision Groups Table - 複数の改訂項目をまとめて管理
+export const revisionGroups = pgTable("revision_groups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(), // 令和7年度改訂対応
+  version: text("version").notNull(), // r7, r6, etc.
+  description: text("description"),
+  totalItems: integer("total_items").default(0),
+  completedItems: integer("completed_items").default(0),
+  status: text("status").notNull().default("draft"), // draft, in_progress, completed, approved
+  effectiveDate: timestamp("effective_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Regulation Revisions Table - 個別の改訂項目 (既存テーブル構造を維持)
+export const regulationRevisions = pgTable("regulation_revisions", {
+  id: serial("id").primaryKey(), // serialの型を正確に維持
+  groupId: varchar("group_id", { length: 100 }).references(() => revisionGroups.id), // 新しく追加するカラム
+  category: varchar("category", { length: 100 }).notNull(), // 既存の長さ制限を維持
+  title: varchar("title", { length: 200 }).notNull(), // 既存の長さ制限を維持
+  changeDescription: text("change_description").notNull(),
+  beforeText: text("before_text"),
+  afterText: text("after_text"),
+  articleNumber: varchar("article_number", { length: 50 }), // 既存の長さ制限を維持
+  referenceSection: varchar("reference_section", { length: 100 }), // 既存の長さ制限を維持
+  changeType: varchar("change_type", { length: 50 }).notNull(), // 既存の長さ制限を維持
+  creationDate: timestamp("creation_date") // 既存カラム名を維持
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true
 });
+
+export const insertRevisionGroupSchema = createInsertSchema(revisionGroups).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertRegulationRevisionSchema = createInsertSchema(regulationRevisions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+// Types
+export type RevisionGroup = typeof revisionGroups.$inferSelect;
+export type RegulationRevision = typeof regulationRevisions.$inferSelect;
+export type InsertRevisionGroup = z.infer<typeof insertRevisionGroupSchema>;
+export type InsertRegulationRevision = z.infer<typeof insertRegulationRevisionSchema>;
 
 export const insertCondominiumSchema = createInsertSchema(condominiums).omit({
   id: true,
