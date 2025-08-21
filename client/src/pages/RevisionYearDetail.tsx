@@ -819,26 +819,26 @@ export default function RevisionYearDetail() {
                       <tr key={revision.id || index}>
                         <td className="border border-gray-300 p-3 align-top">
                           <div className="space-y-2">
-                            <div className="font-bold text-blue-700">
+                            <div className="font-bold text-gray-900">
                               {revision.title}
                             </div>
                             <div className="font-semibold text-gray-800">
                               {revision.article_number}
                             </div>
-                            <div className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-2 rounded">
+                            <div className="text-sm text-gray-700 leading-relaxed border border-gray-200 p-2 rounded">
                               {revision.current_text || '現行規約の内容が設定されていません'}
                             </div>
                           </div>
                         </td>
                         <td className="border border-gray-300 p-3 align-top">
                           <div className="space-y-2">
-                            <div className="font-bold text-green-700">
+                            <div className="font-bold text-gray-900">
                               {revision.title}
                             </div>
                             <div className="font-semibold text-gray-800">
                               {revision.article_number}
                             </div>
-                            <div className="text-sm text-gray-700 leading-relaxed bg-green-50 p-2 rounded">
+                            <div className="text-sm text-gray-700 leading-relaxed border border-gray-200 p-2 rounded">
                               {revision.proposed_text || '改正案が設定されていません'}
                             </div>
                           </div>
