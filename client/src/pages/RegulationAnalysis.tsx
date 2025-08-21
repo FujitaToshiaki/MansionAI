@@ -22,6 +22,60 @@ export default function RegulationAnalysis() {
   const { id } = useParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Utility functions
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800 border-red-300';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'low': return 'bg-green-100 text-green-800 border-green-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'high': return <AlertTriangle className="w-3 h-3 mr-1" />;
+      case 'medium': return <Clock className="w-3 h-3 mr-1" />;
+      case 'low': return <CheckCircle className="w-3 h-3 mr-1" />;
+      default: return null;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return (
+          <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300">
+            改訂済み
+          </Badge>
+        );
+      case 'in_progress':
+        return (
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
+            改訂中
+          </Badge>
+        );
+      case 'under_review':
+        return (
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+            検討中
+          </Badge>
+        );
+      case 'pending':
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-800 border-gray-300">
+            未着手
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-800 border-gray-300">
+            不明
+          </Badge>
+        );
+    }
+  };
   
   // State for analysis settings
   const [analysisSettings, setAnalysisSettings] = useState({
@@ -45,6 +99,10 @@ export default function RegulationAnalysis() {
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [analysisSteps, setAnalysisSteps] = useState([
     { id: 1, name: '文書解析開始', status: 'pending', description: 'アップロードされた議事録を解析しています', details: '議事録テキストから決議項目を特定中...' },
     { id: 2, name: '決議事項抽出', status: 'pending', description: 'AI が決議内容を識別・分類しています', details: '個人情報保護法対応、ペット飼育規定等を評価中...' },
@@ -166,23 +224,7 @@ export default function RegulationAnalysis() {
     }
   });
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-orange-100 text-orange-800';
-      case 'low': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'high': return <AlertTriangle className="w-4 h-4" />;
-      case 'medium': return <Clock className="w-4 h-4" />;
-      case 'low': return <CheckCircle className="w-4 h-4" />;
-      default: return null;
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -523,14 +565,65 @@ export default function RegulationAnalysis() {
               改訂必要箇所一覧
             </CardTitle>
             <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="group hover:scale-105 transition-all duration-200 hover:shadow-md"
-              >
-                <Filter className="w-4 h-4 mr-2 group-hover:animate-bounce" />
-                フィルタ
-              </Button>
+              <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="group hover:scale-105 transition-all duration-200 hover:shadow-md"
+                  >
+                    <Filter className="w-4 h-4 mr-2 group-hover:animate-bounce" />
+                    フィルタ
+                    {statusFilter !== 'all' && (
+                      <Badge className="ml-2 bg-blue-100 text-blue-800">1</Badge>
+                    )}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>フィルタ設定</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="status-filter" className="text-right">
+                        ステータス
+                      </Label>
+                      <div className="col-span-3">
+                        <RadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="all" id="all" />
+                            <Label htmlFor="all">すべて</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="completed" id="completed" />
+                            <Label htmlFor="completed">改訂済み</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="in_progress" id="in_progress" />
+                            <Label htmlFor="in_progress">改訂中</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="under_review" id="under_review" />
+                            <Label htmlFor="under_review">検討中</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="pending" id="pending" />
+                            <Label htmlFor="pending">未着手</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setStatusFilter('all')}>
+                      リセット
+                    </Button>
+                    <Button onClick={() => setShowFilterDialog(false)}>
+                      適用
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardHeader>
@@ -552,7 +645,9 @@ export default function RegulationAnalysis() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {((analysisResults as any)?.issues || []).map((issue: any, index: number) => (
+                {((analysisResults as any)?.issues || [])
+                  .filter((issue: any) => statusFilter === 'all' || issue.status === statusFilter)
+                  .map((issue: any, index: number) => (
                   <TableRow 
                     key={index} 
                     className="hover:bg-gray-50 transition-colors duration-200 animate-fadeIn"
@@ -577,9 +672,7 @@ export default function RegulationAnalysis() {
                       <p className="text-sm text-gray-600 line-clamp-2">{issue.reason}</p>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300">
-                        改訂済み
-                      </Badge>
+                      {getStatusBadge(issue.status)}
                     </TableCell>
                     <TableCell>
                       <span className="text-sm font-medium text-gray-700">
