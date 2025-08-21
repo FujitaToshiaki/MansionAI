@@ -579,6 +579,116 @@ export default function RegulationAnalysis() {
         </CardContent>
       </Card>
 
+      {/* 年度別改訂管理セクション */}
+      <Card className="bg-white">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <CardTitle className="flex items-center">
+            <FileText className="w-5 h-5 mr-2 text-blue-600" />
+            年度別改訂管理
+          </CardTitle>
+          <Link to="/revision-years">
+            <Button variant="outline" size="sm" className="ml-auto">
+              管理画面へ
+            </Button>
+          </Link>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>改訂年度</TableHead>
+                  <TableHead>タイトル</TableHead>
+                  <TableHead>ステータス</TableHead>
+                  <TableHead>進捗</TableHead>
+                  <TableHead>担当者</TableHead>
+                  <TableHead>操作</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">令和7年度</TableCell>
+                  <TableCell>令和7年度改訂対応</TableCell>
+                  <TableCell>
+                    <Badge className="bg-blue-100 text-blue-800">
+                      <Clock className="w-3 h-3 mr-1" />
+                      進行中
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600">6/8項目</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>田中太郎</TableCell>
+                  <TableCell>
+                    <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
+                      <Button variant="outline" size="sm">
+                        <FileText className="w-3 h-3 mr-1" />
+                        詳細
+                      </Button>
+                    </Link>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">令和6年度</TableCell>
+                  <TableCell>令和6年度改訂対応</TableCell>
+                  <TableCell>
+                    <Badge className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      完了
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '100%' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600">8/8項目</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>佐藤花子</TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="sm" disabled>
+                      <FileText className="w-3 h-3 mr-1" />
+                      詳細
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">令和5年度</TableCell>
+                  <TableCell>令和5年度改訂対応</TableCell>
+                  <TableCell>
+                    <Badge className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      完了
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '100%' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600">5/5項目</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>山田次郎</TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="sm" disabled>
+                      <FileText className="w-3 h-3 mr-1" />
+                      詳細
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Analysis Results Table */}
       <Card className="bg-white hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-slideIn">
         <CardHeader className="relative overflow-hidden">
@@ -764,116 +874,6 @@ export default function RegulationAnalysis() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* 年度別改訂管理セクション */}
-      <Card className="bg-white">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="flex items-center">
-            <FileText className="w-5 h-5 mr-2 text-blue-600" />
-            年度別改訂管理
-          </CardTitle>
-          <Link to="/revision-years">
-            <Button variant="outline" size="sm" className="ml-auto">
-              管理画面へ
-            </Button>
-          </Link>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>改訂年度</TableHead>
-                  <TableHead>タイトル</TableHead>
-                  <TableHead>ステータス</TableHead>
-                  <TableHead>進捗</TableHead>
-                  <TableHead>担当者</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">令和7年度</TableCell>
-                  <TableCell>令和7年度改訂対応</TableCell>
-                  <TableCell>
-                    <Badge className="bg-blue-100 text-blue-800">
-                      <Clock className="w-3 h-3 mr-1" />
-                      進行中
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600">6/8項目</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>田中太郎</TableCell>
-                  <TableCell>
-                    <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
-                      <Button variant="outline" size="sm">
-                        <FileText className="w-3 h-3 mr-1" />
-                        詳細
-                      </Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">令和6年度</TableCell>
-                  <TableCell>令和6年度改訂対応</TableCell>
-                  <TableCell>
-                    <Badge className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      完了
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '100%' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600">8/8項目</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>佐藤花子</TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm" disabled>
-                      <FileText className="w-3 h-3 mr-1" />
-                      詳細
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">令和5年度</TableCell>
-                  <TableCell>令和5年度改訂対応</TableCell>
-                  <TableCell>
-                    <Badge className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      完了
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '100%' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600">5/5項目</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>山田次郎</TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm" disabled>
-                      <FileText className="w-3 h-3 mr-1" />
-                      詳細
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
         </CardContent>
       </Card>
 
