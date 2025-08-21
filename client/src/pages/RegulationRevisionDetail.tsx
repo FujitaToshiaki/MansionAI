@@ -431,6 +431,20 @@ export default function RegulationRevisionDetail() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div>
                 <div className="flex items-center mb-3">
+                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-medium mr-3">改訂案</span>
+                  <h4 className="font-medium text-gray-700">{getTranslatedText('新しい規約条文')}</h4>
+                </div>
+                <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                  <p className="text-sm leading-relaxed mb-3">
+                    {getTranslatedText(revisionDetail?.proposedText || getRevisionSpecificProposedText(revisionDetail?.title))}
+                  </p>
+                  <div className="text-sm text-green-600">
+                    ✅ {getTranslatedText('法的要件を完全満足')}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center mb-3">
                   <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium mr-3">現行</span>
                   <h4 className="font-medium text-gray-700">{getTranslatedText('現在の規約条文')}</h4>
                 </div>
@@ -440,20 +454,6 @@ export default function RegulationRevisionDetail() {
                   </p>
                   <div className="text-sm text-red-600">
                     ⚠️ {getTranslatedText('法的根拠が不明確')}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center mb-3">
-                  <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium mr-3">改訂案</span>
-                  <h4 className="font-medium text-gray-700">{getTranslatedText('新しい規約条文')}</h4>
-                </div>
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm leading-relaxed mb-3">
-                    {getTranslatedText(revisionDetail?.proposedText || getRevisionSpecificProposedText(revisionDetail?.title))}
-                  </p>
-                  <div className="text-sm text-green-600">
-                    ✅ {getTranslatedText('法的要件を完全満足')}
                   </div>
                 </div>
               </div>
