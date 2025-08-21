@@ -416,14 +416,6 @@ export default function RegulationRevisionDetail() {
             </div>
           </div>
           
-          {/* Reason Section */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <h3 className="font-medium mb-3">{getTranslatedText('改訂理由')}</h3>
-            <p className="text-gray-700 leading-relaxed">
-              {getTranslatedText(revisionDetail?.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。')}
-            </p>
-          </div>
-
           {/* 規約の変更内容 */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <h3 className="font-medium mb-6">{getTranslatedText('規約の変更内容')}</h3>
@@ -459,8 +451,16 @@ export default function RegulationRevisionDetail() {
               </div>
             </div>
 
+            {/* 改訂理由セクション - 改訂案・現行の下に配置 */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h4 className="font-medium mb-3">{getTranslatedText('改訂理由')}</h4>
+              <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
+                {getTranslatedText(revisionDetail?.reason || '改正個人情報保護法に対応するため、個人情報の取り扱いに関する規定を強化する必要があります。現行の規約では法律が求める基準を満たしていないため、総会での承認を得て改訂を行います。')}
+              </p>
+            </div>
+
             {/* 変更のポイント - 最下段に配置 */}
-            <div className="border-t border-gray-200 pt-4">
+            <div className="mt-4 pt-4 border-t border-gray-200">
               <h4 className="font-medium mb-3">{getTranslatedText('変更のポイント')}</h4>
               <div className="flex flex-wrap gap-2">
                 <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">#法的根拠の明確化</span>
