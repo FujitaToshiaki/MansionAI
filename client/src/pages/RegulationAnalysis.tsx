@@ -101,7 +101,7 @@ export default function RegulationAnalysis() {
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
 
   // Filter states
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('not_completed');
   const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [analysisSteps, setAnalysisSteps] = useState([
     { id: 1, name: '文書解析開始', status: 'pending', description: 'アップロードされた議事録を解析しています', details: '議事録テキストから決議項目を特定中...' },
@@ -574,7 +574,7 @@ export default function RegulationAnalysis() {
                   >
                     <Filter className="w-4 h-4 mr-2 group-hover:animate-bounce" />
                     フィルタ
-                    {statusFilter !== 'all' && (
+                    {statusFilter !== 'all' && statusFilter !== 'not_completed' && (
                       <Badge className="ml-2 bg-blue-100 text-blue-800">1</Badge>
                     )}
                   </Button>
@@ -593,6 +593,10 @@ export default function RegulationAnalysis() {
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="all" id="all" />
                             <Label htmlFor="all">すべて</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="not_completed" id="not_completed" />
+                            <Label htmlFor="not_completed">改訂済み以外</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="completed" id="completed" />
@@ -615,7 +619,7 @@ export default function RegulationAnalysis() {
                     </div>
                   </div>
                   <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setStatusFilter('all')}>
+                    <Button variant="outline" onClick={() => setStatusFilter('not_completed')}>
                       リセット
                     </Button>
                     <Button onClick={() => setShowFilterDialog(false)}>
@@ -646,7 +650,11 @@ export default function RegulationAnalysis() {
               </TableHeader>
               <TableBody>
                 {((analysisResults as any)?.issues || [])
-                  .filter((issue: any) => statusFilter === 'all' || issue.status === statusFilter)
+                  .filter((issue: any) => {
+                    if (statusFilter === 'all') return true;
+                    if (statusFilter === 'not_completed') return issue.status !== 'completed';
+                    return issue.status === statusFilter;
+                  })
                   .map((issue: any, index: number) => (
                   <TableRow 
                     key={index} 
