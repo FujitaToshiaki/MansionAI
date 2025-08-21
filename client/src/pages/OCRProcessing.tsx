@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useParams, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -277,6 +277,9 @@ export default function OCRProcessing() {
               <Upload className="w-5 h-5" />
               議事録ファイルアップロード
             </CardTitle>
+            <CardDescription>
+              マンション管理組合の議事録画像をアップロードし、Gemini 2.5 Pro AIが自動的にテキストを抽出します。手書き文字も含めて高精度で読み取り、デジタル議事録として保存できます。
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
@@ -458,6 +461,9 @@ export default function OCRProcessing() {
               <FileText className="w-5 h-5" />
               OCR処理結果確認
             </CardTitle>
+            <CardDescription>
+              Gemini 2.5 Pro AIによる高精度な議事録テキスト抽出結果です。必要に応じてテキストを編集し、マンション管理組合の議事録として保存してください。
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {ocrResults.map((result, index) => {
@@ -476,7 +482,7 @@ export default function OCRProcessing() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div>
                       <Label className="text-sm font-medium mb-2 block">原本画像</Label>
                       {fileData && (
@@ -488,7 +494,7 @@ export default function OCRProcessing() {
                       )}
                     </div>
                     
-                    <div className="flex flex-col h-full">
+                    <div className="flex flex-col h-full lg:col-span-2">
                       <Label className="text-sm font-medium mb-2 block">抽出テキスト</Label>
                       <Textarea
                         value={result.text}
