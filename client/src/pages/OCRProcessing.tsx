@@ -308,7 +308,7 @@ export default function OCRProcessing() {
               議事録ファイルアップロード
             </CardTitle>
             <CardDescription>
-              マンション管理組合の議事録画像をアップロードし、Gemini 2.5 Pro AIが自動的にテキストを抽出します。手書き文字も含めて高精度で読み取り、デジタル議事録として保存できます。
+              マンション管理組合の議事録画像をアップロードし、AIが自動的にテキストを抽出します。手書き文字も含めて高精度で読み取り、デジタル議事録として保存できます。
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
