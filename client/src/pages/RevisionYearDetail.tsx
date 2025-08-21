@@ -225,33 +225,34 @@ export default function RevisionYearDetail() {
                 <button
                   key={revision.id}
                   onClick={() => scrollToSection(`revision-${revision.id}`)}
-                  className={`w-full text-left p-2 rounded transition-all duration-200 hover:bg-gray-100 ${
+                  className={`w-full text-left p-3 rounded transition-all duration-200 hover:bg-gray-100 ${
                     activeSection === `revision-${revision.id}` 
                       ? 'bg-blue-50 text-blue-900' 
                       : 'text-gray-700'
                   }`}
                 >
-                  <div className="flex items-center space-x-2">
-                    <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                  {/* First Line: Article Number + Category */}
+                  <div className="flex items-center space-x-2 mb-1">
+                    <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
                       {getCategoryIcon(revision.category)}
                     </div>
-                    <span className="font-medium text-sm text-blue-600 min-w-0">
+                    <span className="font-medium text-sm text-blue-600">
                       {revision.article_number}
                     </span>
-                    <span className="text-sm text-gray-900 truncate flex-1">
-                      {revision.title}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mt-1 ml-7">
-                    <Badge variant="outline" className="text-xs">
+                    <span className="text-xs text-gray-500">
                       {revision.category}
-                    </Badge>
+                    </span>
                     <Badge 
                       variant={getStatusVariant(revision.status)}
-                      className="text-xs"
+                      className="text-xs ml-auto"
                     >
                       {getStatusText(revision.status)}
                     </Badge>
+                  </div>
+                  
+                  {/* Second Line: Item Title */}
+                  <div className="text-sm text-gray-900 ml-6">
+                    {revision.title}
                   </div>
                 </button>
               ))}
