@@ -45,11 +45,6 @@ export default function RegulationAnalysis() {
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
-  
-  // Filter states
-  const [filterText, setFilterText] = useState('');
-  const [showFilterDialog, setShowFilterDialog] = useState(false);
-  const [priorityFilter, setPriorityFilter] = useState<string[]>(['high', 'medium', 'low']);
   const [analysisSteps, setAnalysisSteps] = useState([
     { id: 1, name: '文書解析開始', status: 'pending', description: 'アップロードされた議事録を解析しています', details: '議事録テキストから決議項目を特定中...' },
     { id: 2, name: '決議事項抽出', status: 'pending', description: 'AI が決議内容を識別・分類しています', details: '個人情報保護法対応、ペット飼育規定等を評価中...' },
@@ -528,117 +523,36 @@ export default function RegulationAnalysis() {
               改訂必要箇所一覧
             </CardTitle>
             <div className="flex space-x-2">
-              <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
-                <DialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="group hover:scale-105 transition-all duration-200 hover:shadow-md"
-                  >
-                    <Filter className="w-4 h-4 mr-2 group-hover:animate-bounce" />
-                    フィルタ
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>改訂項目フィルタ</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium">キーワード検索</Label>
-                      <input
-                        type="text"
-                        placeholder="例: ペット、動物、個人情報"
-                        value={filterText}
-                        onChange={(e) => setFilterText(e.target.value)}
-                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">優先度</Label>
-                      <div className="mt-2 space-y-2">
-                        {['high', 'medium', 'low'].map((priority) => (
-                          <div key={priority} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={priority}
-                              checked={priorityFilter.includes(priority)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setPriorityFilter([...priorityFilter, priority]);
-                                } else {
-                                  setPriorityFilter(priorityFilter.filter(p => p !== priority));
-                                }
-                              }}
-                            />
-                            <Label htmlFor={priority} className="text-sm">
-                              {priority === 'high' ? '高' : priority === 'medium' ? '中' : '低'}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex justify-between space-x-2 pt-4">
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          setFilterText('');
-                          setPriorityFilter(['high', 'medium', 'low']);
-                        }}
-                      >
-                        リセット
-                      </Button>
-                      <Button onClick={() => setShowFilterDialog(false)}>
-                        適用
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="group hover:scale-105 transition-all duration-200 hover:shadow-md"
+              >
+                <Filter className="w-4 h-4 mr-2 group-hover:animate-bounce" />
+                フィルタ
+              </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          {(() => {
-            // Apply filters
-            const filteredIssues = ((analysisResults as any)?.issues || []).filter((issue: any) => {
-              // Text filter
-              const matchesText = !filterText || 
-                issue.title?.toLowerCase().includes(filterText.toLowerCase()) ||
-                issue.reason?.toLowerCase().includes(filterText.toLowerCase()) ||
-                issue.article?.toLowerCase().includes(filterText.toLowerCase());
-              
-              // Priority filter
-              const matchesPriority = priorityFilter.includes(issue.priority);
-              
-              return matchesText && matchesPriority;
-            });
-
-            return filteredIssues.length > 0 ? (
-              <div>
-                {filterText && (
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-700">
-                      「{filterText}」で検索: {filteredIssues.length}件見つかりました
-                    </p>
-                  </div>
-                )}
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>優先度</TableHead>
-                      <TableHead>条文</TableHead>
-                      <TableHead>改訂タイトル</TableHead>
-                      <TableHead>改定理由</TableHead>
-                      <TableHead>ステータス</TableHead>
-                      <TableHead>改定年度</TableHead>
-                      <TableHead>関連決議</TableHead>
-                      <TableHead>法改正</TableHead>
-                      <TableHead>影響度</TableHead>
-                      <TableHead>操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredIssues.map((issue: any, index: number) => (
+          {(analysisResults as any)?.issues?.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>優先度</TableHead>
+                  <TableHead>条文</TableHead>
+                  <TableHead>改訂タイトル</TableHead>
+                  <TableHead>改定理由</TableHead>
+                  <TableHead>ステータス</TableHead>
+                  <TableHead>改定年度</TableHead>
+                  <TableHead>関連決議</TableHead>
+                  <TableHead>法改正</TableHead>
+                  <TableHead>影響度</TableHead>
+                  <TableHead>操作</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {((analysisResults as any)?.issues || []).map((issue: any, index: number) => (
                   <TableRow 
                     key={index} 
                     className="hover:bg-gray-50 transition-colors duration-200 animate-fadeIn"
@@ -713,28 +627,18 @@ export default function RegulationAnalysis() {
                       </Link>
                     </TableCell>
                   </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-8 text-gray-500 animate-fadeIn">
+              <div className="group">
+                <Bot className="mx-auto mb-4 group-hover:animate-bounce transition-transform duration-200" size={48} />
+                <p className="font-medium">分析結果がありません</p>
+                <p className="text-sm animate-pulse">決議事項の抽出と分類を先に実行してください</p>
               </div>
-            ) : filterText ? (
-              <div className="text-center py-8 text-gray-500 animate-fadeIn">
-                <div className="group">
-                  <Filter className="mx-auto mb-4 group-hover:animate-bounce transition-transform duration-200" size={48} />
-                  <p className="font-medium">「{filterText}」に一致する項目がありません</p>
-                  <p className="text-sm animate-pulse">フィルタ条件を変更してお試しください</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500 animate-fadeIn">
-                <div className="group">
-                  <Bot className="mx-auto mb-4 group-hover:animate-bounce transition-transform duration-200" size={48} />
-                  <p className="font-medium">分析結果がありません</p>
-                  <p className="text-sm animate-pulse">決議事項の抽出と分類を先に実行してください</p>
-                </div>
-              </div>
-            );
-          })()}
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -79,15 +79,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Regulation analysis results endpoint (overrides the mock one further down)
   app.get("/api/condominiums/:id/regulation-analysis", async (req, res) => {
     try {
-      // Use raw SQL query to avoid PostgreSQL parameter issues - include pet-related items
+      // Use raw SQL query to avoid PostgreSQL parameter issues
       const query = `
         SELECT *, 
           'completed' as status,
           '2024年' as revision_year
         FROM regulation_analysis_results 
         WHERE condominium_id = '${req.params.id}'
-          AND (title LIKE '%ペット%' OR title LIKE '%動物%' OR article LIKE '%20条%' 
-               OR title LIKE '%所在不明%' OR title LIKE '%建替え%' OR title LIKE '%役員%')
         ORDER BY 
           CASE priority 
             WHEN 'high' THEN 1 
@@ -95,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             WHEN 'low' THEN 3 
           END, 
           created_at DESC
-        LIMIT 4
+        LIMIT 3
       `;
       const result = await db.execute(query);
       
