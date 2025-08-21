@@ -154,70 +154,62 @@ export default function StandardRegulations() {
       .trim();
   };
 
-  // 差分をハイライトする関数
+  // 差分をハイライトする関数（改訂案中心の表示）
   const highlightDifferences = (beforeText: string, afterText: string, isAfter: boolean = false) => {
-    if (!beforeText || !afterText) {
-      return formatRegulationText(isAfter ? afterText : beforeText);
+    // 改訂前テキストが存在しない場合は、改訂案をそのまま表示（新設項目）
+    if (!beforeText && afterText) {
+      if (isAfter) {
+        return `<span style="color: #dc2626; font-weight: 600;">${formatRegulationText(afterText)}</span>`;
+      } else {
+        return '（規定なし）';
+      }
     }
 
-    const before = formatRegulationText(beforeText).split('');
-    const after = formatRegulationText(afterText).split('');
-    
-    // 簡単なLCS（最長共通部分列）アルゴリズムで差分を検出
-    const lcs = (a: string[], b: string[]) => {
-      const m = a.length;
-      const n = b.length;
-      const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
-      
-      for (let i = 1; i <= m; i++) {
-        for (let j = 1; j <= n; j++) {
-          if (a[i - 1] === b[j - 1]) {
-            dp[i][j] = dp[i - 1][j - 1] + 1;
+    // 改訂案が存在しない場合は、現行をそのまま表示
+    if (beforeText && !afterText) {
+      if (isAfter) {
+        return '（削除）';
+      } else {
+        return formatRegulationText(beforeText);
+      }
+    }
+
+    // 両方存在する場合の差分表示
+    if (beforeText && afterText) {
+      if (isAfter) {
+        // 改訂案では変更箇所のみを赤字で強調
+        const before = formatRegulationText(beforeText);
+        const after = formatRegulationText(afterText);
+        
+        // 単語レベルでの差分検出（より精密な比較）
+        const beforeWords = before.split(/(\s+|。|、|「|」|（|）)/);
+        const afterWords = after.split(/(\s+|。|、|「|」|（|）)/);
+        
+        // シンプルな差分検出
+        const result: string[] = [];
+        let i = 0, j = 0;
+        
+        while (j < afterWords.length) {
+          if (i < beforeWords.length && beforeWords[i] === afterWords[j]) {
+            result.push(afterWords[j]);
+            i++; j++;
           } else {
-            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            // 変更または追加された部分を赤字に
+            result.push(`<span style="color: #dc2626; font-weight: 600;">${afterWords[j]}</span>`);
+            j++;
+            // 対応する原文の単語をスキップ
+            if (i < beforeWords.length) i++;
           }
         }
+        
+        return result.join('');
+      } else {
+        // 現行は正確な原文をそのまま表示
+        return formatRegulationText(beforeText);
       }
-      
-      // バックトラック
-      const result: Array<{char: string, type: 'same' | 'add' | 'delete'}> = [];
-      let i = m, j = n;
-      
-      while (i > 0 || j > 0) {
-        if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
-          result.unshift({char: a[i - 1], type: 'same'});
-          i--; j--;
-        } else if (i > 0 && (j === 0 || dp[i - 1][j] >= dp[i][j - 1])) {
-          result.unshift({char: a[i - 1], type: 'delete'});
-          i--;
-        } else {
-          result.unshift({char: b[j - 1], type: 'add'});
-          j--;
-        }
-      }
-      
-      return result;
-    };
-    
-    const diff = lcs(before, after);
-    
-    if (isAfter) {
-      // 改訂案では追加された部分を赤字にする
-      return diff.map((item, index) => {
-        if (item.type === 'add') {
-          return `<span key="${index}" style="color: #dc2626; font-weight: 600;">${item.char}</span>`;
-        }
-        return item.char;
-      }).join('');
-    } else {
-      // 現行では削除された部分を薄い赤字にする
-      return diff.map((item, index) => {
-        if (item.type === 'delete') {
-          return `<span key="${index}" style="color: #dc2626; opacity: 0.6; text-decoration: line-through;">${item.char}</span>`;
-        }
-        return item.char;
-      }).join('');
     }
+
+    return formatRegulationText(isAfter ? afterText : beforeText);
   };
 
   // Update translations when language changes
