@@ -21,6 +21,8 @@ import StandardRegulationDetail from "@/pages/StandardRegulationDetail";
 import MinuteDetail from "@/pages/MinuteDetail";
 import AIAgentHistory from "@/pages/AIAgentHistory";
 import AIAgentExecutionDetail from "@/pages/AIAgentExecutionDetail";
+import RevisionYearList from "@/pages/RevisionYearList";
+import RevisionYearDetail from "@/pages/RevisionYearDetail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -48,6 +50,8 @@ function Router() {
         <Route path="/standard-regulations/:versionId" component={StandardRegulations} />
         <Route path="/standard-regulations/:versionId/:id" component={StandardRegulationDetail} />
         <Route path="/condominiums/:condominiumId/minutes/:minuteId" component={MinuteDetail} />
+        <Route path="/revision-years" component={RevisionYearList} />
+        <Route path="/revision-years/:id" component={RevisionYearDetail} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

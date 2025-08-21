@@ -72,6 +72,47 @@ export const regulations = pgTable("regulations", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
+// 年度別改訂ヘッダテーブル
+export const revision_headers = pgTable("revision_headers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  year: integer("year").notNull(), // 令和年度（例：7 = 令和7年度）
+  title: text("title").notNull(), // 例：「令和7年度改訂対応」
+  description: text("description"), // 改訂の概要説明
+  status: text("status").notNull().default("planning"), // planning, in_progress, completed, cancelled
+  totalItems: integer("total_items").default(0), // 総改訂項目数
+  completedItems: integer("completed_items").default(0), // 完了済み項目数
+  startDate: timestamp("start_date"),
+  targetCompletionDate: timestamp("target_completion_date"),
+  actualCompletionDate: timestamp("actual_completion_date"),
+  revisionType: text("revision_type").notNull().default("law_compliance"), // law_compliance, internal_improvement, emergency
+  priorityLevel: text("priority_level").notNull().default("medium"), // high, medium, low
+  assignedManager: text("assigned_manager"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// 既存の regulation_revisions テーブルに revision_header_id を追加
+export const regulation_revisions = pgTable("regulation_revisions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  revision_header_id: varchar("revision_header_id").references(() => revision_headers.id), // 新規追加
+  category: text("category").notNull(),
+  title: text("title").notNull(),
+  change_description: text("change_description").notNull(),
+  before_text: text("before_text"),
+  after_text: text("after_text"),
+  article_number: text("article_number"),
+  reference_section: text("reference_section"),
+  change_type: text("change_type").notNull(),
+  priority: text("priority").default("medium"),
+  status: text("status").default("pending"), // pending, in_progress, completed, cancelled
+  assignedTo: text("assigned_to"),
+  reviewedBy: text("reviewed_by"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
 export const activities = pgTable("activities", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
@@ -158,6 +199,20 @@ export const insertKnowledgeDocumentSchema = createInsertSchema(knowledgeDocumen
 export const insertKnowledgeChunkSchema = createInsertSchema(knowledgeChunks).omit({
   id: true,
   createdAt: true
+});
+
+// Revision Header スキーマ
+export const insertRevisionHeaderSchema = createInsertSchema(revision_headers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+// Regulation Revision スキーマ（更新）
+export const insertRegulationRevisionSchema = createInsertSchema(regulation_revisions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
 });
 
 // AI Agent Task Management
@@ -252,3 +307,9 @@ export type InsertAiTask = z.infer<typeof insertAiTaskSchema>;
 
 export type RegulationAnalysisResult = typeof regulationAnalysisResults.$inferSelect;
 export type InsertRegulationAnalysisResult = z.infer<typeof insertRegulationAnalysisResultSchema>;
+
+export type RevisionHeader = typeof revision_headers.$inferSelect;
+export type InsertRevisionHeader = z.infer<typeof insertRevisionHeaderSchema>;
+
+export type RegulationRevision = typeof regulation_revisions.$inferSelect;
+export type InsertRegulationRevision = z.infer<typeof insertRegulationRevisionSchema>;

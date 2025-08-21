@@ -61,6 +61,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Revision headers endpoints
+  app.get("/api/revision-headers", async (req, res) => {
+    try {
+      const query = `
+        SELECT 
+          rh.*,
+          COUNT(rr.id) as actual_total_items,
+          COUNT(CASE WHEN rr.status = 'completed' THEN 1 END) as actual_completed_items
+        FROM revision_headers rh
+        LEFT JOIN regulation_revisions rr ON rh.id = rr.revision_header_id
+        GROUP BY rh.id
+        ORDER BY rh.year DESC
+      `;
+      const result = await db.execute(query);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching revision headers:', error);
+      res.status(500).json({ error: "Failed to fetch revision headers" });
+    }
+  });
+
+  app.get("/api/revision-headers/:id", async (req, res) => {
+    try {
+      const headerQuery = `SELECT * FROM revision_headers WHERE id = $1`;
+      const revisionQuery = `
+        SELECT * FROM regulation_revisions 
+        WHERE revision_header_id = $1 
+        ORDER BY article_number, id
+      `;
+      
+      const [headerResult, revisionResult] = await Promise.all([
+        db.execute(headerQuery, [req.params.id]),
+        db.execute(revisionQuery, [req.params.id])
+      ]);
+      
+      if (headerResult.rows.length === 0) {
+        return res.status(404).json({ error: "Revision header not found" });
+      }
+      
+      res.json({
+        header: headerResult.rows[0],
+        revisions: revisionResult.rows
+      });
+    } catch (error) {
+      console.error('Error fetching revision header:', error);
+      res.status(500).json({ error: "Failed to fetch revision header" });
+    }
+  });
+
   // Regulation revisions endpoint
   app.get("/api/regulation-revisions", async (req, res) => {
     try {
