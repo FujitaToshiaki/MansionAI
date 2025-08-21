@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +38,11 @@ export default function OCRProcessing() {
   const [documentTitle, setDocumentTitle] = useState<string>('');
   const [meetingDate, setMeetingDate] = useState<string>('');
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  
+  // Debug: Log enlargedImage state changes
+  useEffect(() => {
+    console.log('enlargedImage state changed:', enlargedImage);
+  }, [enlargedImage]);
   const [highlightLowConfidence, setHighlightLowConfidence] = useState<boolean>(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -548,10 +553,20 @@ export default function OCRProcessing() {
                             src={fileData.preview}
                             alt={`原本 ${result.pageNumber}`}
                             className="w-full h-auto border rounded max-h-[500px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => setEnlargedImage(fileData.preview)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Image clicked, setting enlarged image:', fileData.preview);
+                              setEnlargedImage(fileData.preview);
+                            }}
                           />
                           <button
-                            onClick={() => setEnlargedImage(fileData.preview)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Zoom button clicked, setting enlarged image:', fileData.preview);
+                              setEnlargedImage(fileData.preview);
+                            }}
                             className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <ZoomIn className="w-4 h-4" />
@@ -775,13 +790,19 @@ export default function OCRProcessing() {
             className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
+                console.log('Background clicked, closing modal');
                 setEnlargedImage(null);
               }
             }}
           >
             <div className="relative max-w-[90vw] max-h-[90vh] p-4">
               <button
-                onClick={() => setEnlargedImage(null)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Close button clicked, closing modal');
+                  setEnlargedImage(null);
+                }}
                 className="absolute -top-2 -right-2 bg-white text-black p-2 rounded-full hover:bg-gray-100 shadow-lg z-10"
               >
                 <X className="w-5 h-5" />
