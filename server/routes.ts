@@ -84,10 +84,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                COUNT(rr.id) as revision_count
         FROM revision_groups rg
         LEFT JOIN regulation_revisions rr ON rg.id = rr.group_id
-        WHERE rg.id = $1
+        WHERE rg.id = '${req.params.id}'
         GROUP BY rg.id
       `;
-      const result = await db.execute(query, [req.params.id]);
+      const result = await db.execute(query);
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "Revision group not found" });
       }
@@ -103,10 +103,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const query = `
         SELECT * FROM regulation_revisions 
-        WHERE group_id = $1
+        WHERE group_id = '${req.params.id}'
         ORDER BY creation_date DESC, id ASC
       `;
-      const result = await db.execute(query, [req.params.id]);
+      const result = await db.execute(query);
       res.json(result.rows);
     } catch (error) {
       console.error('Error fetching revisions for group:', error);
@@ -121,9 +121,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         SELECT rr.*, rg.title as group_title, rg.version as group_version
         FROM regulation_revisions rr
         LEFT JOIN revision_groups rg ON rr.group_id = rg.id
-        WHERE rr.id = $1
+        WHERE rr.id = ${parseInt(req.params.id)}
       `;
-      const result = await db.execute(query, [parseInt(req.params.id)]);
+      const result = await db.execute(query);
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "Regulation revision not found" });
       }
