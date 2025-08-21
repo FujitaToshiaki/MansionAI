@@ -784,7 +784,7 @@ export default function StandardRegulations() {
                           </div>
                           <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                             <div 
-                              className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
+                              className="text-sm leading-relaxed whitespace-pre-wrap font-sans"
                               dangerouslySetInnerHTML={{
                                 __html: highlightDifferences(revision.before_text || '', revision.after_text || '（新設）', true)
                               }}
@@ -798,7 +798,7 @@ export default function StandardRegulations() {
                           </div>
                           <div className="border border-gray-200 rounded-lg p-3">
                             <div 
-                              className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
+                              className="text-sm leading-relaxed whitespace-pre-wrap font-sans"
                               dangerouslySetInnerHTML={{
                                 __html: highlightDifferences(revision.before_text || '（規定なし）', revision.after_text || '', false)
                               }}
@@ -811,7 +811,7 @@ export default function StandardRegulations() {
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <h6 className="text-sm font-medium text-gray-900 mb-2">改訂理由</h6>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          <pre className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+                          <pre className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
                             {formatRegulationText(getTranslatedText(revision.change_description))}
                           </pre>
                         </div>
@@ -900,7 +900,7 @@ export default function StandardRegulations() {
                           </div>
                           <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                             <div 
-                              className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
+                              className="text-sm leading-relaxed whitespace-pre-wrap font-sans"
                               dangerouslySetInnerHTML={{
                                 __html: highlightDifferences(revision.before_text || '', revision.after_text || '（新設）', true)
                               }}
@@ -914,7 +914,7 @@ export default function StandardRegulations() {
                           </div>
                           <div className="border border-gray-200 rounded-lg p-3">
                             <div 
-                              className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
+                              className="text-sm leading-relaxed whitespace-pre-wrap font-sans"
                               dangerouslySetInnerHTML={{
                                 __html: highlightDifferences(revision.before_text || '（規定なし）', revision.after_text || '', false)
                               }}
@@ -926,7 +926,7 @@ export default function StandardRegulations() {
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <h6 className="text-sm font-medium text-gray-900 mb-2">改訂理由</h6>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          <pre className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+                          <pre className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
                             {formatRegulationText(getTranslatedText(revision.change_description))}
                           </pre>
                         </div>
