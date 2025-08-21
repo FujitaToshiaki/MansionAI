@@ -14,10 +14,25 @@ import { extractTextFromMultipleImages } from "./openai";
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
   
-  // Configure multer for file uploads
+  // Configure multer for file uploads (disk storage)
   const upload = multer({
     dest: 'uploads/',
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('画像ファイルのみアップロード可能です'), false);
+      }
+    }
+  });
+
+  // Configure multer for in-memory uploads (for OCR processing)
+  const uploadMemory = multer({ 
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
     fileFilter: (req, file, cb) => {
       if (file.mimetype.startsWith('image/')) {
         cb(null, true);
@@ -79,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Real-time OCR processing endpoint
-  app.post("/api/documents/process-ocr", upload.array('files'), async (req, res) => {
+  app.post("/api/documents/process-ocr", uploadMemory.array('files'), async (req, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       
