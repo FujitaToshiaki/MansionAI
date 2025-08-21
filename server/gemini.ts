@@ -23,9 +23,11 @@ export async function extractTextFromImage(imageBuffer: Buffer, mimeType: string
 要求事項:
 1. 画像中のすべてのテキストを正確に抽出
 2. 手書き文字も含めて読み取り
-3. レイアウトや改行を保持
-4. 日付、時刻、名前、議題などを正確に識別
-5. 読み取り困難な箇所は[?]で表記
+3. 元の文書の空白、改行、インデントを完全に保持
+4. 表形式やレイアウトの構造を維持
+5. 日付、時刻、名前、議題などを正確に識別
+6. 読み取り困難な箇所は[?]で表記
+7. 空白文字（スペース、タブ）は元のまま保持
 
 JSONフォーマットで以下を返してください:
 {
@@ -47,11 +49,11 @@ JSONフォーマットで以下を返してください:
           mimeType: mimeType,
         },
       },
-      "この議事録画像からテキストを正確に抽出してください。手書き部分も含めて全て読み取り、JSONフォーマットで返してください。"
+      "この議事録画像からテキストを正確に抽出してください。元の文書の空白、改行、インデント、表形式を完全に保持し、手書き部分も含めて全て読み取り、JSONフォーマットで返してください。"
     ];
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",

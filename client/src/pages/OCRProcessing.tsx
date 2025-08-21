@@ -497,7 +497,8 @@ export default function OCRProcessing() {
                           newResults[index].text = e.target.value;
                           setOcrResults(newResults);
                         }}
-                        className="flex-1 min-h-[500px] font-mono text-sm resize-none"
+                        className="flex-1 min-h-[500px] font-mono text-sm resize-none whitespace-pre-wrap"
+                        style={{ whiteSpace: 'pre-wrap' }}
                       />
                       
                       {result.lowConfidenceRegions.length > 0 && (
