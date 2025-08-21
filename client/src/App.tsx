@@ -35,8 +35,8 @@ function Router() {
         <Route path="/condominiums" component={CondominiumList} />
         <Route path="/condominiums/:id" component={CondominiumDetail} />
         <Route path="/condominiums/:id/upload" component={DocumentUpload} />
+        <Route path="/data-import" component={OCRProcessing} />
         <Route path="/condominiums/:id/ocr" component={OCRProcessing} />
-        <Route path="/condominiums/ocr-processing" component={OCRProcessing} />
         <Route path="/condominiums/:id/decisions" component={DecisionExtraction} />
         <Route path="/condominiums/:id/regulation-analysis" component={RegulationAnalysis} />
         <Route path="/condominiums/:id/regulation-analysis/:revisionId" component={RegulationRevisionDetail} />
