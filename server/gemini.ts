@@ -53,9 +53,22 @@ JSONフォーマットで以下を返してください:
     ];
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
+      contents: [{
+        role: "user",
+        parts: [
+          {
+            inlineData: {
+              data: base64Image,
+              mimeType: mimeType,
+            },
+          },
+          {
+            text: systemPrompt + "\n\n" + "この議事録画像からテキストを正確に抽出してください。元の文書の空白、改行、インデント、表形式を完全に保持し、手書き部分も含めて全て読み取り、JSONフォーマットで返してください。"
+          }
+        ]
+      }],
       config: {
-        systemInstruction: systemPrompt,
         responseMimeType: "application/json",
         responseSchema: {
           type: "object",
@@ -86,22 +99,41 @@ JSONフォーマットで以下を返してください:
           },
           required: ["text", "accuracy", "lowConfidenceRegions"]
         }
-      },
-      contents: contents,
+      }
     });
 
     const rawJson = response.text;
     console.log(`Gemini OCR Raw JSON: ${rawJson}`);
 
-    if (rawJson) {
+    if (!rawJson) {
+      console.error('Empty response from Gemini');
+      throw new Error("Empty response from Gemini model");
+    }
+
+    try {
       const result: OCRResult = JSON.parse(rawJson);
       return {
         text: result.text || '',
         accuracy: Math.max(80, Math.min(100, result.accuracy || 90)),
         lowConfidenceRegions: result.lowConfidenceRegions || []
       };
-    } else {
-      throw new Error("Empty response from Gemini model");
+    } catch (parseError) {
+      console.error('Failed to parse Gemini JSON response:', parseError);
+      console.error('Raw response was:', rawJson);
+      
+      // Fallback: try to extract text manually if JSON parsing fails
+      if (rawJson.includes('"text"')) {
+        const textMatch = rawJson.match(/"text":\s*"([^"]*(?:\\.[^"]*)*)"/);
+        if (textMatch) {
+          return {
+            text: textMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
+            accuracy: 85,
+            lowConfidenceRegions: []
+          };
+        }
+      }
+      
+      throw new Error("Failed to parse Gemini response");
     }
 
   } catch (error) {
