@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, FileText, CheckCircle, Clock, AlertTriangle, Calendar, User, BarChart3, BookOpen, ExternalLink, Package, Monitor, Users, Shield, Car, AlertCircle, Edit3, Save, X } from "lucide-react";
+import { ArrowLeft, FileText, CheckCircle, Clock, AlertTriangle, Calendar, User, BarChart3, BookOpen, ExternalLink, Package, Monitor, Users, Shield, Car, AlertCircle, Edit3, Save, X, Download } from "lucide-react";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface RegulationRevision {
   id: number;
@@ -44,7 +45,85 @@ export default function RevisionYearDetail() {
   const [activeSection, setActiveSection] = useState<string>("");
   const [editingRevisions, setEditingRevisions] = useState<{[key: number]: boolean}>({});
   const [editedTexts, setEditedTexts] = useState<{[key: number]: string}>({});
+  const [showProposalModal, setShowProposalModal] = useState(false);
   const queryClient = useQueryClient();
+
+  // Function to generate PDF download
+  const handlePDFDownload = () => {
+    // Create a new window with the proposal content for printing/PDF
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>第1号議案 管理規約変更の件【特別決議】</title>
+          <style>
+            body { font-family: 'Noto Sans JP', sans-serif; margin: 20px; line-height: 1.6; }
+            .header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; }
+            .content { margin: 20px 0; }
+            .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .table th, .table td { border: 1px solid #000; padding: 8px; text-align: left; }
+            .table th { background-color: #f5f5f5; }
+            @media print { body { margin: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h2>第1号議案 管理規約変更の件【特別決議】</h2>
+          </div>
+          
+          <div class="content">
+            <p>現在、1階店舗兼事務所(A)の売却について、管理組合と後継会社にて協議を行っております。協議を行う中で、管理規約上「しきり相互銀行」の名称が残っており、現況との乖離があることを改編する必要があると判断しました。なお、これまでの経緯で、「東日本銀行」へ読み替える旨は決議されておりますが、今後も区分所有者の変更の可能性があることを鑑みて、名称自体を削除することとしております。</p>
+            
+            <p>本来であれば、全文見直しを行い、現況に即した内容に改編する必要があるものの、1階店舗兼事務所(A)については、売却を行う必要があるため、先んじて変更することとしました。</p>
+            
+            <p>上記を受けて、以下の規約部分を変更することを提案申し上げます。</p>
+            
+            <p>主旨ご理解の上、ご承認の程宜しくお願いいたします。</p>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 50%;">変更前</th>
+                <th style="width: 50%;">変更後</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>(駐車場の専用使用権と専用使用)</strong><br>
+                  <strong>第15条</strong> 区分所有者は別添の図に示す駐車場施設(台数14台)について、1階店舗兼事務所(A)区分所有者である「しきり相互銀行」が4台分(指定位置No.1～No.4)について確定的に専用使用権を有し、又、残余については他の特定の区分所有者が、管理組合と駐車場使用契約締結のうえ、夫々、専用使用することを承認する。<br>
+                  (以下略)
+                </td>
+                <td>
+                  <strong>(駐車場の専用使用権と専用使用)</strong><br>
+                  <strong>第15条</strong> 区分所有者は別添の図に示す駐車場施設(台数14台)について、1階店舗兼事務所(A)区分所有者が4台分(指定位置No.1～No.4)について確定的に専用使用権を有し、又、残余については他の特定の区分所有者が、管理組合と駐車場使用契約締結のうえ、夫々、専用使用することを承認する。<br>
+                  (以下略)
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>(自転車置場の専用使用権と専用使用)</strong><br>
+                  <strong>第16条</strong> 区分所有者は別添の図に示す自転車置場(台数146台)について1階店舗兼事務所(A)の区分所有者である「しきり相互銀行」が18台分(本マンション建物の北側非常階段寄りの18台収容部分)<br>
+                  について、確定的に専用使用権を有し、残余
+                </td>
+                <td>
+                  <strong>(自転車置場の専用使用権と専用使用)</strong><br>
+                  <strong>第16条</strong> 区分所有者は別添の図に示す自転車置場(台数146台)について1階店舗兼事務所(A)の区分所有者が18台分(本マンション建物の北側非常階段寄りの18台収容部分)<br>
+                  について、確定的に専用使用権を有し、残余
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
 
   const { data, isLoading, error } = useQuery<RevisionYearDetailData>({
     queryKey: ['/api/revision-headers', id],
@@ -337,6 +416,15 @@ export default function RevisionYearDetail() {
                   <FileText className="w-4 h-4 mr-2" />
                   日本語
                 </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowProposalModal(true)}
+                  className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  議案書作成
+                </Button>
                 {getStatusBadge(header.status)}
               </div>
             </div>
@@ -556,6 +644,120 @@ export default function RevisionYearDetail() {
           </div>
         </div>
       </div>
+
+      {/* Proposal Creation Modal */}
+      <Dialog open={showProposalModal} onOpenChange={setShowProposalModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader className="flex flex-row items-center justify-between">
+            <DialogTitle className="text-xl font-bold">第1号議案 管理規約変更の件【特別決議】</DialogTitle>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handlePDFDownload}
+                className="bg-red-600 hover:bg-red-700 text-white"
+                size="sm"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                PDF出力
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowProposalModal(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          
+          <div className="overflow-y-auto max-h-[calc(90vh-120px)] pr-4">
+            <div className="space-y-6 text-sm leading-relaxed">
+              {/* Header Section */}
+              <div className="text-center border-2 border-black p-4 bg-gray-50">
+                <h2 className="text-lg font-bold">第1号議案 管理規約変更の件【特別決議】</h2>
+              </div>
+
+              {/* Content */}
+              <div className="space-y-4">
+                <p>
+                  現在、1階店舗兼事務所(A)の売却について、管理組合と後継会社にて協議を行っております。協議を行う中で、管理規約上「しきり相互銀行」の名称が残っており、現況との乖離があることを改編する必要があると判断しました。なお、これまでの経緯で、「東日本銀行」へ読み替える旨は決議されておりますが、今後も区分所有者の変更の可能性があることを鑑みて、名称自体を削除することとしております。
+                </p>
+                
+                <p>
+                  本来であれば、全文見直しを行い、現況に即した内容に改編する必要があるものの、1階店舗兼事務所(A)については、売却を行う必要があるため、先んじて変更することとしました。
+                </p>
+                
+                <p>
+                  上記を受けて、以下の規約部分を変更することを提案申し上げます。
+                </p>
+                
+                <p>
+                  主旨ご理解の上、ご承認の程宜しくお願いいたします。
+                </p>
+              </div>
+
+              {/* Comparison Table */}
+              <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 p-3 text-left font-bold w-1/2">変更前</th>
+                      <th className="border border-gray-300 p-3 text-left font-bold w-1/2">変更後</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-gray-300 p-3 align-top">
+                        <div className="space-y-2">
+                          <div>
+                            <strong>(駐車場の専用使用権と専用使用)</strong>
+                          </div>
+                          <div>
+                            <strong>第15条</strong> 区分所有者は別添の図に示す駐車場施設(台数14台)について、1階店舗兼事務所(A)区分所有者である「<span className="bg-red-200">しきり相互銀行</span>」が4台分(指定位置No.1～No.4)について確定的に専用使用権を有し、又、残余については他の特定の区分所有者が、管理組合と駐車場使用契約締結のうえ、夫々、専用使用することを承認する。
+                          </div>
+                          <div className="text-gray-600">(以下略)</div>
+                        </div>
+                      </td>
+                      <td className="border border-gray-300 p-3 align-top">
+                        <div className="space-y-2">
+                          <div>
+                            <strong>(駐車場の専用使用権と専用使用)</strong>
+                          </div>
+                          <div>
+                            <strong>第15条</strong> 区分所有者は別添の図に示す駐車場施設(台数14台)について、1階店舗兼事務所(A)区分所有者が4台分(指定位置No.1～No.4)について確定的に専用使用権を有し、又、残余については他の特定の区分所有者が、管理組合と駐車場使用契約締結のうえ、夫々、専用使用することを承認する。
+                          </div>
+                          <div className="text-gray-600">(以下略)</div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 p-3 align-top">
+                        <div className="space-y-2">
+                          <div>
+                            <strong>(自転車置場の専用使用権と専用使用)</strong>
+                          </div>
+                          <div>
+                            <strong>第16条</strong> 区分所有者は別添の図に示す自転車置場(台数146台)について1階店舗兼事務所(A)の区分所有者である「<span className="bg-red-200">しきり相互銀行</span>」が18台分(本マンション建物の北側非常階段寄りの18台収容部分)について、確定的に専用使用権を有し、残余
+                          </div>
+                        </div>
+                      </td>
+                      <td className="border border-gray-300 p-3 align-top">
+                        <div className="space-y-2">
+                          <div>
+                            <strong>(自転車置場の専用使用権と専用使用)</strong>
+                          </div>
+                          <div>
+                            <strong>第16条</strong> 区分所有者は別添の図に示す自転車置場(台数146台)について1階店舗兼事務所(A)の区分所有者が18台分(本マンション建物の北側非常階段寄りの18台収容部分)について、確定的に専用使用権を有し、残余
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

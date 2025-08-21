@@ -710,23 +710,12 @@ export default function RegulationAnalysis() {
                     </TableCell>
                     <TableCell>田中太郎</TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
-                          <Button variant="outline" size="sm">
-                            <FileText className="w-3 h-3 mr-1" />
-                            詳細
-                          </Button>
-                        </Link>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setShowProposalModal(true)}
-                          className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
-                        >
+                      <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
+                        <Button variant="outline" size="sm">
                           <FileText className="w-3 h-3 mr-1" />
-                          議案書作成
+                          詳細
                         </Button>
-                      </div>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 )}
