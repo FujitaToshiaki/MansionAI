@@ -68,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         SELECT 
           rh.*,
           COUNT(rr.id) as actual_total_items,
-          COUNT(CASE WHEN rr.status = 'completed' THEN 1 END) as actual_completed_items
+          COUNT(rr.id) as actual_completed_items
         FROM revision_headers rh
         LEFT JOIN regulation_revisions rr ON rh.id = rr.revision_header_id
         GROUP BY rh.id

@@ -148,25 +148,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Revision Management Section */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            年度別改訂管理
-          </CardTitle>
-          <p className="text-gray-600 text-sm">法改正に対応した年度単位での管理規約改訂状況</p>
-        </CardHeader>
-        <CardContent>
-          <Link to="/revision-years">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-              <FileText className="h-4 w-4 mr-2" />
-              年度別改訂一覧を表示
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
-
       {/* Condominium List */}
       <Card className="bg-white">
         <CardHeader className="flex flex-row items-center justify-between">
