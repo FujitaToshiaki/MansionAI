@@ -167,6 +167,8 @@ export default function StandardRegulations() {
 
   const getVersionName = (versionId: string) => {
     switch (versionId) {
+      case 'r7':
+        return '令和7年度改訂';
       case 'r6':
         return '令和6年度改訂';
       case 'r3':
@@ -189,11 +191,32 @@ export default function StandardRegulations() {
         return <Users className="h-5 w-5 text-purple-600" />;
       case '役員欠格条項':
       case '監事機能強化':
+      case '役員資格要件':
+      case '本人確認':
         return <Shield className="h-5 w-5 text-red-600" />;
       case '電磁的方法活用':
       case '管理情報提供':
       case '組合員名簿管理':
         return <Monitor className="h-5 w-5 text-orange-600" />;
+      case '修繕積立金管理':
+      case '損害賠償請求権代理':
+        return <FileText className="h-5 w-5 text-emerald-600" />;
+      case '防災業務':
+      case '防火管理者':
+        return <AlertCircle className="h-5 w-5 text-amber-600" />;
+      case '喫煙ルール':
+        return <Shield className="h-5 w-5 text-indigo-600" />;
+      case '総会決議要件':
+      case '総会招集通知':
+        return <Users className="h-5 w-5 text-teal-600" />;
+      case '国内管理人':
+      case '所在不明区分所有者':
+      case '専有部分管理制度':
+        return <Users className="h-5 w-5 text-slate-600" />;
+      case '立入り・保存権限':
+      case '専有部分管理':
+      case '区分所有者責務':
+        return <FileText className="h-5 w-5 text-cyan-600" />;
       default:
         return <FileText className="h-5 w-5 text-gray-600" />;
     }
@@ -210,11 +233,32 @@ export default function StandardRegulations() {
         return 'bg-purple-100 text-purple-800';
       case '役員欠格条項':
       case '監事機能強化':
+      case '役員資格要件':
+      case '本人確認':
         return 'bg-red-100 text-red-800';
       case '電磁的方法活用':
       case '管理情報提供':
       case '組合員名簿管理':
         return 'bg-orange-100 text-orange-800';
+      case '修繕積立金管理':
+      case '損害賠償請求権代理':
+        return 'bg-emerald-100 text-emerald-800';
+      case '防災業務':
+      case '防火管理者':
+        return 'bg-amber-100 text-amber-800';
+      case '喫煙ルール':
+        return 'bg-indigo-100 text-indigo-800';
+      case '総会決議要件':
+      case '総会招集通知':
+        return 'bg-teal-100 text-teal-800';
+      case '国内管理人':
+      case '所在不明区分所有者':
+      case '専有部分管理制度':
+        return 'bg-slate-100 text-slate-800';
+      case '立入り・保存権限':
+      case '専有部分管理':
+      case '区分所有者責務':
+        return 'bg-cyan-100 text-cyan-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }

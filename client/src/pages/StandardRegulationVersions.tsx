@@ -24,6 +24,15 @@ interface RegulationVersion {
 // 改正版の一覧データ
 const regulationVersions: RegulationVersion[] = [
   {
+    id: "r7",
+    name: "令和7年度改訂",
+    year: "2025",
+    description: "総会決議要件見直し、役員選任範囲拡大、防災業務明確化、国内管理人制度導入、マンション財産管理制度活用等",
+    revisionCount: 16,
+    status: 'active',
+    lastUpdated: "2025-06-01"
+  },
+  {
     id: "r6",
     name: "令和6年度改訂",
     year: "2024",
