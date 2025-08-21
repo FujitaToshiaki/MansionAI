@@ -44,6 +44,7 @@ export default function OCRProcessing() {
 
   const { data: condominiums } = useQuery({
     queryKey: ['/api/condominiums'],
+    enabled: true, // Always fetch condominiums list for selection
   });
 
   const processOCRMutation = useMutation({
@@ -492,7 +493,7 @@ export default function OCRProcessing() {
                       <SelectValue placeholder="マンションを選択してください" />
                     </SelectTrigger>
                     <SelectContent>
-                      {condominiums?.map((condo: any) => (
+                      {(condominiums as any[])?.map((condo: any) => (
                         <SelectItem key={condo.id} value={condo.id}>
                           {condo.name}
                         </SelectItem>
