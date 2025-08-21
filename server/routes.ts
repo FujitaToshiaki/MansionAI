@@ -84,10 +84,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/revision-headers/:id", async (req, res) => {
     try {
-      const headerQuery = `SELECT * FROM revision_headers WHERE id = $1`;
+      const headerQuery = `SELECT * FROM revision_headers WHERE id = ?`;
       const revisionQuery = `
         SELECT * FROM regulation_revisions 
-        WHERE revision_header_id = $1 
+        WHERE revision_header_id = ? 
         ORDER BY article_number, id
       `;
       

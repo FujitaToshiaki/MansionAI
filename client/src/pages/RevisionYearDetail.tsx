@@ -3,356 +3,366 @@ import { useParams, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  Calendar,
-  CheckCircle, 
-  Clock, 
-  AlertTriangle, 
-  FileText,
-  ArrowLeft,
-  Edit,
-  Eye,
-  Target,
-  User,
-  Plus
-} from "lucide-react";
-
-interface RevisionHeader {
-  id: string;
-  year: number;
-  title: string;
-  description: string;
-  status: 'planning' | 'in_progress' | 'completed' | 'cancelled';
-  total_items: number;
-  completed_items: number;
-  start_date: string;
-  target_completion_date: string;
-  actual_completion_date: string;
-  revision_type: 'law_compliance' | 'internal_improvement' | 'emergency';
-  priority_level: 'high' | 'medium' | 'low';
-  assigned_manager: string;
-  notes: string;
-  created_at: string;
-  updated_at: string;
-}
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowLeft, FileText, CheckCircle, Clock, AlertTriangle, Calendar, User, BarChart3, BookOpen, ExternalLink } from "lucide-react";
+import { useState } from "react";
 
 interface RegulationRevision {
   id: number;
-  category: string;
   title: string;
-  change_description: string;
-  before_text: string;
-  after_text: string;
+  category: string;
   article_number: string;
-  reference_section: string;
-  change_type: 'addition' | 'modification' | 'deletion';
-  creation_date: string;
-  group_id: string;
-  revision_header_id: string;
+  current_text: string;
+  proposed_text?: string;
+  reason?: string;
+  impact?: string;
+  status?: string;
+  revision_header_id?: string;
+  creation_date?: string;
 }
 
-const getChangeTypeInfo = (type: RegulationRevision['change_type']) => {
-  switch (type) {
-    case 'addition':
-      return { label: '新設', color: 'bg-green-100 text-green-800' };
-    case 'modification':
-      return { label: '改訂', color: 'bg-blue-100 text-blue-800' };
-    case 'deletion':
-      return { label: '削除', color: 'bg-red-100 text-red-800' };
-    default:
-      return { label: '不明', color: 'bg-gray-100 text-gray-800' };
-  }
-};
+interface RevisionHeader {
+  id: string;
+  year: string;
+  title: string;
+  status: string;
+  total_items: number;
+  completed_items: number;
+  assignee: string;
+  created_at: string;
+}
 
-const getStatusInfo = (status: RevisionHeader['status']) => {
-  switch (status) {
-    case 'completed':
-      return { 
-        label: '完了', 
-        color: 'bg-green-100 text-green-800', 
-        icon: CheckCircle 
-      };
-    case 'in_progress':
-      return { 
-        label: '進行中', 
-        color: 'bg-blue-100 text-blue-800', 
-        icon: Clock 
-      };
-    case 'planning':
-      return { 
-        label: '計画中', 
-        color: 'bg-yellow-100 text-yellow-800', 
-        icon: Target 
-      };
-    case 'cancelled':
-      return { 
-        label: '中止', 
-        color: 'bg-gray-100 text-gray-800', 
-        icon: AlertTriangle 
-      };
-    default:
-      return { 
-        label: '不明', 
-        color: 'bg-gray-100 text-gray-800', 
-        icon: AlertTriangle 
-      };
-  }
-};
+interface RevisionYearDetailData {
+  header: RevisionHeader;
+  revisions: RegulationRevision[];
+}
 
 export default function RevisionYearDetail() {
-  const params = useParams<{ id: string }>();
+  const { id } = useParams();
+  const [activeSection, setActiveSection] = useState<string>("");
 
-  const { data, isLoading } = useQuery<{
-    header: RevisionHeader;
-    revisions: RegulationRevision[];
-  }>({
-    queryKey: ['/api/revision-headers', params.id],
-    queryFn: async () => {
-      const response = await fetch(`/api/revision-headers/${params.id}`);
-      if (!response.ok) throw new Error('改訂詳細の取得に失敗しました');
-      return response.json();
-    }
+  const { data, isLoading, error } = useQuery<RevisionYearDetailData>({
+    queryKey: ['/api/revision-headers', id],
+    enabled: !!id
   });
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const calculateProgress = (revisions: RegulationRevision[]) => {
-    if (!revisions || revisions.length === 0) return 0;
-    // For demonstration, let's count first 6 items as completed
-    const completedCount = Math.min(6, revisions.length);
-    return Math.round((completedCount / revisions.length) * 100);
-  };
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
-          <div className="h-6 bg-gray-200 rounded w-96"></div>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+            <div className="w-32 h-6 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!data) {
+  if (error || !data) {
     return (
-      <div className="text-center py-12">
-        <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          改訂年度が見つかりません
-        </h3>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-12">
+            <AlertTriangle className="mx-auto mb-4 text-red-500" size={48} />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">データの読み込みに失敗しました</h2>
+            <p className="text-gray-600 mb-4">改訂年度詳細を取得できませんでした。</p>
+            <Link to="/revision-years">
+              <Button variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                一覧に戻る
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   const { header, revisions } = data;
-  const statusInfo = getStatusInfo(header.status);
-  const StatusIcon = statusInfo.icon;
-  const progress = calculateProgress(revisions);
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />完了</Badge>;
+      case 'in_progress':
+        return <Badge className="bg-blue-100 text-blue-800"><Clock className="w-3 h-3 mr-1" />進行中</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800"><AlertTriangle className="w-3 h-3 mr-1" />保留</Badge>;
+      default:
+        return <Badge variant="outline">未定</Badge>;
+    }
+  };
+
+  const progressPercentage = header.total_items > 0 ? (header.completed_items / header.total_items) * 100 : 0;
+
+  // Group revisions by category for table of contents
+  const groupedRevisions = revisions.reduce((acc, revision) => {
+    const category = revision.category || 'その他';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(revision);
+    return acc;
+  }, {} as Record<string, RegulationRevision[]>);
+
+  const scrollToSection = (sectionId: string) => {
+    setActiveSection(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/revision-years">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              年度一覧へ戻る
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              令和{header.year}年度改訂 - {header.title}
-            </h1>
-            <p className="text-gray-600 mt-2">{header.description}</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="flex">
+        {/* Table of Contents Sidebar */}
+        <div className="w-80 bg-white border-r border-gray-200 fixed h-full">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center space-x-2 mb-4">
+              <BookOpen className="w-5 h-5 text-blue-600" />
+              <h3 className="font-semibold text-gray-900">条番号別改正項目目次</h3>
+            </div>
+            <p className="text-sm text-gray-600">各条文の改正内容を条番順にまとめました</p>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Badge className={statusInfo.color}>
-            <StatusIcon className="h-3 w-3 mr-1" />
-            {statusInfo.label}
-          </Badge>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-2" />
-            新規項目追加
-          </Button>
-        </div>
-      </div>
-
-      {/* Summary Card */}
-      <Card className="border-l-4 border-l-blue-500">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-blue-600" />
-            改訂概要
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Progress Section */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">進捗状況</span>
-              <span className="text-sm font-semibold text-gray-900">
-                6 / {revisions.length} 項目完了
-              </span>
-            </div>
-            <Progress value={progress} className="h-2 mb-2" />
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>完了率: {progress}%</span>
-              <span>残り: {revisions.length - 6} 項目</span>
-            </div>
-          </div>
-
-          {/* Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <div>
-                <span className="text-gray-600">開始日: </span>
-                <span className="font-medium">{formatDate(header.start_date)}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-gray-500" />
-              <div>
-                <span className="text-gray-600">目標完了: </span>
-                <span className="font-medium">{formatDate(header.target_completion_date)}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-gray-500" />
-              <div>
-                <span className="text-gray-600">担当者: </span>
-                <span className="font-medium">{header.assigned_manager || '未割当'}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-gray-500" />
-              <div>
-                <span className="text-gray-600">総項目数: </span>
-                <span className="font-medium">{revisions.length} 項目</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Notes Section */}
-          {header.notes && (
-            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-              <h6 className="text-sm font-medium text-blue-900 mb-1">備考</h6>
-              <p className="text-sm text-blue-800">{header.notes}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Revisions Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>改訂項目一覧</CardTitle>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">全 {revisions.length} 項目</span>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-16">No.</TableHead>
-                <TableHead className="w-24">カテゴリ</TableHead>
-                <TableHead>タイトル</TableHead>
-                <TableHead className="w-20">条文</TableHead>
-                <TableHead className="w-24">変更種別</TableHead>
-                <TableHead className="w-20">状態</TableHead>
-                <TableHead className="w-32">操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {revisions.map((revision, index) => {
-                const changeTypeInfo = getChangeTypeInfo(revision.change_type);
-                const isCompleted = index < 6; // First 6 items are completed for demo
-                
-                return (
-                  <TableRow key={revision.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {revision.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium text-gray-900">{revision.title}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-md">
-                          {revision.change_description}
+          
+          <ScrollArea className="h-[calc(100vh-120px)]">
+            <div className="p-4 space-y-3">
+              {Object.entries(groupedRevisions).map(([category, categoryRevisions]) => (
+                <div key={category} className="space-y-2">
+                  <h4 className="font-medium text-gray-900 text-sm border-b border-gray-200 pb-1">
+                    {category}
+                  </h4>
+                  {categoryRevisions.map((revision) => (
+                    <button
+                      key={revision.id}
+                      onClick={() => scrollToSection(`revision-${revision.id}`)}
+                      className={`w-full text-left p-3 rounded-lg border transition-all duration-200 hover:shadow-md ${
+                        activeSection === `revision-${revision.id}` 
+                          ? 'bg-blue-50 border-blue-200' 
+                          : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="outline" className="text-xs">
+                          {revision.article_number}
+                        </Badge>
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs text-gray-500">1項目</span>
+                          <ExternalLink className="w-3 h-3 text-gray-400" />
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-mono text-sm">第{revision.article_number}条</span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={changeTypeInfo.color}>
-                        {changeTypeInfo.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {isCompleted ? (
-                        <Badge className="bg-green-100 text-green-800">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          完了
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-yellow-100 text-yellow-800">
-                          <Clock className="h-3 w-3 mr-1" />
-                          進行中
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-
-          {revisions.length === 0 && (
-            <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                改訂項目が登録されていません
-              </h3>
-              <p className="text-gray-600 mb-4">
-                新規改訂項目を追加して管理を開始してください
-              </p>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                新規項目追加
-              </Button>
+                      <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                        {revision.title}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </ScrollArea>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 ml-80">
+          <div className="p-6">
+            {/* Header Section */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <Link to="/revision-years">
+                  <Button variant="outline" size="sm">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    一覧に戻る
+                  </Button>
+                </Link>
+                <div>
+                  <div className="flex items-center space-x-3 mb-2">
+                    <h1 className="text-2xl font-bold text-gray-900">{header.title}</h1>
+                    <Badge className="bg-red-100 text-red-800">緊急度：高</Badge>
+                  </div>
+                  <p className="text-gray-600">改訂詳細 - {header.year}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Button variant="outline" size="sm">
+                  <FileText className="w-4 h-4 mr-2" />
+                  日本語
+                </Button>
+                {getStatusBadge(header.status)}
+              </div>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">総項目数</p>
+                      <p className="text-xl font-semibold">{header.total_items}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">完了項目</p>
+                      <p className="text-xl font-semibold">{header.completed_items}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2">
+                    <BarChart3 className="w-5 h-5 text-purple-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">進捗率</p>
+                      <p className="text-xl font-semibold">{Math.round(progressPercentage)}%</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2">
+                    <User className="w-5 h-5 text-orange-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">担当者</p>
+                      <p className="text-xl font-semibold">{header.assignee}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Revision Cards */}
+            <div className="space-y-6">
+              {revisions.length > 0 ? (
+                revisions.map((revision) => (
+                  <Card 
+                    key={revision.id} 
+                    id={`revision-${revision.id}`}
+                    className="hover:shadow-lg transition-all duration-200"
+                  >
+                    <CardHeader className="bg-gradient-to-r from-gray-50 to-white">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">{revision.title}</h3>
+                            <Badge className="bg-red-100 text-red-800">緊急度：高</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">改訂詳細 - 第{revision.article_number}</p>
+                          
+                          <div className="flex items-center space-x-4">
+                            <Badge variant="outline" className="bg-white">
+                              第{revision.article_number}
+                            </Badge>
+                            <Badge variant="secondary">{revision.category}</Badge>
+                            {revision.status && getStatusBadge(revision.status)}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent className="p-6">
+                      {/* Current vs Proposed Regulations */}
+                      <div className="space-y-6">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-3">規約の変更内容</h4>
+                          
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Current Text */}
+                            <div>
+                              <div className="flex items-center space-x-2 mb-3">
+                                <Badge variant="outline">現行</Badge>
+                                <span className="text-sm font-medium">現在の規約条文</span>
+                              </div>
+                              <div className="bg-gray-50 border-l-4 border-gray-400 p-4 rounded-r-lg">
+                                <p className="text-sm text-gray-700 leading-relaxed">
+                                  {revision.current_text || '現行規約の内容が設定されていません'}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {/* Proposed Text */}
+                            {revision.proposed_text && (
+                              <div>
+                                <div className="flex items-center space-x-2 mb-3">
+                                  <Badge className="bg-blue-100 text-blue-800">改訂案</Badge>
+                                  <span className="text-sm font-medium">新しい規約条文</span>
+                                </div>
+                                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                                  <p className="text-sm text-gray-700 leading-relaxed">
+                                    {revision.proposed_text}
+                                  </p>
+                                  <div className="mt-3 flex items-center space-x-2">
+                                    <CheckCircle className="w-4 h-4 text-green-600" />
+                                    <span className="text-xs text-green-700 font-medium">法的要件を完全満足</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Revision Reason */}
+                        {revision.reason && (
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-3">改訂理由</h4>
+                            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                              <p className="text-sm text-gray-700 leading-relaxed">{revision.reason}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Key Points */}
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-3">変更のポイント</h4>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="outline">#法的根拠の明確化</Badge>
+                            <Badge variant="outline">#法律用語への統一</Badge>
+                            <Badge variant="outline">#利用条件の限定強化</Badge>
+                          </div>
+                        </div>
+
+                        {/* Impact Analysis */}
+                        {revision.impact && (
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-3">影響範囲</h4>
+                            <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+                              <p className="text-sm text-gray-700 leading-relaxed">{revision.impact}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <FileText className="mx-auto mb-4" size={48} />
+                  <p className="font-medium">改訂項目がありません</p>
+                  <p className="text-sm">この年度の改訂項目はまだ登録されていません。</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
