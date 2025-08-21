@@ -133,37 +133,40 @@ export default function RevisionYearDetail() {
           </div>
           
           <ScrollArea className="h-[calc(100vh-120px)]">
-            <div className="p-4 space-y-3">
-              {Object.entries(groupedRevisions).map(([category, categoryRevisions]) => (
-                <div key={category} className="space-y-2">
-                  <h4 className="font-medium text-gray-900 text-sm border-b border-gray-200 pb-1">
-                    {category}
-                  </h4>
-                  {categoryRevisions.map((revision) => (
-                    <button
-                      key={revision.id}
-                      onClick={() => scrollToSection(`revision-${revision.id}`)}
-                      className={`w-full text-left p-3 rounded-lg border transition-all duration-200 hover:shadow-md ${
-                        activeSection === `revision-${revision.id}` 
-                          ? 'bg-blue-50 border-blue-200' 
-                          : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                      }`}
+            <div className="p-4 space-y-1">
+              {revisions.map((revision) => (
+                <button
+                  key={revision.id}
+                  onClick={() => scrollToSection(`revision-${revision.id}`)}
+                  className={`w-full text-left p-2 rounded transition-all duration-200 hover:bg-gray-100 ${
+                    activeSection === `revision-${revision.id}` 
+                      ? 'bg-blue-50 text-blue-900' 
+                      : 'text-gray-700'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                      {getCategoryIcon(revision.category)}
+                    </div>
+                    <span className="font-medium text-sm text-blue-600 min-w-0">
+                      {revision.article_number}
+                    </span>
+                    <span className="text-sm text-gray-900 truncate flex-1">
+                      {revision.title}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1 ml-7">
+                    <Badge variant="outline" className="text-xs">
+                      {revision.category}
+                    </Badge>
+                    <Badge 
+                      variant={getStatusVariant(revision.status)}
+                      className="text-xs"
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline" className="text-xs">
-                          {revision.article_number}
-                        </Badge>
-                        <div className="flex items-center space-x-1">
-                          <span className="text-xs text-gray-500">1項目</span>
-                          <ExternalLink className="w-3 h-3 text-gray-400" />
-                        </div>
-                      </div>
-                      <p className="text-sm font-medium text-gray-900 line-clamp-2">
-                        {revision.title}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+                      {getStatusText(revision.status)}
+                    </Badge>
+                  </div>
+                </button>
               ))}
             </div>
           </ScrollArea>

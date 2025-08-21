@@ -179,6 +179,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             },
             {
               id: 6,
+              title: "建替え・大規模修繕工事等の実施の決議",
+              category: "建替え関連",
+              article_number: "第47条",
+              current_text: "建替えの実施の決議は、区分所有者数及び議決権の各5分の4以上の賛成により決議する。",
+              proposed_text: "建替えの実施の決議は、区分所有者数及び議決権の各4分の3以上の賛成により決議する。ただし、耐震性の不足その他建物の状況を勘案して国土交通省令で定める要件に該当する場合に限る。",
+              reason: "2025年区分所有法改正により、一定の要件を満たす場合の建替え決議要件が5分の4（80%）から4分の3（75%）に緩和された。耐震性不足・バリアフリー未対応等の客観的要件の満足が前提となる。本マンション（築26年）でも将来的に該当する可能性があり、規約整備が必要。",
+              impact: "決議要件の緩和により、建替えプロジェクトの実現可能性が向上します。",
+              status: "in_progress"
+            },
+            {
+              id: 7,
               title: "マンション内での暴力団関係者に関するルールの整備",
               category: "反社会的勢力排除",
               article_number: "第20条",
@@ -189,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: "pending"
             },
             {
-              id: 7,
+              id: 8,
               title: "区分所有者の責務",
               category: "区分所有者関連",
               article_number: "第21条",
@@ -200,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: "in_progress"
             },
             {
-              id: 8,
+              id: 9,
               title: "共用部分等に係る損害保険契約の代行取得",
               category: "損害保険",
               article_number: "第24条、第67条",
@@ -211,7 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: "pending"
             },
             {
-              id: 9,
+              id: 10,
               title: "修繕積立金の保全措置の促進",
               category: "修繕積立金",
               article_number: "第28条",
@@ -222,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: "completed"
             },
             {
-              id: 10,
+              id: 11,
               title: "ITシステム活用規定の追加",
               category: "IT・デジタル化",
               article_number: "第30条",
@@ -233,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: "in_progress"
             },
             {
-              id: 11,
+              id: 12,
               title: "国際管理人制度の活用に係る手続き",
               category: "管理人制度",
               article_number: "第31条の3",
@@ -241,17 +252,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               proposed_text: "理事又は監事のなり手不足その他の事情により、理事会の運営に支障が生じるおそれがある場合は、外部の専門家等を活用することができる。",
               reason: "管理組合の担い手不足が深刻化している中、外部専門家の活用が重要になっている。令和7年度標準管理規約では、国際管理人制度の活用手続きが明文化された。本マンションでも将来的な検討が必要。",
               impact: "外部専門家の活用により、管理組合運営の継続性が確保されます。",
-              status: "pending"
-            },
-            {
-              id: 12,
-              title: "AIを活用した管理業務効率化",
-              category: "AI・自動化",
-              article_number: "第32条",
-              current_text: "管理業務の効率化に関する規定",
-              proposed_text: "管理組合は、人工知能技術を活用した管理業務の自動化及び効率化を図ることができる。AI技術の導入に当たっては、個人情報保護に十分配慮するものとする。",
-              reason: "AI技術の急速な発展により、管理業務への活用が現実的になっている。令和7年度標準管理規約では、AI活用に関する基本方針が示された。本マンションでも先進的な取り組みとして検討の価値がある。",
-              impact: "AI活用により、管理業務の大幅な効率化と品質向上が期待できます。",
               status: "pending"
             },
             {
