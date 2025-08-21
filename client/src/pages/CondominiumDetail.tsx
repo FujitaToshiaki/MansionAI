@@ -137,7 +137,7 @@ export default function CondominiumDetail() {
             <CardContent className="p-4">
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-600">管理組合理事長</p>
-                <p className="text-lg font-semibold text-gray-900">田中 一郎様</p>
+                <p className="text-lg font-semibold text-gray-900">修繕 未来様</p>
                 <p className="text-sm text-gray-500">連絡先: xxx-xxx-xxxx</p>
               </div>
             </CardContent>

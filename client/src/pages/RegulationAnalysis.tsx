@@ -708,7 +708,7 @@ export default function RegulationAnalysis() {
                         <span className="text-sm text-gray-600">6/8項目</span>
                       </div>
                     </TableCell>
-                    <TableCell>田中太郎</TableCell>
+                    <TableCell>修繕 未来</TableCell>
                     <TableCell>
                       <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
                         <Button variant="outline" size="sm">

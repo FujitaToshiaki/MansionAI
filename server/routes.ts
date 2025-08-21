@@ -225,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "in_progress",
           total_items: 8,
           completed_items: 6,
-          assignee: "田中太郎",
+          assignee: "修繕 未来",
           actual_total_items: 8,
           actual_completed_items: 6
         },
@@ -271,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: "in_progress",
             total_items: 15,
             completed_items: 8,
-            assignee: "田中太郎"
+            assignee: "修繕 未来"
           },
           revisions: [
             {
@@ -1066,7 +1066,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           time: extractTimeFromContent(rawContent),
           location: extractLocationFromContent(rawContent),
           meetingType: foundMinute.meetingType || '通常総会',
-          chairman: '田中一郎（理事長）',
+          chairman: '修繕 未来（理事長）',
           secretary: '佐藤花子（理事）',
           attendees: foundMinute.attendees || 45,
           totalUnits: foundMinute.totalUnits || 68,
@@ -1081,7 +1081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             {
               number: 1,
               title: 'メゾンドオプテージマンション管理規約変更の件',
-              presenter: '田中一郎理事長',
+              presenter: '修繕 未来理事長',
               content: foundMinute.content?.slice(0, 300) + '...' || '実際の議事録内容から抽出された議題の詳細',
               result: '可決',
               votingResults: { favor: 42, against: 1, abstain: 2 }
@@ -1503,7 +1503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 開催場所：メゾンドオプテージ集会室
 出席者：45名（委任状含む）
 総戸数：68戸
-議長：田中一郎（理事長）
+議長：修繕 未来（理事長）
 
 議題第1号　前年度事業報告承認の件
 議題第2号　前年度収支決算承認の件
@@ -1514,7 +1514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 開催場所：メゾンドオプテージ集会室
 出席者：38名（委任状含む）
 総戸数：68戸
-議長：田中一郎（理事長）
+議長：修繕 未来（理事長）
 
 議題第1号　管理規約変更の件（さくら銀行名称削除）
 
@@ -1523,7 +1523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 開催場所：メゾンドオプテージ集会室
 出席者：41名（委任状含む）
 総戸数：68戸
-議長：田中一郎（理事長）
+議長：修繕 未来（理事長）
 
 議題第1号　103号室の賃貸使用に関する管理規約変更
 `;

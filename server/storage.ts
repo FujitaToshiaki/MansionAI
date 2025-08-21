@@ -246,7 +246,7 @@ export class MemStorage implements IStorage {
         mimeType: "application/pdf",
         ocrStatus: "completed",
         ocrAccuracy: 96.8,
-        ocrText: "管理組合設立届出書　管理組合名：メゾンドオプテージ管理組合　設立年月日：2000年4月1日　組合員数：120名　理事長：田中太郎　副理事長：佐藤花子　理事：5名　監事：2名　管理会社：東京マンション管理株式会社　管理形態：全部委託　所轄官庁：○○区役所",
+        ocrText: "管理組合設立届出書　管理組合名：メゾンドオプテージ管理組合　設立年月日：2000年4月1日　組合員数：120名　理事長：修繕 未来　副理事長：佐藤花子　理事：5名　監事：2名　管理会社：東京マンション管理株式会社　管理形態：全部委託　所轄官庁：○○区役所",
         uploadedAt: new Date(Date.now() - 604800000),
         processedAt: new Date(Date.now() - 601200000)
       },

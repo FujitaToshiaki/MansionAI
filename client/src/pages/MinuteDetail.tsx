@@ -311,7 +311,7 @@ export default function MinuteDetail() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             <div>
-              <strong>議長:</strong> {minute.chairman || '田中一郎 (理事長)'}
+              <strong>議長:</strong> {minute.chairman || '修繕 未来 (理事長)'}
             </div>
             <div>
               <strong>議事録作成者:</strong> {minute.secretary || '佐藤花子 (理事)'}
