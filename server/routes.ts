@@ -134,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // OCR document upload endpoint (save results)
-  app.post("/api/documents/ocr-upload", upload.array('files'), async (req, res) => {
+  app.post("/api/documents/ocr-upload", uploadMemory.array('files'), async (req, res) => {
     try {
       const { condominiumId, title, meetingDate, ocrResults } = req.body;
       const files = req.files as Express.Multer.File[];

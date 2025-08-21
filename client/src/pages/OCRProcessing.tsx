@@ -483,12 +483,12 @@ export default function OCRProcessing() {
                         <img
                           src={fileData.preview}
                           alt={`原本 ${result.pageNumber}`}
-                          className="w-full border rounded"
+                          className="w-full h-auto border rounded max-h-[500px] object-contain"
                         />
                       )}
                     </div>
                     
-                    <div>
+                    <div className="flex flex-col h-full">
                       <Label className="text-sm font-medium mb-2 block">抽出テキスト</Label>
                       <Textarea
                         value={result.text}
@@ -497,7 +497,7 @@ export default function OCRProcessing() {
                           newResults[index].text = e.target.value;
                           setOcrResults(newResults);
                         }}
-                        className="min-h-[300px] font-mono text-sm"
+                        className="flex-1 min-h-[500px] font-mono text-sm resize-none"
                       />
                       
                       {result.lowConfidenceRegions.length > 0 && (
@@ -506,7 +506,7 @@ export default function OCRProcessing() {
                             <AlertTriangle className="w-4 h-4 inline mr-1" />
                             精度が低い箇所
                           </Label>
-                          <div className="space-y-2">
+                          <div className="space-y-2 max-h-[100px] overflow-y-auto">
                             {result.lowConfidenceRegions.map((region, regionIndex) => (
                               <div key={regionIndex} className="flex items-center gap-2 text-sm bg-yellow-50 p-2 rounded">
                                 <Badge variant="outline" className="text-yellow-700">
