@@ -772,20 +772,25 @@ export default function OCRProcessing() {
         {/* Image Enlargement Modal */}
         {enlargedImage && (
           <div 
-            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-            onClick={() => setEnlargedImage(null)}
+            className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setEnlargedImage(null);
+              }
+            }}
           >
-            <div className="relative max-w-screen-lg max-h-screen-lg p-4">
+            <div className="relative max-w-[90vw] max-h-[90vh] p-4">
               <button
                 onClick={() => setEnlargedImage(null)}
-                className="absolute top-2 right-2 bg-white text-black p-2 rounded-full hover:bg-gray-100"
+                className="absolute -top-2 -right-2 bg-white text-black p-2 rounded-full hover:bg-gray-100 shadow-lg z-10"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
               <img
                 src={enlargedImage}
                 alt="拡大表示"
-                className="max-w-full max-h-full object-contain"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-xl"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
           </div>
