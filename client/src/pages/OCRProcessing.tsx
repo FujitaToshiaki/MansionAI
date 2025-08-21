@@ -49,16 +49,22 @@ export default function OCRProcessing() {
 
   const processOCRMutation = useMutation({
     mutationFn: async (files: UploadedFile[]) => {
+      console.log('Starting OCR processing for', files.length, 'files');
+      
       // Real AI-powered OCR processing using OpenAI
       const formData = new FormData();
-      files.forEach(fileData => {
+      files.forEach((fileData, index) => {
+        console.log(`Adding file ${index + 1}:`, fileData.file.name, fileData.file.type, fileData.file.size, 'bytes');
         formData.append('files', fileData.file);
       });
 
+      console.log('Sending OCR request to API...');
       const response = await apiRequest('/api/documents/process-ocr', {
         method: 'POST',
         body: formData,
       });
+
+      console.log('OCR API response:', response);
 
       if (!response.success) {
         throw new Error(response.error || 'OCR処理に失敗しました');
@@ -67,20 +73,14 @@ export default function OCRProcessing() {
       return response.results as OCRResult[];
     },
     onSuccess: (results) => {
+      console.log('OCR processing successful:', results);
       setOcrResults(results);
       setStep('review');
     },
     onError: (error) => {
       console.error('OCR processing error:', error);
-      // Fallback to mock data if API fails
-      const fallbackResults: OCRResult[] = uploadedFiles.map(file => ({
-        pageNumber: file.pageNumber,
-        text: generateMockOCRText(file.pageNumber),
-        accuracy: 75, // Lower accuracy to indicate fallback
-        lowConfidenceRegions: generateMockLowConfidenceRegions()
-      }));
-      setOcrResults(fallbackResults);
-      setStep('review');
+      alert(`OCR処理エラー: ${error.message}`);
+      setStep('preview'); // Go back to preview step
     }
   });
 
@@ -197,28 +197,42 @@ export default function OCRProcessing() {
   };
 
   const loadDemoFiles = async () => {
-    const demoImages = [
-      '/assets/mezon-minutes-1.jpg',
-      '/assets/mezon-minutes-2.jpg',
-      '/assets/mezon-minutes-3.jpg'
+    // Use the actual attached demo images
+    const demoImagePaths = [
+      '/attached_assets/メゾンドオプテージ議事録_1_1755783927139.jpg',
+      '/attached_assets/メゾンドオプテージ議事録_2_1755783927141.jpg',
+      '/attached_assets/メゾンドオプテージ議事録_3_1755783927141.jpg'
     ];
 
     const mockFiles: UploadedFile[] = [];
     
-    for (let i = 0; i < demoImages.length; i++) {
+    for (let i = 0; i < demoImagePaths.length; i++) {
       try {
-        const response = await fetch(demoImages[i]);
+        console.log('Loading demo file:', demoImagePaths[i]);
+        const response = await fetch(demoImagePaths[i]);
+        if (!response.ok) {
+          console.error('Failed to fetch demo image:', response.status, response.statusText);
+          continue;
+        }
+        
         const blob = await response.blob();
         const file = new File([blob], `メゾンドオプテージ議事録_${i + 1}.jpg`, { type: 'image/jpeg' });
         
         mockFiles.push({
           file,
-          preview: demoImages[i],
+          preview: demoImagePaths[i],
           pageNumber: i + 1
         });
+        
+        console.log('Successfully loaded demo file:', file.name, file.size, 'bytes');
       } catch (error) {
-        console.error('Failed to load demo image:', demoImages[i], error);
+        console.error('Failed to load demo image:', demoImagePaths[i], error);
       }
+    }
+    
+    if (mockFiles.length === 0) {
+      alert('デモ用議事録画像の読み込みに失敗しました');
+      return;
     }
     
     setUploadedFiles(mockFiles);
@@ -226,6 +240,8 @@ export default function OCRProcessing() {
     setDocumentTitle('令和6年度第5回理事会議事録');
     setMeetingDate('2024-04-17');
     setStep('preview');
+    
+    console.log('Demo files loaded:', mockFiles.length, 'files');
   };
 
   if (step === 'upload') {
