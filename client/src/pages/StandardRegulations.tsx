@@ -216,6 +216,87 @@ export default function StandardRegulations() {
     return result.join('');
   };
 
+  // LCS計算関数
+  const computeLCS = (arr1: string[], arr2: string[]): string[] => {
+    const m = arr1.length;
+    const n = arr2.length;
+    const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+    
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (arr1[i - 1] === arr2[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1] + 1;
+        } else {
+          dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+        }
+      }
+    }
+    
+    // LCSを構築
+    const lcs: string[] = [];
+    let i = m, j = n;
+    
+    while (i > 0 && j > 0) {
+      if (arr1[i - 1] === arr2[j - 1]) {
+        lcs.unshift(arr1[i - 1]);
+        i--; j--;
+      } else if (dp[i - 1][j] > dp[i][j - 1]) {
+        i--;
+      } else {
+        j--;
+      }
+    }
+    
+    return lcs;
+  };
+
+  // より精密な差分ハイライト（文字レベル）
+  const highlightPreciseDifferences = (beforeLine: string, afterLine: string): string => {
+    // より細かい分割で精密な比較
+    const beforeParts = beforeLine.split(/(\s+|、|。|「|」|（|）|の|に|を|は|が|で|と|及び|又は|の各|分の)/);
+    const afterParts = afterLine.split(/(\s+|、|。|「|」|（|）|の|に|を|は|が|で|と|及び|又は|の各|分の)/);
+    
+    // 動的プログラミングによるLCS（最長共通部分列）
+    const lcs = computeLCS(beforeParts, afterParts);
+    
+    const result: string[] = [];
+    let i = 0, j = 0, lcsIndex = 0;
+    
+    while (j < afterParts.length) {
+      if (lcsIndex < lcs.length && 
+          i < beforeParts.length && 
+          j < afterParts.length && 
+          beforeParts[i] === afterParts[j] && 
+          beforeParts[i] === lcs[lcsIndex]) {
+        // 共通部分は通常表示
+        result.push(afterParts[j]);
+        i++; j++; lcsIndex++;
+      } else if (lcsIndex < lcs.length && 
+                 j < afterParts.length && 
+                 afterParts[j] === lcs[lcsIndex]) {
+        // 追加された部分を赤字に
+        result.push(`<span style="color: #dc2626; font-weight: 600;">${afterParts[j]}</span>`);
+        j++; lcsIndex++;
+      } else if (i < beforeParts.length && 
+                 lcsIndex < lcs.length && 
+                 beforeParts[i] === lcs[lcsIndex]) {
+        // 削除された部分（スキップ）
+        i++; lcsIndex++;
+      } else {
+        // 変更された部分を赤字に
+        if (j < afterParts.length) {
+          result.push(`<span style="color: #dc2626; font-weight: 600;">${afterParts[j]}</span>`);
+          j++;
+        }
+        if (i < beforeParts.length) {
+          i++;
+        }
+      }
+    }
+    
+    return result.join('');
+  };
+
   // 差分をハイライトする関数（改訂案中心の表示）
   const highlightDifferences = (beforeText: string, afterText: string, isAfter: boolean = false) => {
     // 改訂前テキストが存在しない場合は、改訂案をそのまま表示（新設項目）
@@ -272,12 +353,12 @@ export default function StandardRegulations() {
               const beforeLine = beforeLines[i].trim();
               const afterLine = afterLines[j].trim();
               
-              // 50%以上が一致する場合は部分変更とみなす
+              // 30%以上が一致する場合は部分変更とみなす（閾値を下げて細かい変更を検出）
               const similarity = calculateSimilarity(beforeLine, afterLine);
               
-              if (similarity > 0.5) {
-                // 単語レベルで差分をハイライト
-                const highlightedLine = highlightWordDifferences(beforeLine, afterLine);
+              if (similarity > 0.3) {
+                // より精密な差分をハイライト
+                const highlightedLine = highlightPreciseDifferences(beforeLine, afterLine);
                 result.push(highlightedLine);
                 i++;
                 partialMatch = true;
