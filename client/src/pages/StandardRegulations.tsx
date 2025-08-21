@@ -154,6 +154,72 @@ export default function StandardRegulations() {
       .trim();
   };
 
+  // 差分をハイライトする関数
+  const highlightDifferences = (beforeText: string, afterText: string, isAfter: boolean = false) => {
+    if (!beforeText || !afterText) {
+      return formatRegulationText(isAfter ? afterText : beforeText);
+    }
+
+    const before = formatRegulationText(beforeText).split('');
+    const after = formatRegulationText(afterText).split('');
+    
+    // 簡単なLCS（最長共通部分列）アルゴリズムで差分を検出
+    const lcs = (a: string[], b: string[]) => {
+      const m = a.length;
+      const n = b.length;
+      const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+      
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (a[i - 1] === b[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1] + 1;
+          } else {
+            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+          }
+        }
+      }
+      
+      // バックトラック
+      const result: Array<{char: string, type: 'same' | 'add' | 'delete'}> = [];
+      let i = m, j = n;
+      
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
+          result.unshift({char: a[i - 1], type: 'same'});
+          i--; j--;
+        } else if (i > 0 && (j === 0 || dp[i - 1][j] >= dp[i][j - 1])) {
+          result.unshift({char: a[i - 1], type: 'delete'});
+          i--;
+        } else {
+          result.unshift({char: b[j - 1], type: 'add'});
+          j--;
+        }
+      }
+      
+      return result;
+    };
+    
+    const diff = lcs(before, after);
+    
+    if (isAfter) {
+      // 改訂案では追加された部分を赤字にする
+      return diff.map((item, index) => {
+        if (item.type === 'add') {
+          return `<span key="${index}" style="color: #dc2626; font-weight: 600;">${item.char}</span>`;
+        }
+        return item.char;
+      }).join('');
+    } else {
+      // 現行では削除された部分を薄い赤字にする
+      return diff.map((item, index) => {
+        if (item.type === 'delete') {
+          return `<span key="${index}" style="color: #dc2626; opacity: 0.6; text-decoration: line-through;">${item.char}</span>`;
+        }
+        return item.char;
+      }).join('');
+    }
+  };
+
   // Update translations when language changes
   useEffect(() => {
     if (currentLanguage === 'ja') return;
@@ -410,9 +476,12 @@ export default function StandardRegulations() {
                         <h6 className="text-sm font-medium text-gray-700">新しい規約条文</h6>
                       </div>
                       <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
-                        <pre className="text-xs leading-relaxed whitespace-pre-wrap font-sans">
-                          {formatRegulationText(revision.after_text || '（新設）')}
-                        </pre>
+                        <div 
+                          className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
+                          dangerouslySetInnerHTML={{
+                            __html: highlightDifferences(revision.before_text || '', revision.after_text || '（新設）', true)
+                          }}
+                        />
                       </div>
                     </div>
                     <div>
@@ -421,9 +490,12 @@ export default function StandardRegulations() {
                         <h6 className="text-sm font-medium text-gray-700">現在の規約条文</h6>
                       </div>
                       <div className="border border-gray-200 rounded-lg p-3">
-                        <pre className="text-xs leading-relaxed whitespace-pre-wrap font-sans">
-                          {formatRegulationText(revision.before_text || '（規定なし）')}
-                        </pre>
+                        <div 
+                          className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
+                          dangerouslySetInnerHTML={{
+                            __html: highlightDifferences(revision.before_text || '（規定なし）', revision.after_text || '', false)
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
