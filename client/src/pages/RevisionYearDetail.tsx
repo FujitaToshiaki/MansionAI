@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, FileText, CheckCircle, Clock, AlertTriangle, Calendar, User, BarChart3, BookOpen, ExternalLink, Package, Monitor, Users, Shield, Car, AlertCircle } from "lucide-react";
+import { ArrowLeft, FileText, CheckCircle, Clock, AlertTriangle, Calendar, User, BarChart3, BookOpen, ExternalLink, Package, Monitor, Users, Shield, Car, AlertCircle, Edit3, Save, X } from "lucide-react";
 import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface RegulationRevision {
   id: number;
@@ -40,6 +41,8 @@ interface RevisionYearDetailData {
 export default function RevisionYearDetail() {
   const { id } = useParams();
   const [activeSection, setActiveSection] = useState<string>("");
+  const [editingRevisions, setEditingRevisions] = useState<{[key: number]: boolean}>({});
+  const [editedTexts, setEditedTexts] = useState<{[key: number]: string}>({});
 
   const { data, isLoading, error } = useQuery<RevisionYearDetailData>({
     queryKey: ['/api/revision-headers', id],
@@ -204,6 +207,27 @@ export default function RevisionYearDetail() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
+
+  const startEditing = (revisionId: number, currentText: string) => {
+    setEditingRevisions(prev => ({ ...prev, [revisionId]: true }));
+    setEditedTexts(prev => ({ ...prev, [revisionId]: currentText }));
+  };
+
+  const saveEdit = (revisionId: number) => {
+    // TODO: API call to save changes would go here
+    console.log('Saving revision:', revisionId, editedTexts[revisionId]);
+    setEditingRevisions(prev => ({ ...prev, [revisionId]: false }));
+    // In a real implementation, you'd update the revision data and refetch
+  };
+
+  const cancelEdit = (revisionId: number) => {
+    setEditingRevisions(prev => ({ ...prev, [revisionId]: false }));
+    setEditedTexts(prev => {
+      const newTexts = { ...prev };
+      delete newTexts[revisionId];
+      return newTexts;
+    });
   };
 
   return (
@@ -379,14 +403,59 @@ export default function RevisionYearDetail() {
                             {/* Proposed Text - Left Side */}
                             {revision.proposed_text && (
                               <div>
-                                <div className="flex items-center space-x-2 mb-3">
-                                  <Badge className="bg-blue-100 text-blue-800">改訂案</Badge>
-                                  <span className="text-sm font-medium">新しい規約条文</span>
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center space-x-2">
+                                    <Badge className="bg-blue-100 text-blue-800">改訂案</Badge>
+                                    <span className="text-sm font-medium">新しい規約条文</span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    {editingRevisions[revision.id] ? (
+                                      <>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => saveEdit(revision.id)}
+                                          className="h-7 w-7 p-0"
+                                        >
+                                          <Save className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => cancelEdit(revision.id)}
+                                          className="h-7 w-7 p-0"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </Button>
+                                      </>
+                                    ) : (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => startEditing(revision.id, revision.proposed_text || '')}
+                                        className="h-7 w-7 p-0 hover:bg-blue-100"
+                                      >
+                                        <Edit3 className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
-                                  <p className="text-sm text-gray-700 leading-relaxed">
-                                    {revision.proposed_text}
-                                  </p>
+                                  {editingRevisions[revision.id] ? (
+                                    <Textarea
+                                      value={editedTexts[revision.id] || revision.proposed_text || ''}
+                                      onChange={(e) => setEditedTexts(prev => ({ 
+                                        ...prev, 
+                                        [revision.id]: e.target.value 
+                                      }))}
+                                      className="text-sm leading-relaxed min-h-[100px] resize-none bg-white border-blue-200 focus:border-blue-400"
+                                      placeholder="改訂案の内容を入力してください..."
+                                    />
+                                  ) : (
+                                    <p className="text-sm text-gray-700 leading-relaxed">
+                                      {revision.proposed_text}
+                                    </p>
+                                  )}
                                   <div className="mt-3 flex items-center space-x-2">
                                     <CheckCircle className="w-4 h-4 text-green-600" />
                                     <span className="text-xs text-green-700 font-medium">法的要件を完全満足</span>
