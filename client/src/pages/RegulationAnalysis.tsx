@@ -146,6 +146,9 @@ export default function RegulationAnalysis() {
 
   // Track analysis completion status for R7 revision display
   const [analysisCompleted, setAnalysisCompleted] = useState(false);
+  
+  // Proposal creation modal states
+  const [showProposalModal, setShowProposalModal] = useState(false);
 
   const { data: currentRegulations } = useQuery({
     queryKey: ['/api/condominiums', id, 'regulations'],
@@ -630,12 +633,23 @@ export default function RegulationAnalysis() {
                     </TableCell>
                     <TableCell>田中太郎</TableCell>
                     <TableCell>
-                      <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
-                        <Button variant="outline" size="sm">
+                      <div className="flex gap-2">
+                        <Link to="/revision-years/3125710f-b498-4949-86e2-b01bc9fcc13a">
+                          <Button variant="outline" size="sm">
+                            <FileText className="w-3 h-3 mr-1" />
+                            詳細
+                          </Button>
+                        </Link>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setShowProposalModal(true)}
+                          className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+                        >
                           <FileText className="w-3 h-3 mr-1" />
-                          詳細
+                          議案書作成
                         </Button>
-                      </Link>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
