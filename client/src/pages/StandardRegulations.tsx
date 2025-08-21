@@ -75,14 +75,22 @@ export default function StandardRegulations() {
   // 改正項目を分類・並び替え
   const sortedRevisions = [...revisions].sort(sortByArticleNumber);
   
-  // 別添項目と通常項目を分離
+  // 別添項目と通常項目を分離（別添を最下段に配置するため）
   const regularRevisions = sortedRevisions.filter(revision => 
     !revision.title.includes('別添') && !revision.category.includes('別添')
   );
   
   const annexRevisions = sortedRevisions.filter(revision => 
     revision.title.includes('別添') || revision.category.includes('別添')
-  );
+  ).sort((a, b) => {
+    // 別添項目内でも条番号順に並び替え
+    if (!a.article_number || !b.article_number) return 0;
+    const getNum = (str: string): number => {
+      const match = str.match(/別添(\d+)/);
+      return match ? parseInt(match[1], 10) : 0;
+    };
+    return getNum(a.article_number) - getNum(b.article_number);
+  });
 
   // 条の目次を作成
   const createArticleIndex = (revisions: RegulationRevision[]) => {
@@ -652,11 +660,11 @@ export default function StandardRegulations() {
       </div>
 
       {/* 条の目次 - 折り畳み式 */}
-      {showIndex && (
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      <div className={`transition-all duration-300 ease-in-out overflow-hidden ${showIndex ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+        <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
+              <FileText className="h-5 w-5 text-gray-600" />
               条番号別改正項目目次
             </CardTitle>
             <p className="text-gray-600 text-sm">各条文の改正内容を番号順にまとめました</p>
@@ -664,13 +672,13 @@ export default function StandardRegulations() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {articleIndex.map(([articleNum, revisions], index) => (
-                <div key={articleNum} className="flex items-center justify-between bg-white p-3 rounded-lg border hover:bg-blue-50 cursor-pointer transition-colors" onClick={() => {
+                <div key={articleNum} className="flex items-center justify-between bg-white p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => {
                   const element = document.getElementById(`article-${articleNum.replace(/[^0-9]/g, '')}`);
                   element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   setShowIndex(false); // 目次を閉じる
                 }}>
                   <div className="flex items-center gap-2">
-                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
+                    <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-semibold">
                       {articleNum}
                     </span>
                     <span className="text-sm text-gray-700 font-medium">
@@ -691,7 +699,7 @@ export default function StandardRegulations() {
             )}
           </CardContent>
         </Card>
-      )}
+      </div>
 
       {/* 通常の改正項目 */}
       <div className="grid gap-4">
@@ -818,29 +826,29 @@ export default function StandardRegulations() {
         })}
       </div>
 
-      {/* 別添項目 */}
+      {/* 別添項目 - 最下段に配置 */}
       {annexRevisions.length > 0 && (
-        <>
-          <div className="flex items-center gap-3 mt-8 pt-6">
-            <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 py-2 rounded-lg font-semibold">
+        <div className="mt-12 pt-8 border-t border-gray-300">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-gradient-to-r from-slate-600 to-gray-700 text-white px-4 py-2 rounded-lg font-semibold">
               別添
             </div>
             <div className="flex-1 border-t border-gray-300"></div>
-            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
               {annexRevisions.length}項目
             </Badge>
           </div>
 
           <div className="grid gap-4">
             {annexRevisions.map((revision) => (
-              <Card key={revision.id} className="bg-white hover:shadow-lg transition-shadow border-l-4 border-l-amber-400">
+              <Card key={revision.id} className="bg-white hover:shadow-lg transition-shadow border-l-4 border-l-gray-400">
                 <CardHeader className="pb-4">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         {getCategoryIcon(revision.category)}
                         <CardTitle className="text-lg">{getTranslatedText(revision.title)}</CardTitle>
-                        <Badge className="bg-amber-100 text-amber-800">
+                        <Badge className="bg-gray-100 text-gray-800">
                           {getTranslatedText(revision.category)}
                         </Badge>
                         <Badge variant="outline" className="flex items-center gap-1">
@@ -869,7 +877,6 @@ export default function StandardRegulations() {
                     )}
                   </div>
 
-                  {/* 規約の変更内容 - 横並びレイアウト */}
                   {(revision.before_text || revision.after_text) && (
                     <div className="space-y-4">
                       <h5 className="font-medium text-gray-900">規約の変更内容</h5>
@@ -877,10 +884,10 @@ export default function StandardRegulations() {
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
                           <div className="flex items-center mb-2">
-                            <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-medium mr-2">改訂案</span>
+                            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium mr-2">改訂案</span>
                             <h6 className="text-sm font-medium text-gray-700">新しい規約条文</h6>
                           </div>
-                          <div className="border border-amber-200 rounded-lg p-3 bg-amber-50">
+                          <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                             <div 
                               className="text-xs leading-relaxed whitespace-pre-wrap font-sans"
                               dangerouslySetInnerHTML={{
@@ -905,7 +912,6 @@ export default function StandardRegulations() {
                         </div>
                       </div>
 
-                      {/* 改訂理由 - 横並び下に配置 */}
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <h6 className="text-sm font-medium text-gray-900 mb-2">改訂理由</h6>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
@@ -932,7 +938,7 @@ export default function StandardRegulations() {
               </Card>
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
