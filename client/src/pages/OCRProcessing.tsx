@@ -59,18 +59,26 @@ export default function OCRProcessing() {
       });
 
       console.log('Sending OCR request to API...');
-      const response = await apiRequest('/api/documents/process-ocr', {
+      const response = await fetch('/api/documents/process-ocr', {
         method: 'POST',
         body: formData,
       });
 
-      console.log('OCR API response:', response);
-
-      if (!response.success) {
-        throw new Error(response.error || 'OCR処理に失敗しました');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OCR API error:', response.status, errorText);
+        throw new Error(`OCR API error: ${response.status} ${errorText}`);
       }
 
-      return response.results as OCRResult[];
+      const result = await response.json();
+
+      console.log('OCR API response:', result);
+
+      if (!result.success) {
+        throw new Error(result.error || 'OCR処理に失敗しました');
+      }
+
+      return result.results as OCRResult[];
     },
     onSuccess: (results) => {
       console.log('OCR processing successful:', results);
