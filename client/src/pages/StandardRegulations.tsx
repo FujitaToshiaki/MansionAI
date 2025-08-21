@@ -76,21 +76,32 @@ export default function StandardRegulations() {
   const sortedRevisions = [...revisions].sort(sortByArticleNumber);
   
   // 別添項目と通常項目を分離（別添を最下段に配置するため）
-  const regularRevisions = sortedRevisions.filter(revision => 
-    !revision.title.includes('別添') && !revision.category.includes('別添')
-  );
+  const isAnnexRevision = (revision: RegulationRevision): boolean => {
+    return revision.title.includes('別添') || 
+           revision.category.includes('別添') ||
+           (revision.article_number?.includes('別添') ?? false);
+  };
   
-  const annexRevisions = sortedRevisions.filter(revision => 
-    revision.title.includes('別添') || revision.category.includes('別添')
-  ).sort((a, b) => {
-    // 別添項目内でも条番号順に並び替え
-    if (!a.article_number || !b.article_number) return 0;
-    const getNum = (str: string): number => {
-      const match = str.match(/別添(\d+)/);
-      return match ? parseInt(match[1], 10) : 0;
-    };
-    return getNum(a.article_number) - getNum(b.article_number);
-  });
+  const regularRevisions = sortedRevisions.filter(revision => !isAnnexRevision(revision));
+  
+  const annexRevisions = sortedRevisions.filter(revision => isAnnexRevision(revision))
+    .sort((a, b) => {
+      // 別添項目内でも番号順に並び替え
+      if (!a.article_number || !b.article_number) return 0;
+      const getNum = (str: string): number => {
+        const match = str.match(/別添(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+      };
+      return getNum(a.article_number) - getNum(b.article_number);
+    });
+
+  // デバッグ用：別添項目の判定を確認
+  console.log('別添項目の判定:', annexRevisions.map(r => ({ 
+    id: r.id, 
+    title: r.title, 
+    category: r.category, 
+    article_number: r.article_number 
+  })));
 
   // 条の目次を作成
   const createArticleIndex = (revisions: RegulationRevision[]) => {
