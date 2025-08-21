@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Eye, FileText, CheckCircle, AlertTriangle, RefreshCw, X, Image } from "lucide-react";
+import { Upload, Eye, FileText, CheckCircle, AlertTriangle, RefreshCw, X, Image, ZoomIn } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
 interface UploadedFile {
@@ -37,6 +37,7 @@ export default function OCRProcessing() {
   const [selectedCondominium, setSelectedCondominium] = useState<string>('');
   const [documentTitle, setDocumentTitle] = useState<string>('');
   const [meetingDate, setMeetingDate] = useState<string>('');
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Check if this is a standalone OCR processing page (from menu)
@@ -287,10 +288,10 @@ export default function OCRProcessing() {
               <p className="text-lg font-medium mb-2">議事録画像をアップロードしてください</p>
               <p className="text-gray-500 mb-4">JPG、PNG形式の画像ファイルをサポートしています（複数ページ対応）</p>
               
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-left">
-                <h4 className="font-medium text-blue-900 mb-2">✨ Gemini 2.5 Flash AI OCR機能</h4>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• 手書き文字を含む日本語議事録の高精度認識</li>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 text-left">
+                <h4 className="font-medium text-gray-900 mb-2">🔍 AI文書認識システム</h4>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  <li>• 手書き文字を含む日本語議事録の認識</li>
                   <li>• 元の文書レイアウトと改行を完全保持</li>
                   <li>• 表形式やインデント構造の維持</li>
                   <li>• 読み取り困難箇所の自動検出と表示</li>
@@ -437,13 +438,13 @@ export default function OCRProcessing() {
               </p>
               
               <div className="space-y-2 mt-6">
-                <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
                   <div className="animate-pulse">🤖</div>
-                  <span className="animate-pulse">Gemini AI が画像を解析中</span>
+                  <span className="animate-pulse">AI が画像を解析中</span>
                   <div className="flex gap-1">
-                    <span className="animate-ping inline-block w-1 h-1 bg-blue-600 rounded-full"></span>
-                    <span className="animate-ping inline-block w-1 h-1 bg-blue-600 rounded-full" style={{animationDelay: '0.2s'}}></span>
-                    <span className="animate-ping inline-block w-1 h-1 bg-blue-600 rounded-full" style={{animationDelay: '0.4s'}}></span>
+                    <span className="animate-ping inline-block w-1 h-1 bg-gray-600 rounded-full"></span>
+                    <span className="animate-ping inline-block w-1 h-1 bg-gray-600 rounded-full" style={{animationDelay: '0.2s'}}></span>
+                    <span className="animate-ping inline-block w-1 h-1 bg-gray-600 rounded-full" style={{animationDelay: '0.4s'}}></span>
                   </div>
                 </div>
                 
@@ -454,7 +455,7 @@ export default function OCRProcessing() {
                 </div>
                 
                 <div className="mt-4 text-xs text-gray-500">
-                  高精度な処理のため1-2分程度お待ちください
+                  処理完了まで1-2分程度お待ちください
                 </div>
               </div>
             </div>
@@ -494,7 +495,7 @@ export default function OCRProcessing() {
               OCR処理結果確認
             </CardTitle>
             <CardDescription>
-              Gemini 2.5 Pro AIによる高精度な議事録テキスト抽出結果です。必要に応じてテキストを編集し、マンション管理組合の議事録として保存してください。
+              AIによる議事録テキスト抽出結果です。必要に応じてテキストを編集し、マンション管理組合の議事録として保存してください。
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -518,11 +519,20 @@ export default function OCRProcessing() {
                     <div>
                       <Label className="text-sm font-medium mb-2 block">原本画像</Label>
                       {fileData && (
-                        <img
-                          src={fileData.preview}
-                          alt={`原本 ${result.pageNumber}`}
-                          className="w-full h-auto border rounded max-h-[500px] object-contain"
-                        />
+                        <div className="relative group">
+                          <img
+                            src={fileData.preview}
+                            alt={`原本 ${result.pageNumber}`}
+                            className="w-full h-auto border rounded max-h-[500px] object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => setEnlargedImage(fileData.preview)}
+                          />
+                          <button
+                            onClick={() => setEnlargedImage(fileData.preview)}
+                            className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <ZoomIn className="w-4 h-4" />
+                          </button>
+                        </div>
                       )}
                     </div>
                     
@@ -694,6 +704,28 @@ export default function OCRProcessing() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Image Enlargement Modal */}
+        {enlargedImage && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+            onClick={() => setEnlargedImage(null)}
+          >
+            <div className="relative max-w-screen-lg max-h-screen-lg p-4">
+              <button
+                onClick={() => setEnlargedImage(null)}
+                className="absolute top-2 right-2 bg-white text-black p-2 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <img
+                src={enlargedImage}
+                alt="拡大表示"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
