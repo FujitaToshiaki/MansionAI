@@ -30,16 +30,19 @@ const languages = {
 };
 
 interface RegulationRevision {
-  id: number;
+  id: string | number;
   category: string;
   title: string;
-  change_description: string;
-  before_text: string | null;
-  after_text: string | null;
+  change_description?: string;
+  before_text?: string | null;
+  after_text?: string | null;
   article_number: string | null;
-  reference_section: string | null;
-  change_type: string;
-  creation_date: string;
+  reference_section?: string | null;
+  change_type?: string;
+  creation_date?: string;
+  description?: string;
+  revision_year?: string;
+  status?: string;
 }
 
 export default function StandardRegulations() {
@@ -51,10 +54,10 @@ export default function StandardRegulations() {
   const [showIndex, setShowIndex] = useState(false);
 
   const { data: revisions = [], isLoading } = useQuery<RegulationRevision[]>({
-    queryKey: ['/api/regulation-revisions', versionId],
+    queryKey: ['/api/standard-regulations'],
     queryFn: async () => {
-      const response = await fetch('/api/regulation-revisions');
-      if (!response.ok) throw new Error('改正情報の取得に失敗しました');
+      const response = await fetch('/api/standard-regulations');
+      if (!response.ok) throw new Error('標準管理規約の取得に失敗しました');
       return response.json();
     }
   });
@@ -746,11 +749,11 @@ export default function StandardRegulations() {
                           {getTranslatedText(revision.category)}
                         </Badge>
                         <Badge variant="outline" className="flex items-center gap-1">
-                          {getChangeTypeIcon(revision.change_type)}
-                          {revision.change_type}
+                          {getChangeTypeIcon(revision.change_type || '改正')}
+                          {revision.change_type || '改正'}
                         </Badge>
                       </div>
-                      <p className="text-gray-600 text-sm">{getTranslatedText(revision.change_description)}</p>
+                      <p className="text-gray-600 text-sm">{getTranslatedText(revision.change_description || revision.description || '')}</p>
                     </div>
                   </div>
                 </CardHeader>
@@ -812,7 +815,7 @@ export default function StandardRegulations() {
                         <h6 className="text-sm font-medium text-gray-900 mb-2">改訂理由</h6>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                           <pre className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
-                            {formatRegulationText(getTranslatedText(revision.change_description))}
+                            {formatRegulationText(getTranslatedText(revision.change_description || revision.description || ''))}
                           </pre>
                         </div>
                       </div>
@@ -863,11 +866,11 @@ export default function StandardRegulations() {
                           {getTranslatedText(revision.category)}
                         </Badge>
                         <Badge variant="outline" className="flex items-center gap-1">
-                          {getChangeTypeIcon(revision.change_type)}
-                          {revision.change_type}
+                          {getChangeTypeIcon(revision.change_type || '改正')}
+                          {revision.change_type || '改正'}
                         </Badge>
                       </div>
-                      <p className="text-gray-600 text-sm">{getTranslatedText(revision.change_description)}</p>
+                      <p className="text-gray-600 text-sm">{getTranslatedText(revision.change_description || revision.description || '')}</p>
                     </div>
                   </div>
                 </CardHeader>
@@ -927,7 +930,7 @@ export default function StandardRegulations() {
                         <h6 className="text-sm font-medium text-gray-900 mb-2">改訂理由</h6>
                         <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                           <pre className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
-                            {formatRegulationText(getTranslatedText(revision.change_description))}
+                            {formatRegulationText(getTranslatedText(revision.change_description || revision.description || ''))}
                           </pre>
                         </div>
                       </div>
