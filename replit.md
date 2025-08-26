@@ -2,13 +2,13 @@
 
 This is a Japanese condominium management regulation AI system designed for property management companies. The application helps automate the process of analyzing meeting minutes, extracting decisions, and generating regulation amendments using OCR technology and AI analysis. The system provides a complete workflow from document upload to final regulation output, with a focus on legal compliance and standardized regulation management.
 
-## Recent Changes (2025-08-16)
+## Recent Changes (2025-08-26)
 
-✓ **Standard Regulation Management Complete**: Implemented 3-tier navigation structure (Version List → Items List → Detail)
-✓ **RAG Integration Verified**: regulation_revisions table contains 15 改正項目, knowledge_documents has 5 documents with 160 chunks
-✓ **Navigation Structure Fixed**: Proper routing hierarchy from 改正版一覧 (令和6年度改訂, 令和3年度改訂, 平成29年度改訂) to detailed items
-✓ **API Error Resolution**: Fixed PostgreSQL parameter syntax and integer parsing for regulation revision endpoints
-✓ **Sidebar Simplification**: Removed complex submenu structure, consolidated to single "標準管理規約" menu item
+✓ **PDF Export Enhancement**: Implemented native PDF generation using browser print dialog with monochrome design optimization
+✓ **User Interface Updates**: Changed user identity from "田中 太郎" to "修繕 未来" with female avatar across entire system
+✓ **OCR Processing Refinement**: Removed specific AI model references (Gemini 2.5 Pro) for generic "AI" branding
+✓ **Print Layout Optimization**: Removed all color elements and borders for professional monochrome PDF output
+✓ **Proposal Document Generation**: Enhanced議案書creation with comprehensive R7 legal reform context and scrollable preview
 
 # User Preferences
 
