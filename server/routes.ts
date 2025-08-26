@@ -470,6 +470,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add endpoint for revisions by version ID (used by frontend)
+  app.get("/api/revisions/:versionId?", async (req, res) => {
+    try {
+      const query = `
+        SELECT * FROM regulation_revisions 
+        ORDER BY creation_date DESC, id ASC
+      `;
+      const result = await db.execute(query);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching revisions:', error);
+      res.status(500).json({ error: "Failed to fetch revisions" });
+    }
+  });
+
   // Update regulation revision endpoint
   app.patch("/api/regulation-revisions/:id", async (req, res) => {
     try {
@@ -1225,376 +1240,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/standard-regulations", async (req, res) => {
     try {
-      // Standard regulations based on R7 amendments - Complete 28-item dataset
-      const standardRegs = [
-        {
-          id: "std-1",
-          category: "総会決議要件",
-          title: "総会決議における多数決原則の見直し",
-          article_number: "第47条",
-          description: "一定の軽微な共用部分の変更について過半数決議で可能となった改正内容",
-          change_description: "令和7年改正区分所有法により多数決原則が見直され、一定の軽微な共用部分の変更について過半数決議で可能となった。",
-          before_text: "総会の会議は、前条第1項に定める議決権総数の半数以上を有する組合員が出席しなければならない。",
-          after_text: "総会の会議（WEB会議システム等を用いて開催する会議を含む。）は、前条第1項に定める議決権総数の半数以上を有する組合員が出席しなければならない。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "改正"
-        },
-        {
-          id: "std-2", 
-          category: "IT・デジタル化",
-          title: "ITシステム活用規定の追加",
-          article_number: "第30条",
-          description: "管理組合業務の効率化を図るためのITシステム導入に関する規定",
-          change_description: "デジタル化推進により、管理組合業務の効率化が求められている。ITシステム活用に関する規定が新設された。",
-          before_text: "管理組合の事務処理に関する規定",
-          after_text: "管理組合は、業務の効率化を図るため、情報通信技術を活用したシステムを導入することができる。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "新設"
-        },
-        {
-          id: "std-3",
-          category: "修繕積立金",
-          title: "修繕積立金の保全措置の促進",
-          article_number: "第28条", 
-          description: "修繕積立金の保全措置強化により管理組合の資産保護を図る改正",
-          change_description: "修繕積立金の保全措置強化により、管理組合の資産保護を図る。",
-          before_text: "修繕積立金は、修繕積立金口座に積み立てる。",
-          after_text: "修繕積立金は、修繕積立金口座に積み立てる。修繕積立金は、保全措置を講じた金融機関の口座で管理するものとする。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "追加"
-        },
-        {
-          id: "std-4",
-          category: "管理人制度",
-          title: "国外管理人制度の活用に係る手続き",
-          article_number: "第31条の3",
-          description: "管理組合の担い手不足対応として外部専門家活用手続きを明文化",
-          change_description: "管理組合の担い手不足が深刻化している中、外部専門家の活用が重要になっている。",
-          before_text: "現行規約には規定なし",
-          after_text: "理事又は監事のなり手不足その他の事情により、理事会の運営に支障が生じるおそれがある場合は、外部の専門家等を活用することができる。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "新設"
-        },
-        {
-          id: "std-5",
-          category: "防火・防災",
-          title: "防火管理者の選任",
-          article_number: "第32条の2",
-          description: "消防法の規定により防火管理体制の明確化を図る改正",
-          change_description: "防火管理体制の明確化により、居住者の安全確保を図る。",
-          before_text: "防火管理に関する規定",
-          after_text: "管理組合は、消防法の規定により防火管理者を選任しなければならない場合は、理事会の決議により防火管理者を選任し、消防署長に届け出る。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "明確化"
-        },
-        {
-          id: "std-6",
-          category: "データ管理",
-          title: "クラウドストレージ活用規定",
-          article_number: "第33条",
-          description: "文書管理の効率化と災害対策としてクラウド活用に関する規定を新設",
-          change_description: "クラウド技術の普及により、文書管理の効率化と災害対策が可能になっている。",
-          before_text: "文書の保管に関する規定",
-          after_text: "管理組合は、文書及びデータの保管に当たり、クラウドストレージサービスを活用することができる。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "新設"
-        },
-        {
-          id: "std-7",
-          category: "外部専門家活用詳細",
-          title: "外部専門家活用パターンの改訂",
-          article_number: "別添1",
-          description: "理事・監事外部専門家型、理事長外部専門家型、外部管理者型の3類型を詳細化",
-          change_description: "管理組合の多様化に対応し、外部専門家活用の選択肢を拡大する必要がある。",
-          before_text: "外部専門家の活用方法に関する規定",
-          after_text: "理事・監事外部専門家型、理事長外部専門家型、外部管理者型の3類型について、それぞれの特徴と適用場面を明確化する。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "詳細化"
-        },
-        {
-          id: "std-8",
-          category: "管理情報提供",
-          title: "管理情報提供様式の改訂",
-          article_number: "別添4",
-          description: "管理情報提供様式において役員総数等の記載方法を改訂",
-          change_description: "管理情報提供様式の改訂により、管理組合の透明性向上を図る。",
-          before_text: "管理情報提供様式の従来記載方法",
-          after_text: "管理情報提供様式において、役員総数、外部専門家の活用状況、修繕積立金の保全状況等を明確に記載する。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "改訂"
-        },
-        {
-          id: "std-9",
-          category: "議事録管理",
-          title: "議事録の電子化対応",
-          article_number: "第18条",
-          description: "議事録の電子保管を可能とする規定の追加",
-          change_description: "文書の電子化推進により、議事録の電子保管が一般的になっている。",
-          before_text: "議事録は、管理者が作成し、議事録、出席者名簿及び代理人選任届を保管する。",
-          after_text: "議事録は、管理者が作成し、議事録、出席者名簿及び代理人選任届を書面又は電磁的記録により保管する。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "追加"
-        },
-        {
-          id: "std-10",
-          category: "反社会的勢力排除",
-          title: "暴力団関係者排除規定の整備",
-          article_number: "第20条",
-          description: "マンション内での暴力団関係者に関するルールの整備",
-          change_description: "反社会的勢力の排除により、居住環境の安全性が向上する。",
-          before_text: "区分所有者の責務について規定されている。",
-          after_text: "区分所有者は、その専有部分を暴力団員による不当な行為の防止等に関する法律に規定する暴力団員等に使用させてはならない。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "新設"
-        },
-        {
-          id: "std-11",
-          category: "区分所有者関連",
-          title: "区分所有者の責務強化",
-          article_number: "第21条",
-          description: "専有部分使用者に対する区分所有者の責任を明確化",
-          change_description: "専有部分の使用者に対する区分所有者の責任を明確化する改正。",
-          before_text: "区分所有者は、建物の保存に有害な行為その他建物の管理又は使用に関し区分所有者の共同の利益に反する行為をしてはならない。",
-          after_text: "区分所有者は、建物の保存に有害な行為その他建物の管理又は使用に関し区分所有者の共同の利益に反する行為をしてはならない。専有部分を使用する者に対しても、この規定を遵守させる責任を負う。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "強化"
-        },
-        {
-          id: "std-12",
-          category: "損害保険",
-          title: "共用部分等に係る損害保険契約の代行取得",
-          article_number: "第24条、第67条",
-          description: "専有部分の損害保険を管理組合が代行締結する制度の導入",
-          change_description: "保険契約の一括処理により、管理の効率化と保険料削減が期待できる。",
-          before_text: "管理組合は、共用部分等について損害保険契約を締結する。",
-          after_text: "管理組合は、共用部分等について損害保険契約を締結する。区分所有者は、専有部分について、管理組合が区分所有者を被保険者とする損害保険契約を代行して締結することを承諾する。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "追加"
-        },
-        {
-          id: "std-13",
-          category: "建物設備",
-          title: "エレベーター等の管理規定",
-          article_number: "第13条",
-          description: "建物設備の定期点検と維持管理に関する規定の整備",
-          change_description: "建築基準法等の改正に伴い、エレベーター等の建物設備について定期点検の義務化が強化された。",
-          before_text: "エレベーター等の共用設備の管理について規定",
-          after_text: "エレベーター、機械式駐車場その他の共用設備については、法令に基づく定期点検を実施し、適切な維持管理を行うものとする。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "明確化"
-        },
-        {
-          id: "std-14",
-          category: "駐車場管理",
-          title: "駐車場の使用に関する細則",
-          article_number: "第15条",
-          description: "駐車場使用の適正化と電気自動車充電設備に関する規定",
-          change_description: "電気自動車の普及に伴い、駐車場における充電設備の設置需要が高まっている。",
-          before_text: "駐車場の使用については、管理組合が定める使用細則による。",
-          after_text: "駐車場の使用については、管理組合が定める使用細則による。電気自動車用充電設備の設置については、理事会の承認を得て行うことができる。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "追加"
-        },
-        {
-          id: "std-15",
-          category: "理事会運営",
-          title: "理事会のオンライン開催規定",
-          article_number: "第39条",
-          description: "理事会のWEB会議システム利用に関する規定の明文化",
-          change_description: "コロナ禍を機にWEB会議システムの利用が一般化した。管理組合運営の効率化と出席率向上のため規定を明文化。",
-          before_text: "理事会は、理事長が招集し、理事の過半数の出席をもって成立する。",
-          after_text: "理事会は、理事長が招集し、理事の過半数の出席をもって成立する。理事会は、WEB会議システム等を用いて開催することができる。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "追加"
-        },
-        {
-          id: "std-16",
-          category: "専有部分管理",
-          title: "専有部分のリフォーム事前届出制度",
-          article_number: "第17条",
-          description: "専有部分工事の事前届出と承認手続きの明確化",
-          change_description: "専有部分のリフォーム工事における騒音や振動等の近隣への影響を最小限に抑えるため、事前届出制度を整備。",
-          before_text: "専有部分の工事については、管理組合への事前連絡を要する。",
-          after_text: "専有部分の工事については、工事開始の14日前までに管理組合に届け出て、承認を得なければならない。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "強化"
-        },
-        {
-          id: "std-17",
-          category: "財務管理",
-          title: "管理費等の滞納対策強化",
-          article_number: "第25条",
-          description: "管理費等の滞納に対する措置の明確化と法的手続きの整備",
-          change_description: "管理費等の滞納が長期化するケースに対応するため、段階的な催告手続きと法的措置について規約に明文化。",
-          before_text: "管理費等の滞納者に対しては、督促を行う。",
-          after_text: "管理費等の滞納者に対しては、督促、催告を経て、法的措置を講じることができる。滞納期間が3ヶ月を超える場合は、理事会の決議により法的手続きを開始する。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "強化"
-        },
-        {
-          id: "std-18",
-          category: "環境対策",
-          title: "省エネルギー・環境配慮規定",
-          article_number: "第14条",
-          description: "省エネルギー設備導入と環境配慮に関する規定の新設",
-          change_description: "脱炭素社会実現に向けた取り組みとして、LED照明や省エネ設備の導入、ゴミの分別・リサイクル推進等について規約に盛り込む。",
-          before_text: "共用部分の照明等の管理について規定",
-          after_text: "共用部分においては、省エネルギー設備の導入に努める。廃棄物の分別・リサイクルを推進し、環境負荷の軽減を図る。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "新設"
-        },
-        {
-          id: "std-19",
-          category: "共用施設",
-          title: "共用施設の利用規定整備",
-          article_number: "第16条",
-          description: "集会室・キッズルーム等の共用施設利用に関する詳細規定",
-          change_description: "共用施設の利用需要が高まる中、公平かつ適正な利用を確保するため、予約方法、利用時間、利用料金等の詳細を規約に明文化。",
-          before_text: "共用施設の利用については、管理組合が定める規則による。",
-          after_text: "共用施設の利用については、事前予約制とし、利用時間は午前9時から午後9時までとする。利用料金及び予約方法は理事会が定める規則による。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "詳細化"
-        },
-        {
-          id: "std-20",
-          category: "ペット飼育",
-          title: "ペット飼育に関する規定の見直し",
-          article_number: "第19条",
-          description: "ペット飼育の適正化と近隣住民への配慮規定の強化",
-          change_description: "ペット飼育に関するトラブルの増加を受け、飼育可能なペットの種類・大きさ・頭数の制限、しつけ・健康管理の義務化等を詳細に規定。",
-          before_text: "ペットの飼育については、一定の条件の下で認める。",
-          after_text: "ペットの飼育については、小型犬・猫各1匹まで、事前届出制とし、ワクチン接種、去勢・避妊手術の実施、共用部分での排泄防止等を義務付ける。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "強化"
-        },
-        {
-          id: "std-21",
-          category: "緊急時対応",
-          title: "災害・緊急時対応体制の整備",
-          article_number: "第34条",
-          description: "地震・火災等の災害時及び緊急時の対応体制に関する規定",
-          change_description: "近年の自然災害の頻発を受け、災害時の初動対応、避難誘導、安否確認、復旧作業等について管理組合としての対応体制を規約に明文化。",
-          before_text: "緊急時の対応については、管理規約に定める。",
-          after_text: "災害・緊急時には、理事長を本部長とする緊急対策本部を設置する。居住者の安否確認、被害状況調査、関係機関との連絡調整を行う。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "新設"
-        },
-        {
-          id: "std-22",
-          category: "情報管理",
-          title: "個人情報保護に関する規定の強化",
-          article_number: "第35条",
-          description: "個人情報の適正な取得・利用・保管に関する規定の整備",
-          change_description: "個人情報保護法の改正に伴い、管理組合が取り扱う個人情報の適正な管理体制を確保するため、取得・利用目的の明確化等を規定。",
-          before_text: "個人情報の取扱いについては、法令を遵守する。",
-          after_text: "個人情報の取得・利用・保管については、利用目的を明確にし、適正な管理体制を確保する。第三者への提供は、法令に基づく場合又は本人の同意がある場合に限る。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "強化"
-        },
-        {
-          id: "std-23",
-          category: "通信設備",
-          title: "インターネット・通信設備に関する規定",
-          article_number: "第36条",
-          description: "光ファイバー等の通信設備整備と5G対応に関する規定",
-          change_description: "デジタル化社会の進展に伴い、高速インターネット環境の整備が不可欠となっている。光ファイバー設備の更新、5G基地局設置への対応等について規約に規定。",
-          before_text: "通信設備については、必要に応じて整備する。",
-          after_text: "管理組合は、居住者の利便性向上のため、光ファイバー等の高速通信設備の整備に努める。携帯電話事業者による基地局設置については、理事会で検討する。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "追加"
-        },
-        {
-          id: "std-24",
-          category: "セキュリティ",
-          title: "防犯・セキュリティ体制の強化",
-          article_number: "第37条",
-          description: "防犯カメラ・オートロック等のセキュリティ設備に関する規定",
-          change_description: "居住者の安全確保のため、防犯カメラの設置・更新、オートロックシステムの維持管理、警備会社との契約等について規約に明文化。",
-          before_text: "防犯設備については、適切に管理する。",
-          after_text: "管理組合は、防犯カメラ、オートロックシステム等の防犯設備を適切に維持管理し、必要に応じて更新・増設を行う。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "強化"
-        },
-        {
-          id: "std-25",
-          category: "バリアフリー",
-          title: "バリアフリー対応の推進",
-          article_number: "第38条",
-          description: "高齢者・障害者への配慮とバリアフリー設備の整備",
-          change_description: "高齢化社会の進展に伴い、バリアフリー対応の重要性が高まっている。手すりの設置、段差解消、点字表示等のバリアフリー設備について、計画的な整備を進める。",
-          before_text: "共用部分のバリアフリー化については、必要に応じて検討する。",
-          after_text: "管理組合は、高齢者・障害者等の利便性向上のため、共用部分のバリアフリー化を計画的に推進する。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "強化"
-        },
-        {
-          id: "std-26",
-          category: "外国人居住者",
-          title: "外国人居住者への対応",
-          article_number: "第40条",
-          description: "外国人居住者への情報提供と多言語対応に関する規定",
-          change_description: "外国人居住者の増加に伴い、管理規約の多言語対応、生活ルールの説明、緊急時の情報提供等について、適切な対応体制を整備。",
-          before_text: "外国人居住者への対応については、必要に応じて行う。",
-          after_text: "外国人居住者に対しては、管理規約の要約版を多言語で提供し、生活ルールの説明を行う。緊急時には、多言語による情報提供に努める。",
-          revision_year: "2024年",
-          status: "検討中",
-          change_type: "新設"
-        },
-        {
-          id: "std-27",
-          category: "民泊対応",
-          title: "民泊・短期賃貸に関する規制",
-          article_number: "第41条",
-          description: "住宅宿泊事業法に基づく民泊営業の制限に関する規定",
-          change_description: "住宅宿泊事業法の施行に伴い、マンション内での民泊営業について、管理組合としての方針を明確にする必要がある。",
-          before_text: "専有部分の使用については、住居以外の用途に供してはならない。",
-          after_text: "専有部分における住宅宿泊事業法に基づく民泊営業は、これを禁止する。短期賃貸についても、居住環境への影響を考慮し、理事会で個別に判断する。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "禁止"
-        },
-        {
-          id: "std-28",
-          category: "長期修繕",
-          title: "長期修繕計画の見直し頻度",
-          article_number: "第42条",
-          description: "長期修繕計画の定期的な見直しと修繕積立金の適正化",
-          change_description: "建築技術の進歩と材料費の変動に対応するため、長期修繕計画の見直し頻度を明確化し、修繕積立金の適正な水準を維持する仕組みを整備。",
-          before_text: "長期修繕計画については、必要に応じて見直しを行う。",
-          after_text: "長期修繕計画は、5年ごとに見直しを行い、必要に応じて修繕積立金の額を改定する。専門機関による建物診断を定期的に実施する。",
-          revision_year: "2024年",
-          status: "改正済",
-          change_type: "明確化"
-        }
-      ];
+      const query = `
+        SELECT 
+          id,
+          article as article_number,
+          title,
+          reason as description,
+          priority as category,
+          status,
+          CASE 
+            WHEN created_at >= '2024-01-01' THEN '2024年'
+            WHEN created_at >= '2023-01-01' THEN '2023年'
+            ELSE '2022年'
+          END as revision_year
+        FROM regulation_analysis_results 
+        ORDER BY 
+          CASE priority 
+            WHEN 'high' THEN 1 
+            WHEN 'medium' THEN 2 
+            WHEN 'low' THEN 3 
+          END, 
+          created_at DESC
+      `;
+      const result = await db.execute(query);
       
-      res.json(standardRegs);
+      res.json(result.rows);
     } catch (error) {
+      console.error('Error fetching standard regulations:', error);
       res.status(500).json({ error: "Failed to fetch standard regulations" });
     }
   });
