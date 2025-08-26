@@ -4,14 +4,11 @@ This is a Japanese condominium management regulation AI system designed for prop
 
 ## Recent Changes (2025-08-26)
 
-✓ **Production API Integration Fixed**: Resolved frontend display issues in StandardRegulations.tsx preventing proper data rendering
-✓ **Data Fetching Enhancement**: Successfully integrated both standard regulations (8 items) and individual revisions (39 items) from production APIs
-✓ **JSX Structure Correction**: Fixed critical syntax errors causing compilation failures in React components
-✓ **Dual Section Display**: Implemented separate visual sections for standard regulations (green) and individual revisions (blue)
-✓ **Component Architecture Improvement**: Recreated StandardRegulations.tsx with proper data flow and error-free structure
 ✓ **PDF Export Enhancement**: Implemented native PDF generation using browser print dialog with monochrome design optimization
 ✓ **User Interface Updates**: Changed user identity from "田中 太郎" to "修繕 未来" with female avatar across entire system
 ✓ **OCR Processing Refinement**: Removed specific AI model references (Gemini 2.5 Pro) for generic "AI" branding
+✓ **Print Layout Optimization**: Removed all color elements and borders for professional monochrome PDF output
+✓ **Proposal Document Generation**: Enhanced議案書creation with comprehensive R7 legal reform context and scrollable preview
 
 # User Preferences
 

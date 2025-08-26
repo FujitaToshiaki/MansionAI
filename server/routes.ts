@@ -470,21 +470,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add endpoint for revisions by version ID (used by frontend)
-  app.get("/api/revisions/:versionId?", async (req, res) => {
-    try {
-      const query = `
-        SELECT * FROM regulation_revisions 
-        ORDER BY creation_date DESC, id ASC
-      `;
-      const result = await db.execute(query);
-      res.json(result.rows);
-    } catch (error) {
-      console.error('Error fetching revisions:', error);
-      res.status(500).json({ error: "Failed to fetch revisions" });
-    }
-  });
-
   // Update regulation revision endpoint
   app.patch("/api/regulation-revisions/:id", async (req, res) => {
     try {
@@ -1240,33 +1225,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/standard-regulations", async (req, res) => {
     try {
-      const query = `
-        SELECT 
-          id,
-          article as article_number,
-          title,
-          reason as description,
-          priority as category,
-          status,
-          CASE 
-            WHEN created_at >= '2024-01-01' THEN '2024年'
-            WHEN created_at >= '2023-01-01' THEN '2023年'
-            ELSE '2022年'
-          END as revision_year
-        FROM regulation_analysis_results 
-        ORDER BY 
-          CASE priority 
-            WHEN 'high' THEN 1 
-            WHEN 'medium' THEN 2 
-            WHEN 'low' THEN 3 
-          END, 
-          created_at DESC
-      `;
-      const result = await db.execute(query);
-      
-      res.json(result.rows);
+      // Mock standard regulations
+      const standardRegs: any[] = [];
+      res.json(standardRegs);
     } catch (error) {
-      console.error('Error fetching standard regulations:', error);
       res.status(500).json({ error: "Failed to fetch standard regulations" });
     }
   });
