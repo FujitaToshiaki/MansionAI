@@ -470,6 +470,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add endpoint for revisions by version ID (used by frontend)
+  app.get("/api/revisions/:versionId?", async (req, res) => {
+    try {
+      const query = `
+        SELECT * FROM regulation_revisions 
+        ORDER BY creation_date DESC, id ASC
+      `;
+      const result = await db.execute(query);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching revisions:', error);
+      res.status(500).json({ error: "Failed to fetch revisions" });
+    }
+  });
+
   // Update regulation revision endpoint
   app.patch("/api/regulation-revisions/:id", async (req, res) => {
     try {
@@ -1225,84 +1240,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/standard-regulations", async (req, res) => {
     try {
-      // Standard regulations based on R7 amendments
-      const standardRegs = [
-        {
-          id: "std-1",
-          category: "総会決議要件",
-          title: "総会決議における多数決原則の見直し",
-          article_number: "第47条",
-          description: "一定の軽微な共用部分の変更について過半数決議で可能となった改正内容",
-          revision_year: "2024年",
-          status: "改正済"
-        },
-        {
-          id: "std-2", 
-          category: "IT・デジタル化",
-          title: "ITシステム活用規定の追加",
-          article_number: "第30条",
-          description: "管理組合業務の効率化を図るためのITシステム導入に関する規定",
-          revision_year: "2024年",
-          status: "改正済"
-        },
-        {
-          id: "std-3",
-          category: "修繕積立金",
-          title: "修繕積立金の保全措置の促進",
-          article_number: "第28条", 
-          description: "修繕積立金の保全措置強化により管理組合の資産保護を図る改正",
-          revision_year: "2024年",
-          status: "改正済"
-        },
-        {
-          id: "std-4",
-          category: "管理人制度",
-          title: "国際管理人制度の活用に係る手続き",
-          article_number: "第31条の3",
-          description: "管理組合の担い手不足対応として外部専門家活用手続きを明文化",
-          revision_year: "2024年",
-          status: "検討中"
-        },
-        {
-          id: "std-5",
-          category: "防火・防災",
-          title: "防火管理者の選任",
-          article_number: "第32条の2",
-          description: "消防法の規定により防火管理体制の明確化を図る改正",
-          revision_year: "2024年",
-          status: "改正済"
-        },
-        {
-          id: "std-6",
-          category: "データ管理",
-          title: "クラウドストレージ活用規定",
-          article_number: "第33条",
-          description: "文書管理の効率化と災害対策としてクラウド活用に関する規定を新設",
-          revision_year: "2024年",
-          status: "検討中"
-        },
-        {
-          id: "std-7",
-          category: "外部専門家活用詳細",
-          title: "外部専門家活用パターンの改訂",
-          article_number: "別添1",
-          description: "理事・監事外部専門家型、理事長外部専門家型、外部管理者型の3類型を詳細化",
-          revision_year: "2024年",
-          status: "検討中"
-        },
-        {
-          id: "std-8",
-          category: "管理情報提供",
-          title: "管理情報提供様式の改訂",
-          article_number: "別添4",
-          description: "管理情報提供様式において役員総数等の記載方法を改訂",
-          revision_year: "2024年",
-          status: "改正済"
-        }
-      ];
+      const query = `
+        SELECT 
+          id,
+          article as article_number,
+          title,
+          reason as description,
+          priority as category,
+          status,
+          CASE 
+            WHEN created_at >= '2024-01-01' THEN '2024年'
+            WHEN created_at >= '2023-01-01' THEN '2023年'
+            ELSE '2022年'
+          END as revision_year
+        FROM regulation_analysis_results 
+        ORDER BY 
+          CASE priority 
+            WHEN 'high' THEN 1 
+            WHEN 'medium' THEN 2 
+            WHEN 'low' THEN 3 
+          END, 
+          created_at DESC
+      `;
+      const result = await db.execute(query);
       
-      res.json(standardRegs);
+      res.json(result.rows);
     } catch (error) {
+      console.error('Error fetching standard regulations:', error);
       res.status(500).json({ error: "Failed to fetch standard regulations" });
     }
   });
