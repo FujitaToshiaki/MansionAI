@@ -23,6 +23,7 @@ import AIAgentHistory from "@/pages/AIAgentHistory";
 import AIAgentExecutionDetail from "@/pages/AIAgentExecutionDetail";
 import RevisionYearList from "@/pages/RevisionYearList";
 import RevisionYearDetail from "@/pages/RevisionYearDetail";
+import Reports from "@/pages/Reports";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -53,6 +54,7 @@ function Router() {
         <Route path="/condominiums/:condominiumId/minutes/:minuteId" component={MinuteDetail} />
         <Route path="/revision-years" component={RevisionYearList} />
         <Route path="/revision-years/:id" component={RevisionYearDetail} />
+        <Route path="/reports" component={Reports} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
