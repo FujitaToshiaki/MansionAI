@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedRegulationRevisions } from "./seedRegulationRevisions";
+import { seedRegulationAnalysisResults } from "./seedRegulationAnalysisResults";
 
 const app = express();
 app.use(express.json());
@@ -43,6 +44,13 @@ app.use((req, res, next) => {
     await seedRegulationRevisions();
   } catch (error) {
     console.error("Failed to seed regulation revisions:", error);
+  }
+
+  // Seed regulation analysis results data if not present
+  try {
+    await seedRegulationAnalysisResults();
+  } catch (error) {
+    console.error("Failed to seed regulation analysis results:", error);
   }
 
   const server = await registerRoutes(app);
