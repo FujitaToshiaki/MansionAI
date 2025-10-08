@@ -15,6 +15,14 @@ export async function seedRegulationRevisions() {
 
     console.log("Seeding regulation_revisions data...");
 
+    // まず revision_groups にグループを作成（存在しない場合）
+    const groupId = "5584b0ff-6215-4511-9aa5-b7bfa13dae15";
+    await pool.query(`
+      INSERT INTO revision_groups (id, title, version, description, status, created_at, updated_at)
+      VALUES ($1, '令和7年度改訂対応', 'R7', 'マンション標準管理規約の令和7年度改正に基づく規約改訂項目', 'active', NOW(), NOW())
+      ON CONFLICT (id) DO NOTHING
+    `, [groupId]);
+
     const revisions = [
       {
         category: "充電設備",
