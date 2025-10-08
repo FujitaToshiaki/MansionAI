@@ -2,24 +2,36 @@ import { pool } from "./db";
 
 export async function seedRegulationAnalysisResults() {
   try {
+    console.log("[SEED] Starting regulation_analysis_results seed check...");
+    
     // Check if data already exists
     const { rows } = await pool.query('SELECT COUNT(*) FROM regulation_analysis_results');
     const count = parseInt(rows[0].count);
     
+    console.log(`[SEED] Found ${count} existing regulation_analysis_results records`);
+    
     if (count > 0) {
-      console.log(`regulation_analysis_results already has ${count} records. Skipping seed.`);
+      console.log(`[SEED] regulation_analysis_results already has ${count} records. Skipping seed.`);
       return;
     }
 
-    console.log("Seeding regulation_analysis_results data...");
+    console.log("[SEED] Starting to seed regulation_analysis_results data...");
 
     // First, ensure the condominium exists
     const condominiumId = "a7af9126-67ff-47d9-9c24-cf4054aeb63c";
-    await pool.query(`
-      INSERT INTO condominiums (id, name, address, total_units, completion_date, management_company, created_at, updated_at)
-      VALUES ($1, 'メゾンドオプテージ', '東京都港区', 50, '2010-01-01', '株式会社オプテージマネジメント', NOW(), NOW())
-      ON CONFLICT (id) DO NOTHING
-    `, [condominiumId]);
+    console.log(`[SEED] Ensuring condominium ${condominiumId} exists...`);
+    
+    try {
+      await pool.query(`
+        INSERT INTO condominiums (id, name, address, total_units, completion_date, management_company, created_at, updated_at)
+        VALUES ($1, 'メゾンドオプテージ', '東京都港区', 50, '2010-01-01', '株式会社オプテージマネジメント', NOW(), NOW())
+        ON CONFLICT (id) DO NOTHING
+      `, [condominiumId]);
+      console.log(`[SEED] Condominium insert/update completed`);
+    } catch (condoError) {
+      console.error("[SEED] Error inserting condominium:", condoError);
+      throw condoError;
+    }
 
     const analysisResults = [
       {
@@ -187,35 +199,45 @@ export async function seedRegulationAnalysisResults() {
     ];
 
     // Insert all analysis results
+    console.log(`[SEED] Inserting ${analysisResults.length} regulation_analysis_results records...`);
+    let insertedCount = 0;
+    
     for (const result of analysisResults) {
-      await pool.query(`
-        INSERT INTO regulation_analysis_results (
-          id, condominium_id, priority, article, title, reason, 
-          current_text, proposed_text, legal_basis, law_revision_required, 
-          impact, implementation_notes, data_sources, change_history, status, 
-          created_at, updated_at
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
-      `, [
-        result.id,
-        result.condominium_id,
-        result.priority,
-        result.article,
-        result.title,
-        result.reason,
-        result.current_text,
-        result.proposed_text,
-        result.legal_basis,
-        result.law_revision_required,
-        result.impact,
-        result.implementation_notes,
-        result.data_sources || null,
-        result.change_history || null,
-        result.status
-      ]);
+      try {
+        await pool.query(`
+          INSERT INTO regulation_analysis_results (
+            id, condominium_id, priority, article, title, reason, 
+            current_text, proposed_text, legal_basis, law_revision_required, 
+            impact, implementation_notes, data_sources, change_history, status, 
+            created_at, updated_at
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+        `, [
+          result.id,
+          result.condominium_id,
+          result.priority,
+          result.article,
+          result.title,
+          result.reason,
+          result.current_text,
+          result.proposed_text,
+          result.legal_basis,
+          result.law_revision_required,
+          result.impact,
+          result.implementation_notes,
+          result.data_sources || null,
+          result.change_history || null,
+          result.status
+        ]);
+        insertedCount++;
+        console.log(`[SEED] Inserted record ${insertedCount}/${analysisResults.length}: ${result.title}`);
+      } catch (insertError: any) {
+        console.error(`[SEED] Failed to insert record ${result.title}:`, insertError.message);
+        throw insertError;
+      }
     }
 
-    console.log(`Successfully seeded ${analysisResults.length} regulation_analysis_results records.`);
+    console.log(`[SEED] Successfully seeded ${insertedCount} regulation_analysis_results records.`);
   } catch (error) {
     console.error('Error seeding regulation_analysis_results:', error);
     throw error;
