@@ -199,7 +199,7 @@ class Activity(Base):
     description = Column(Text, nullable=False)
     status = Column(Text, nullable=False)
     user_id = Column(String, ForeignKey("users.id"))
-    metadata = Column(JSONB)
+    activity_metadata = Column("metadata", JSONB)  # Renamed to avoid SQLAlchemy reserved name
     created_at = Column(DateTime, default=func.now())
 
     # Relationships
@@ -214,7 +214,7 @@ class KnowledgeDocument(Base):
     title = Column(Text, nullable=False)
     type = Column(Text, nullable=False)
     content = Column(Text, nullable=False)
-    metadata = Column(JSONB)
+    doc_metadata = Column("metadata", JSONB)  # Renamed to avoid SQLAlchemy reserved name
     original_file_name = Column(Text)
     uploaded_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now())
@@ -232,7 +232,7 @@ class KnowledgeChunk(Base):
     chunk_index = Column(Integer, nullable=False)
     content = Column(Text, nullable=False)
     embedding = Column(Text)
-    metadata = Column(JSONB)
+    chunk_metadata = Column("metadata", JSONB)  # Renamed to avoid SQLAlchemy reserved name
     created_at = Column(DateTime, default=func.now())
 
     # Relationships

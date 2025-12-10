@@ -147,7 +147,7 @@ async def upload_document(
             type=request.type,
             content=request.content,
             original_file_name=request.original_file_name,
-            metadata=request.metadata or {},
+            doc_metadata=request.metadata or {},
         )
         db.add(document)
         db.flush()
@@ -161,7 +161,7 @@ async def upload_document(
                 document_id=document.id,
                 chunk_index=i,
                 content=chunk_content,
-                metadata={
+                chunk_metadata={
                     "document_title": request.title,
                     "document_type": request.type,
                     "chunk_index": i,
@@ -223,7 +223,7 @@ async def get_documents(condominium_id: str, db: Session = Depends(get_db)):
                 "title": doc.title,
                 "type": doc.type,
                 "content": doc.content[:200] + "..." if len(doc.content) > 200 else doc.content,
-                "metadata": doc.metadata,
+                "metadata": doc.doc_metadata,
                 "uploadedAt": doc.uploaded_at.isoformat() if doc.uploaded_at else None,
                 "chunkCount": chunk_count
             })
@@ -252,7 +252,7 @@ async def get_documents_by_type(
                 "title": doc.title,
                 "type": doc.type,
                 "content": doc.content[:200] + "..." if len(doc.content) > 200 else doc.content,
-                "metadata": doc.metadata
+                "metadata": doc.doc_metadata
             }
             for doc in documents
         ]
@@ -328,7 +328,7 @@ async def search_knowledge(request: SearchRequest, db: Session = Depends(get_db)
                     document_id=c.document_id,
                     chunk_index=c.chunk_index,
                     content=c.content,
-                    metadata=c.metadata
+                    metadata=c.chunk_metadata
                 )
                 for c in chunks
             ],

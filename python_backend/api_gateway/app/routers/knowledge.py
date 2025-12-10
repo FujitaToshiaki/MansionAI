@@ -97,7 +97,7 @@ async def get_knowledge_documents(condominium_id: str, db: Session = Depends(get
                     "title": doc.title,
                     "type": doc.type,
                     "content": doc.content[:200] + "..." if len(doc.content) > 200 else doc.content,
-                    "metadata": doc.metadata,
+                    "metadata": doc.doc_metadata,
                     "uploadedAt": doc.uploaded_at.isoformat() if doc.uploaded_at else None,
                     "chunkCount": chunk_count
                 })
@@ -302,7 +302,7 @@ async def search_knowledge(
                     "documentId": c.document_id,
                     "chunkIndex": c.chunk_index,
                     "content": c.content,
-                    "metadata": c.metadata
+                    "metadata": c.chunk_metadata
                 }
                 for c in chunks
             ],
@@ -503,7 +503,7 @@ async def load_minutes(condominium_id: str, db: Session = Depends(get_db)):
             title="メゾンドオプテージ議事録データ",
             type="meeting_minutes",
             content=sample_content,
-            metadata={"source": "manual_load"},
+            doc_metadata={"source": "manual_load"},
             uploaded_at=datetime.now(),
             updated_at=datetime.now()
         )

@@ -94,7 +94,7 @@ async def get_recent_activities(db: Session = Depends(get_db), limit: int = 10):
                 description=activity.description,
                 status=activity.status,
                 user_id=activity.user_id,
-                metadata=activity.metadata,
+                metadata=activity.activity_metadata,
                 created_at=activity.created_at,
                 time_ago=get_time_ago(activity.created_at)
             ))
