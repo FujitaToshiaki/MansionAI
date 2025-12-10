@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # API Gateway Service (Public Subnet)
+  api-gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379/0
+      - OCR_SERVICE_URL=http://ocr-service:8001
+      - KNOWLEDGE_SERVICE_URL=http://knowledge-service:8002
+      - ANALYSIS_SERVICE_URL=http://analysis-service:8003
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - redis
+      - ocr-service
+      - knowledge-service
+      - analysis-service
+    networks:
+      - public
+      - private
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # OCR Service (Private Subnet 1)
+  ocr-service:
+    build:
+      context: ./ocr_service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PORT=8001
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Knowledge/RAG Service (Private Subnet 2)
+  knowledge-service:
+    build:
+      context: ./knowledge_service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CHUNK_SIZE=2000
+      - CHUNK_OVERLAP=400
+      - PORT=8002
+    depends_on:
+      - redis
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Analysis Service (Private Subnet 2)
+  analysis-service:
+    build:
+      context: ./analysis_service
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PORT=8003
+    depends_on:
+      - redis
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache (Private Subnet 3)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Celery Worker for Analysis Service
+  celery-worker:
+    build:
+      context: ./analysis_service
+      dockerfile: Dockerfile
+    command: celery -A app.tasks worker --loglevel=info
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - redis
+      - analysis-service
+    networks:
+      - private
+
+networks:
+  public:
+    driver: bridge
+  private:
+    driver: bridge
+    internal: true
+
+volumes:
+  redis_data:
