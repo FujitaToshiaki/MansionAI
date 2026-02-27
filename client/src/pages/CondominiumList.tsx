@@ -1,16 +1,38 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Clock, AlertTriangle, Search, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckCircle, Clock, AlertTriangle, Search, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CondominiumList() {
+  const { toast } = useToast();
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+
   const { data: condominiums, isLoading } = useQuery({
     queryKey: ['/api/condominiums'],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/condominiums/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/condominiums'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      toast({ title: "削除完了", description: "マンションを削除しました。" });
+      setDeleteTarget(null);
+    },
+    onError: () => {
+      toast({ title: "エラー", description: "削除に失敗しました。", variant: "destructive" });
+    },
   });
 
   if (isLoading) {
@@ -128,6 +150,15 @@ export default function CondominiumList() {
                       <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-900">
                         編集
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-900"
+                        onClick={() => setDeleteTarget({ id: condo.id, name: condo.name })}
+                      >
+                        <Trash2 size={14} className="mr-1" />
+                        削除
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -142,6 +173,29 @@ export default function CondominiumList() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>マンションの削除</DialogTitle>
+            <DialogDescription>
+              「{deleteTarget?.name}」を削除します。この操作は取り消せません。本当に削除しますか？
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+              キャンセル
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "削除中..." : "削除する"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
