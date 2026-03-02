@@ -25,7 +25,6 @@ export interface IStorage {
   getCondominiumById(id: string): Promise<Condominium | undefined>;
   createCondominium(condominium: InsertCondominium): Promise<Condominium>;
   updateCondominium(id: string, updates: Partial<Condominium>): Promise<Condominium>;
-  deleteCondominium(id: string): Promise<void>;
   
   // Document methods
   getDocumentsByCondominiumId(condominiumId: string): Promise<Document[]>;
@@ -373,14 +372,6 @@ export class MemStorage implements IStorage {
     const updated = { ...existing, ...updates };
     this.condominiums.set(id, updated);
     return updated;
-  }
-
-  async deleteCondominium(id: string): Promise<void> {
-    const existing = this.condominiums.get(id);
-    if (!existing) {
-      throw new Error("Condominium not found");
-    }
-    this.condominiums.delete(id);
   }
 
   // Document methods

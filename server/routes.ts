@@ -83,18 +83,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/condominiums/:id", async (req, res) => {
-    try {
-      await storage.deleteCondominium(req.params.id);
-      res.json({ success: true });
-    } catch (error: any) {
-      if (error.message === "Condominium not found") {
-        return res.status(404).json({ error: "Condominium not found" });
-      }
-      res.status(500).json({ error: "Failed to delete condominium" });
-    }
-  });
-
   // Documents endpoints
   app.get("/api/condominiums/:id/documents", async (req, res) => {
     try {
