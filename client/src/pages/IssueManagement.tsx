@@ -9,10 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { AlertTriangle, MessageSquare, Clock, CheckCircle2, Plus, Bot, Filter } from "lucide-react";
+import { AlertTriangle, MessageSquare, Clock, CheckCircle2, Plus, Bot, Filter, History } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { SubNav } from "@/components/SubNav";
+import type { SubNavItem } from "@/components/SubNav";
 
 interface Issue {
   id: number;
@@ -184,6 +186,11 @@ function getUrgencyBadge(urgency: Issue["urgency"]) {
   }
 }
 
+const SUBNAV_ITEMS: SubNavItem[] = [
+  { label: "チャット相談", path: "/consultation/chat", icon: MessageSquare },
+  { label: "相談履歴", path: "/consultation/history", icon: History },
+];
+
 export default function IssueManagement() {
   const { id } = useParams();
   const { toast } = useToast();
@@ -349,47 +356,50 @@ export default function IssueManagement() {
         </Dialog>
       </div>
 
+      {/* SubNav */}
+      <SubNav items={SUBNAV_ITEMS} />
+
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-4">
-        <Card className="border-0 shadow-md bg-red-500 text-white">
+        <Card className="border border-red-200 shadow-sm bg-red-50">
           <CardContent className="pt-6 pb-5">
             <div className="flex items-center gap-4">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <AlertTriangle className="w-6 h-6 text-white" />
+              <div className="p-2 bg-red-100 rounded-lg">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
               </div>
               <div>
-                <p className="text-sm text-white/80 font-medium">未対応件数</p>
-                <p className="text-4xl font-bold text-white leading-tight" data-testid="text-count-unresolved">
+                <p className="text-sm text-red-600/80 font-medium">未対応件数</p>
+                <p className="text-4xl font-bold text-red-700 leading-tight" data-testid="text-count-unresolved">
                   {unresolved}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-md bg-yellow-500 text-white">
+        <Card className="border border-amber-200 shadow-sm bg-amber-50">
           <CardContent className="pt-6 pb-5">
             <div className="flex items-center gap-4">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <Clock className="w-6 h-6 text-white" />
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <Clock className="w-6 h-6 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm text-white/80 font-medium">対応中</p>
-                <p className="text-4xl font-bold text-white leading-tight" data-testid="text-count-inprogress">
+                <p className="text-sm text-amber-600/80 font-medium">対応中</p>
+                <p className="text-4xl font-bold text-amber-700 leading-tight" data-testid="text-count-inprogress">
                   {inProgress}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-md bg-orange-500 text-white">
+        <Card className="border border-orange-200 shadow-sm bg-orange-50">
           <CardContent className="pt-6 pb-5">
             <div className="flex items-center gap-4">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <CheckCircle2 className="w-6 h-6 text-white" />
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <CheckCircle2 className="w-6 h-6 text-orange-500" />
               </div>
               <div>
-                <p className="text-sm text-white/80 font-medium">今月受付件数</p>
-                <p className="text-4xl font-bold text-white leading-tight" data-testid="text-count-thismonth">
+                <p className="text-sm text-orange-600/80 font-medium">今月受付件数</p>
+                <p className="text-4xl font-bold text-orange-700 leading-tight" data-testid="text-count-thismonth">
                   {thisMonth}
                 </p>
               </div>

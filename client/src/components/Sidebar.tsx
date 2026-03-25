@@ -101,6 +101,7 @@ const navEntries: NavEntry[] = [
     label: "管理業務相談",
     paths: ["/consultation/chat", "/consultation/history"],
     items: [
+      { label: "問合せ管理", path: "/condominiums" },
       { label: "チャット相談", path: "/consultation/chat" },
       { label: "相談履歴", path: "/consultation/history" },
     ],
