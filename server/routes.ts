@@ -754,7 +754,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: parsed.error.errors[0].message });
       }
 
-      const minutesText = await generateMinutes(parsed.data);
+      const [minutesText] = await Promise.all([
+        generateMinutes(parsed.data),
+        new Promise(resolve => setTimeout(resolve, 2500)),
+      ]);
       res.json({ minutes: minutesText });
     } catch (error) {
       console.error("Error generating minutes:", error);
