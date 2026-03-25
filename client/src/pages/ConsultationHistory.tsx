@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { History, Star, MessageSquare } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 import { Link } from "wouter";
 import {
   Dialog,
@@ -71,12 +72,10 @@ export default function ConsultationHistory() {
           <History className="mr-2 h-6 w-6 text-orange-500" />
           相談履歴
         </h1>
-        <Link href={`/consultation/chat?condominiumId=${condominiumId}`}>
-          <Button className="bg-orange-500 hover:bg-orange-600">
-            <MessageSquare className="mr-2 h-4 w-4" />
-            新規相談を開始
-          </Button>
-        </Link>
+        <SubNav items={[
+          { label: "チャット相談", path: `/consultation/chat?condominiumId=${condominiumId}`, icon: MessageSquare },
+          { label: "相談履歴", path: `/consultation/history?condominiumId=${condominiumId}`, icon: History },
+        ]} />
       </div>
 
       {/* Summary Cards */}

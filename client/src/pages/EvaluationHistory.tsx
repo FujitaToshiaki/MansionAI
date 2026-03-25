@@ -14,8 +14,11 @@ import {
   ChevronRight, 
   History,
   FileText,
-  Star
+  Star,
+  ClipboardCheck,
+  BarChart2
 } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +67,15 @@ export default function EvaluationHistory() {
         <ChevronRight className="w-4 h-4 mx-2" />
         <span className="text-gray-900 font-medium">評価履歴・推移</span>
       </nav>
+
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">管理適正評価</h1>
+        <SubNav items={[
+          { label: "セルフチェック実施", path: `/evaluation/check?condominiumId=${condominiumId}`, icon: ClipboardCheck },
+          { label: "スコア詳細・改善提案", path: `/evaluation/score?condominiumId=${condominiumId}`, icon: BarChart2 },
+          { label: "評価履歴・推移", path: `/evaluation/history?condominiumId=${condominiumId}`, icon: History },
+        ]} />
+      </div>
 
       {/* Line Chart Section */}
       <Card>

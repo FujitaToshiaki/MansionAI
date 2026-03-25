@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, FileText, Mic, Sparkles } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 
 const mockActions = [
   {
@@ -102,9 +103,17 @@ export default function MinutesActions() {
         <span>決定事項管理</span>
       </nav>
 
-      <div className="flex items-center space-x-2">
-        <CheckSquare className="w-8 h-8 text-orange-600" />
-        <h1 className="text-2xl font-bold text-gray-900">決定事項管理</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <CheckSquare className="w-8 h-8 text-orange-600" />
+          <h1 className="text-2xl font-bold text-gray-900">決定事項管理</h1>
+        </div>
+        <SubNav items={[
+          { label: "議事録一覧", path: `/minutes/list?condominiumId=${condominiumId}`, icon: FileText },
+          { label: "音声・メモ取込", path: `/minutes/import?condominiumId=${condominiumId}`, icon: Mic },
+          { label: "AI議事録生成", path: `/minutes/generate?condominiumId=${condominiumId}`, icon: Sparkles },
+          { label: "決定事項管理", path: `/minutes/actions?condominiumId=${condominiumId}`, icon: CheckSquare },
+        ]} />
       </div>
 
       <Card>

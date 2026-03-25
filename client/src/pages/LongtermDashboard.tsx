@@ -12,8 +12,10 @@ import {
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
-  AlertTriangle
+  AlertTriangle,
+  LayoutDashboard
 } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 
 export default function LongtermDashboard() {
   const params = new URLSearchParams(useSearch());
@@ -54,32 +56,13 @@ export default function LongtermDashboard() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">長期修繕計画ダッシュボード</h1>
-        <div className="flex gap-2">
-          <Link href={`/longterm/items?condominiumId=${condominiumId}`}>
-            <Button variant="outline" size="sm">
-              <List className="w-4 h-4 mr-2" />
-              修繕項目一覧
-            </Button>
-          </Link>
-          <Link href={`/longterm/history?condominiumId=${condominiumId}`}>
-            <Button variant="outline" size="sm">
-              <History className="w-4 h-4 mr-2" />
-              修繕履歴
-            </Button>
-          </Link>
-          <Link href={`/longterm/simulation?condominiumId=${condominiumId}`}>
-            <Button variant="outline" size="sm">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              積立金推移
-            </Button>
-          </Link>
-          <Link href={`/longterm/analysis?condominiumId=${condominiumId}`}>
-            <Button variant="default" size="sm" className="bg-orange-600 hover:bg-orange-700">
-              <BarChart className="w-4 h-4 mr-2" />
-              AI分析
-            </Button>
-          </Link>
-        </div>
+        <SubNav items={[
+          { label: "修繕計画ダッシュボード", path: `/longterm/dashboard?condominiumId=${condominiumId}`, icon: LayoutDashboard },
+          { label: "修繕項目一覧", path: `/longterm/items?condominiumId=${condominiumId}`, icon: List },
+          { label: "修繕履歴", path: `/longterm/history?condominiumId=${condominiumId}`, icon: History },
+          { label: "積立金シミュレーション", path: `/longterm/simulation?condominiumId=${condominiumId}`, icon: TrendingUp },
+          { label: "AI見直し分析", path: `/longterm/analysis?condominiumId=${condominiumId}`, icon: BarChart },
+        ]} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles, LayoutDashboard, List, History, TrendingUp, BarChart } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 
 export default function LongtermItems() {
   const params = new URLSearchParams(useSearch());
@@ -46,25 +47,33 @@ export default function LongtermItems() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">修繕項目一覧</h1>
-        <div className="flex gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={16} />
-            <Input type="text" placeholder="項目名で検索..." className="pl-10 w-64" />
-          </div>
-          <Select defaultValue="all">
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="工事区分" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">すべての区分</SelectItem>
-              <SelectItem value="ext">共通・外構</SelectItem>
-              <SelectItem value="roof">屋上・防水</SelectItem>
-              <SelectItem value="wall">外壁・塗装</SelectItem>
-              <SelectItem value="water">給排水設備</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="default" className="bg-orange-600 hover:bg-orange-700">新規項目追加</Button>
+        <SubNav items={[
+          { label: "修繕計画ダッシュボード", path: `/longterm/dashboard?condominiumId=${condominiumId}`, icon: LayoutDashboard },
+          { label: "修繕項目一覧", path: `/longterm/items?condominiumId=${condominiumId}`, icon: List },
+          { label: "修繕履歴", path: `/longterm/history?condominiumId=${condominiumId}`, icon: History },
+          { label: "積立金シミュレーション", path: `/longterm/simulation?condominiumId=${condominiumId}`, icon: TrendingUp },
+          { label: "AI見直し分析", path: `/longterm/analysis?condominiumId=${condominiumId}`, icon: BarChart },
+        ]} />
+      </div>
+
+      <div className="flex gap-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 text-gray-400" size={16} />
+          <Input type="text" placeholder="項目名で検索..." className="pl-10 w-64" />
         </div>
+        <Select defaultValue="all">
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="工事区分" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">すべての区分</SelectItem>
+            <SelectItem value="ext">共通・外構</SelectItem>
+            <SelectItem value="roof">屋上・防水</SelectItem>
+            <SelectItem value="wall">外壁・塗装</SelectItem>
+            <SelectItem value="water">給排水設備</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="default" className="bg-orange-600 hover:bg-orange-700">新規項目追加</Button>
       </div>
 
       <Card className="bg-white">

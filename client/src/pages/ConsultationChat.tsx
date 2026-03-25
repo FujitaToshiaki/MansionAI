@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, Send, User, Bot, HelpCircle } from "lucide-react";
+import { MessageSquare, Send, User, Bot, HelpCircle, History } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 import { Link } from "wouter";
 
 interface Message {
@@ -79,11 +80,17 @@ export default function ConsultationChat() {
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500">
-        <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">マンション詳細</Link>
-        <span className="mx-2">{'>'}</span>
-        <span>チャット相談</span>
-      </nav>
+      <div className="flex items-center justify-between">
+        <nav className="text-sm text-gray-500">
+          <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">マンション詳細</Link>
+          <span className="mx-2">{'>'}</span>
+          <span>チャット相談</span>
+        </nav>
+        <SubNav items={[
+          { label: "チャット相談", path: `/consultation/chat?condominiumId=${condominiumId}`, icon: MessageSquare },
+          { label: "相談履歴", path: `/consultation/history?condominiumId=${condominiumId}`, icon: History },
+        ]} />
+      </div>
 
       <div className="flex flex-1 gap-4 overflow-hidden">
         {/* Main Chat Area */}

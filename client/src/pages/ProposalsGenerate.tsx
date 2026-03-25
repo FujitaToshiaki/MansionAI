@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
-import { Sparkles, Save, ArrowLeft, ExternalLink, Loader2 } from "lucide-react";
+import { Sparkles, Save, ArrowLeft, ExternalLink, Loader2, FileText, Edit2 } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ProposalsGenerate() {
@@ -65,9 +66,10 @@ export default function ProposalsGenerate() {
           <Sparkles className="text-orange-500" />
           新規議案作成 (AIアシスト)
         </h1>
-        <Button variant="outline" onClick={() => setLocation(`/proposals/list?condominiumId=${condominiumId}`)}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> 一覧に戻る
-        </Button>
+        <SubNav items={[
+          { label: "議案書一覧", path: `/proposals/list?condominiumId=${condominiumId}`, icon: FileText },
+          { label: "AI議案書生成", path: `/proposals/generate?condominiumId=${condominiumId}`, icon: Sparkles },
+        ]} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

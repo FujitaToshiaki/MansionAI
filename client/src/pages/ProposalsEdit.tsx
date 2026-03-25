@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Link } from "wouter";
-import { Save, Download, ArrowLeft, Loader2, FileText, CheckCircle2 } from "lucide-react";
+import { Save, Download, ArrowLeft, Loader2, FileText, CheckCircle2, Sparkles, Edit2 } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ProposalsEdit() {
@@ -103,6 +104,14 @@ export default function ProposalsEdit() {
             <Save className="w-4 h-4 mr-2" /> 保存
           </Button>
         </div>
+      </div>
+
+      {/* Sub Navigation */}
+      <div className="flex justify-end mb-2 flex-shrink-0">
+        <SubNav items={[
+          { label: "議案書一覧", path: `/proposals/list?condominiumId=${condominiumId}`, icon: FileText },
+          { label: "AI議案書生成", path: `/proposals/generate?condominiumId=${condominiumId}`, icon: Sparkles },
+        ]} />
       </div>
 
       {/* Main Content Area */}

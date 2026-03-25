@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sparkles, Save, ArrowRight, Loader2 } from "lucide-react";
+import { Sparkles, Save, ArrowRight, Loader2, FileText, Mic, CheckSquare } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 import { useToast } from "@/hooks/use-toast";
 
 const mockGeneratedMinutes = `【第12回理事会議事録】
@@ -79,24 +80,32 @@ export default function MinutesGenerate() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">AI議事録生成</h1>
-        <Button 
-          className="bg-orange-600 hover:bg-orange-700" 
-          onClick={handleGenerate}
-          disabled={isGenerating}
-          data-testid="button-generate-minutes"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              生成中...
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 mr-2" />
-              AI議事録を生成
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-3">
+          <SubNav items={[
+            { label: "議事録一覧", path: `/minutes/list?condominiumId=${condominiumId}`, icon: FileText },
+            { label: "音声・メモ取込", path: `/minutes/import?condominiumId=${condominiumId}`, icon: Mic },
+            { label: "AI議事録生成", path: `/minutes/generate?condominiumId=${condominiumId}`, icon: Sparkles },
+            { label: "決定事項管理", path: `/minutes/actions?condominiumId=${condominiumId}`, icon: CheckSquare },
+          ]} />
+          <Button 
+            className="bg-orange-600 hover:bg-orange-700" 
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            data-testid="button-generate-minutes"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                生成中...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI議事録を生成
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-250px)]">

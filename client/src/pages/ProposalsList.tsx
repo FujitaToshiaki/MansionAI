@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { BookOpen, FileText, Plus, ArrowRight } from "lucide-react";
+import { BookOpen, FileText, Plus, ArrowRight, Sparkles, Edit2 } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 
 export default function ProposalsList() {
   const params = new URLSearchParams(useSearch());
@@ -61,13 +62,19 @@ export default function ProposalsList() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500">
-        <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">
-          {condominium?.name || "マンション詳細"}
-        </Link>
-        <span className="mx-2">{">"}</span>
-        <span>総会議案書管理</span>
-      </nav>
+      <div className="flex items-center justify-between">
+        <nav className="text-sm text-gray-500">
+          <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">
+            {condominium?.name || "マンション詳細"}
+          </Link>
+          <span className="mx-2">{">"}</span>
+          <span>総会議案書管理</span>
+        </nav>
+        <SubNav items={[
+          { label: "議案書一覧", path: `/proposals/list?condominiumId=${condominiumId}`, icon: FileText },
+          { label: "AI議案書生成", path: `/proposals/generate?condominiumId=${condominiumId}`, icon: Sparkles },
+        ]} />
+      </div>
 
       {/* Banner */}
       <Card className="bg-orange-50 border-orange-200">

@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Mic, Upload, ChevronRight, ArrowLeft, Users } from "lucide-react";
+import { FileText, Mic, Upload, ChevronRight, ArrowLeft, Users, Sparkles, CheckSquare } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 
 export default function MinutesImport() {
   const search = useSearch();
@@ -62,14 +63,12 @@ export default function MinutesImport() {
           <h1 className="text-2xl font-bold text-gray-900">音声・メモ取込</h1>
           <p className="text-sm text-gray-500 mt-1">会議の録音や手書きメモを取り込みAIが議事録を自動生成します</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(`/minutes/list?condominiumId=${condominiumId}`)}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          一覧に戻る
-        </Button>
+        <SubNav items={[
+          { label: "議事録一覧", path: `/minutes/list?condominiumId=${condominiumId}`, icon: FileText },
+          { label: "音声・メモ取込", path: `/minutes/import?condominiumId=${condominiumId}`, icon: Mic },
+          { label: "AI議事録生成", path: `/minutes/generate?condominiumId=${condominiumId}`, icon: Sparkles },
+          { label: "決定事項管理", path: `/minutes/actions?condominiumId=${condominiumId}`, icon: CheckSquare },
+        ]} />
       </div>
 
       {/* Step Indicator */}

@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Calendar, ChevronRight, Plus, Filter } from "lucide-react";
+import { FileText, Calendar, ChevronRight, Plus, Filter, Mic, Sparkles, CheckSquare } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 
 const mockMinutes = [
   {
@@ -74,12 +75,12 @@ export default function MinutesList() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">議事録一覧</h1>
-        <Link href={`/minutes/import?condominiumId=${condominiumId}`}>
-          <Button className="bg-orange-600 hover:bg-orange-700" data-testid="button-create-minutes">
-            <Plus className="w-4 h-4 mr-2" />
-            新規作成
-          </Button>
-        </Link>
+        <SubNav items={[
+          { label: "議事録一覧", path: `/minutes/list?condominiumId=${condominiumId}`, icon: FileText },
+          { label: "音声・メモ取込", path: `/minutes/import?condominiumId=${condominiumId}`, icon: Mic },
+          { label: "AI議事録生成", path: `/minutes/generate?condominiumId=${condominiumId}`, icon: Sparkles },
+          { label: "決定事項管理", path: `/minutes/actions?condominiumId=${condominiumId}`, icon: CheckSquare },
+        ]} />
       </div>
 
       <Card>

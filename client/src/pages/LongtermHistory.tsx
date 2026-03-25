@@ -2,7 +2,8 @@ import { useSearch } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { History, TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+import { History, TrendingUp, TrendingDown, ArrowRight, LayoutDashboard, List, BarChart } from "lucide-react";
+import { SubNav } from "@/components/SubNav";
 
 export default function LongtermHistory() {
   const params = new URLSearchParams(useSearch());
@@ -31,6 +32,13 @@ export default function LongtermHistory() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">年度別修繕履歴</h1>
+        <SubNav items={[
+          { label: "修繕計画ダッシュボード", path: `/longterm/dashboard?condominiumId=${condominiumId}`, icon: LayoutDashboard },
+          { label: "修繕項目一覧", path: `/longterm/items?condominiumId=${condominiumId}`, icon: List },
+          { label: "修繕履歴", path: `/longterm/history?condominiumId=${condominiumId}`, icon: History },
+          { label: "積立金シミュレーション", path: `/longterm/simulation?condominiumId=${condominiumId}`, icon: TrendingUp },
+          { label: "AI見直し分析", path: `/longterm/analysis?condominiumId=${condominiumId}`, icon: BarChart },
+        ]} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
