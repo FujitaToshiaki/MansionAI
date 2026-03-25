@@ -142,6 +142,67 @@ function Router() {
           {() => <PlaceholderPage title="設定" icon={Settings} />}
         </Route>
 
+        {/* /condominiums/:id/evaluation/* */}
+        <Route path="/condominiums/:id/evaluation/check">
+          {() => <PlaceholderPage title="適正評価セルフチェック" icon={ClipboardCheck} />}
+        </Route>
+        <Route path="/condominiums/:id/evaluation/score">
+          {() => <PlaceholderPage title="スコア詳細・改善提案" icon={BarChart2} />}
+        </Route>
+        <Route path="/condominiums/:id/evaluation/history">
+          {() => <PlaceholderPage title="評価履歴・推移" icon={History} />}
+        </Route>
+
+        {/* /condominiums/:id/longterm/* */}
+        <Route path="/condominiums/:id/longterm/dashboard">
+          {() => <PlaceholderPage title="修繕計画ダッシュボード" icon={Wrench} />}
+        </Route>
+        <Route path="/condominiums/:id/longterm/items">
+          {() => <PlaceholderPage title="修繕項目一覧" icon={List} />}
+        </Route>
+        <Route path="/condominiums/:id/longterm/history">
+          {() => <PlaceholderPage title="修繕履歴" icon={FileStack} />}
+        </Route>
+        <Route path="/condominiums/:id/longterm/simulation">
+          {() => <PlaceholderPage title="積立金シミュレーション" icon={TrendingUp} />}
+        </Route>
+        <Route path="/condominiums/:id/longterm/analysis">
+          {() => <PlaceholderPage title="AI見直し分析" icon={BarChart} />}
+        </Route>
+
+        {/* /condominiums/:id/consultation/* */}
+        <Route path="/condominiums/:id/consultation/chat">
+          {() => <PlaceholderPage title="チャット相談" icon={MessageSquare} />}
+        </Route>
+        <Route path="/condominiums/:id/consultation/history">
+          {() => <PlaceholderPage title="相談履歴" icon={History} />}
+        </Route>
+
+        {/* /condominiums/:id/minutes/* */}
+        <Route path="/condominiums/:id/minutes/list">
+          {() => <PlaceholderPage title="議事録一覧" icon={FileText} />}
+        </Route>
+        <Route path="/condominiums/:id/minutes/import">
+          {() => <PlaceholderPage title="音声・メモ取込" icon={Mic} />}
+        </Route>
+        <Route path="/condominiums/:id/minutes/generate">
+          {() => <PlaceholderPage title="AI議事録生成" icon={Sparkles} />}
+        </Route>
+        <Route path="/condominiums/:id/minutes/actions">
+          {() => <PlaceholderPage title="決定事項管理" icon={CheckSquare} />}
+        </Route>
+
+        {/* /condominiums/:id/proposals/* */}
+        <Route path="/condominiums/:id/proposals/list">
+          {() => <PlaceholderPage title="議案書一覧" icon={BookOpen} />}
+        </Route>
+        <Route path="/condominiums/:id/proposals/generate">
+          {() => <PlaceholderPage title="AI議案書生成" icon={Sparkles} />}
+        </Route>
+        <Route path="/condominiums/:id/proposals/edit">
+          {() => <PlaceholderPage title="議案書編集" icon={FilePen} />}
+        </Route>
+
         <Route component={NotFound} />
       </Switch>
     </Layout>
