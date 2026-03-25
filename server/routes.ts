@@ -10,10 +10,13 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { extractTextFromMultipleImages } from "./gemini";
-import { generateMinutes } from "./openai";
+import { generateMinutes, transcribeAudio } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
+
+  // Ensure required upload directories exist at startup
+  await fs.mkdir("uploads/audio", { recursive: true });
   
   // Configure multer for file uploads (disk storage)
   const upload = multer({
@@ -756,6 +759,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating minutes:", error);
       res.status(500).json({ error: "議事録の生成中にエラーが発生しました" });
+    }
+  });
+
+  // Audio transcription endpoint using OpenAI Whisper
+  const uploadAudio = multer({
+    dest: "uploads/audio/",
+    limits: { fileSize: 25 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      const allowedMimes = ["audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp4", "audio/m4a", "audio/x-m4a", "audio/mp3"];
+      if (allowedMimes.includes(file.mimetype) || /\.(mp3|wav|m4a)$/i.test(file.originalname)) {
+        cb(null, true);
+      } else {
+        cb(new Error("MP3/WAV/M4A形式のファイルのみアップロード可能です"));
+      }
+    }
+  });
+
+  app.post("/api/minutes/transcribe", (req, res, next) => {
+    uploadAudio.single("audio")(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(400).json({ error: "ファイルサイズは25MB以下にしてください" });
+        }
+        return res.status(400).json({ error: err.message });
+      }
+      if (err instanceof Error) {
+        return res.status(400).json({ error: err.message });
+      }
+      next();
+    });
+  }, async (req, res) => {
+    let filePath: string | undefined;
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "音声ファイルが見つかりません" });
+      }
+      filePath = req.file.path;
+      const fileBuffer = await fs.readFile(filePath);
+      const text = await transcribeAudio(fileBuffer, req.file.originalname, req.file.mimetype);
+      res.json({ text });
+    } catch (error) {
+      console.error("Transcription error:", error);
+      res.status(500).json({ error: "文字起こし処理中にエラーが発生しました" });
+    } finally {
+      if (filePath) {
+        fs.unlink(filePath).catch((e) => console.error("Failed to delete temp audio file:", e));
+      }
     }
   });
 

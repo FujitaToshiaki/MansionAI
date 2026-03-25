@@ -133,6 +133,24 @@ ${notes || "メモなし"}`;
   return response.choices[0].message.content ?? "";
 }
 
+export async function transcribeAudio(fileBuffer: Buffer, filename: string, mimeType: string): Promise<string> {
+  const openai = getOpenAIClient();
+
+  const file = await OpenAI.toFile(fileBuffer, filename, { type: mimeType });
+
+  const transcription = await openai.audio.transcriptions.create({
+    file,
+    model: "whisper-1",
+    language: "ja",
+    response_format: "text",
+  });
+
+  if (typeof transcription !== "string") {
+    throw new Error("Whisper API から予期しない形式のレスポンスが返されました");
+  }
+  return transcription;
+}
+
 export async function extractTextFromMultipleImages(imageBuffers: Array<{buffer: Buffer, mimeType: string}>): Promise<OCRResult[]> {
   const results: OCRResult[] = [];
   
