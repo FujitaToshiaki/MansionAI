@@ -445,7 +445,7 @@ export default function LongtermSimulation() {
       {/* Balance Line Chart */}
       <Card className="bg-white shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg">積立金残高推移グラフ（{PLAN_YEARS}年間）</CardTitle>
+          <CardTitle className="text-lg">繰越金残高推移グラフ（{PLAN_YEARS}年間）</CardTitle>
           <p className="text-sm text-gray-500">
             残高がマイナスになる年は赤色で表示されます
             {stepUpRefLines.length > 0 && "　縦線：値上げタイミング"}
