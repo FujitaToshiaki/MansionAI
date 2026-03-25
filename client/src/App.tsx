@@ -24,6 +24,9 @@ import AIAgentExecutionDetail from "@/pages/AIAgentExecutionDetail";
 import RevisionYearList from "@/pages/RevisionYearList";
 import RevisionYearDetail from "@/pages/RevisionYearDetail";
 import Reports from "@/pages/Reports";
+import EvaluationCheck from "@/pages/EvaluationCheck";
+import EvaluationScore from "@/pages/EvaluationScore";
+import EvaluationHistory from "@/pages/EvaluationHistory";
 import NotFound from "@/pages/not-found";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import {
@@ -75,15 +78,12 @@ function Router() {
         <Route path="/revision-years/:id" component={RevisionYearDetail} />
         <Route path="/reports" component={Reports} />
 
-        <Route path="/evaluation/check">
-          {() => <PlaceholderPage title="セルフチェック実施" icon={ClipboardCheck} />}
-        </Route>
-        <Route path="/evaluation/score">
-          {() => <PlaceholderPage title="スコア詳細・改善提案" icon={BarChart2} />}
-        </Route>
-        <Route path="/evaluation/history">
-          {() => <PlaceholderPage title="評価履歴・推移" icon={History} />}
-        </Route>
+        <Route path="/evaluation/check" component={EvaluationCheck} />
+        <Route path="/evaluation/score" component={EvaluationScore} />
+        <Route path="/evaluation/history" component={EvaluationHistory} />
+        <Route path="/condominiums/:id/evaluation/check" component={EvaluationCheck} />
+        <Route path="/condominiums/:id/evaluation/score" component={EvaluationScore} />
+        <Route path="/condominiums/:id/evaluation/history" component={EvaluationHistory} />
 
         <Route path="/ai-revision">
           {() => <PlaceholderPage title="AI改訂案生成" icon={Sparkles} />}

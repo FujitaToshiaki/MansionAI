@@ -1364,6 +1364,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==========================================
+  // Evaluation Check (適正評価セルフチェック)
+  // ==========================================
+
+  // Seed evaluation items master (run once if empty)
+  async function seedEvaluationItemsMaster() {
+    const existingCheck = await db.execute(`SELECT COUNT(*) as count FROM evaluation_items_master`);
+    const count = parseInt((existingCheck.rows[0] as any).count);
+    if (count > 0) return;
+
+    const items = [
+      // 財務 (合計20点)
+      { category: '財務', item_number: 1, question: '修繕積立金の月額が標準的な金額以上に設定されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '修繕積立金の見直しを検討してください。長期修繕計画に基づいた適切な積立が必要です。' },
+      { category: '財務', item_number: 2, question: '長期修繕計画が直近5年以内に見直しされているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '長期修繕計画を専門家と協力して見直し、建物の状態に応じた計画を策定してください。' },
+      { category: '財務', item_number: 3, question: '管理費の収支が健全であるか（赤字でないか）', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '管理費の収支を精査し、不要な支出の見直しや適切な管理費額の設定を検討してください。' },
+      { category: '財務', item_number: 4, question: '外部監査または会計監査を実施しているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '会計の透明性確保のため、外部監査の実施を検討してください。' },
+      { category: '財務', item_number: 5, question: '修繕積立金の不足が生じていないか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '積立金不足解消のため、一時金徴収または積立金増額の計画を立ててください。' },
+
+      // 管理体制 (合計20点)
+      { category: '管理体制', item_number: 6, question: '管理規約が最新の法令に対応しているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '管理規約を定期的に見直し、法改正に対応した内容に更新してください。' },
+      { category: '管理体制', item_number: 7, question: '理事会が年4回以上開催されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '理事会の定期開催スケジュールを策定し、適切な管理運営を推進してください。' },
+      { category: '管理体制', item_number: 8, question: '総会が毎年適切に開催されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '年次総会の開催を確保し、区分所有者への情報共有と意思決定を行ってください。' },
+      { category: '管理体制', item_number: 9, question: '管理会社との契約内容が適切に更新・見直しされているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '管理委託契約の内容を定期的に見直し、適切なサービス水準を維持してください。' },
+      { category: '管理体制', item_number: 10, question: '管理組合の運営情報が区分所有者に適切に開示されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '定期的なニュースレターや掲示板活用で情報開示を促進してください。' },
+
+      // 建物 (合計20点)
+      { category: '建物', item_number: 11, question: '建物の外壁・屋根等に大きな劣化・損傷がないか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '建物診断を実施し、劣化状況の把握と適切な修繕計画を立ててください。' },
+      { category: '建物', item_number: 12, question: '給排水設備が適切に維持管理されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '給排水管の定期点検と清掃を実施し、設備の長寿命化を図ってください。' },
+      { category: '建物', item_number: 13, question: 'エレベーターの定期点検・保守が実施されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: 'エレベーターの法定点検と定期保守契約を確実に実施してください。' },
+      { category: '建物', item_number: 14, question: '消防設備の法定点検が実施されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '消防設備の定期点検を実施し、消防法の基準を遵守してください。' },
+      { category: '建物', item_number: 15, question: '耐震診断または耐震改修が実施されているか（旧耐震基準の場合）', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '耐震診断を実施し、必要に応じて耐震改修工事の計画を立ててください。' },
+
+      // 防災 (合計20点)
+      { category: '防災', item_number: 16, question: '防災マニュアルまたは避難計画が整備されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '防災マニュアルを作成し、全居住者への配布と定期的な見直しを行ってください。' },
+      { category: '防災', item_number: 17, question: '防災訓練が年1回以上実施されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '定期的な防災訓練を実施し、居住者の防災意識を高めてください。' },
+      { category: '防災', item_number: 18, question: '防災備蓄（食料・飲料水等）が整備されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '防災備蓄品の整備・定期点検を実施し、緊急時に備えてください。' },
+      { category: '防災', item_number: 19, question: '共用部の防犯設備（カメラ・オートロック等）が整備されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '防犯カメラやオートロックシステムの設置・更新を検討してください。' },
+      { category: '防災', item_number: 20, question: '災害時の連絡体制が整備されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '緊急連絡網の整備と定期的な更新を行ってください。' },
+
+      // 居住環境 (合計20点)
+      { category: '居住環境', item_number: 21, question: '共用部分（廊下・エントランス等）の清掃が適切に実施されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '清掃業務の品質基準を設定し、定期的な清掃実施と確認を行ってください。' },
+      { category: '居住環境', item_number: 22, question: 'ゴミ置き場の管理が適切に行われているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: 'ゴミ分別ルールの周知と適切な管理で、ゴミ置き場の環境を改善してください。' },
+      { category: '居住環境', item_number: 23, question: '駐車場・駐輪場の管理が適切に行われているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '駐車場・駐輪場のルール整備と不法駐車・駐輪への対応策を講じてください。' },
+      { category: '居住環境', item_number: 24, question: 'ペット飼育に関するルールが整備・遵守されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: 'ペット飼育規程の整備と周知、問題発生時の対応手順を確立してください。' },
+      { category: '居住環境', item_number: 25, question: '騒音・振動等の生活トラブルへの対応体制があるか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: 'トラブル対応マニュアルの整備と相談窓口の設置を検討してください。' },
+      { category: '居住環境', item_number: 26, question: '緑化・植栽の管理が適切に行われているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '植栽の定期管理計画を立て、建物の美観と居住環境の向上を図ってください。' },
+      { category: '居住環境', item_number: 27, question: '共用施設（集会室等）が適切に管理・運営されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '共用施設の使用ルール整備と定期的な点検・清掃を実施してください。' },
+      { category: '居住環境', item_number: 28, question: 'バリアフリー対応（スロープ・手すり等）が整備されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: 'バリアフリー化の計画を立て、高齢者・障害者が暮らしやすい環境を整えてください。' },
+      { category: '居住環境', item_number: 29, question: '掲示板・回覧板等による情報周知が適切に行われているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: 'デジタル掲示板の活用など、情報伝達手段の多様化を検討してください。' },
+      { category: '居住環境', item_number: 30, question: 'コミュニティ活動（イベント等）が実施されているか', max_score: 4, yes_score: 4, partial_score: 2, improvement_suggestion: '住民同士の交流促進のため、定期的なコミュニティイベントの企画・実施を検討してください。' },
+    ];
+
+    for (const item of items) {
+      await db.execute(`
+        INSERT INTO evaluation_items_master (category, item_number, question, max_score, yes_score, partial_score, improvement_suggestion)
+        VALUES ('${item.category}', ${item.item_number}, '${item.question.replace(/'/g, "''")}', ${item.max_score}, ${item.yes_score}, ${item.partial_score}, '${(item.improvement_suggestion || '').replace(/'/g, "''")}')
+      `);
+    }
+    console.log('Seeded evaluation_items_master with 30 items');
+  }
+
+  // Seed evaluation checks for メゾンドオプテージ
+  async function seedEvaluationChecks() {
+    const existingCheck = await db.execute(`SELECT COUNT(*) as count FROM evaluation_checks WHERE condominium_id = 'a7af9126-67ff-47d9-9c24-cf4054aeb63c'`);
+    const count = parseInt((existingCheck.rows[0] as any).count);
+    if (count > 0) return;
+
+    const categoryScores1 = JSON.stringify({ 財務: 16, 管理体制: 18, 建物: 14, 防災: 12, 居住環境: 16 });
+    const answers1 = JSON.stringify({
+      1: 'yes', 2: 'yes', 3: 'yes', 4: 'partial', 5: 'yes',
+      6: 'yes', 7: 'yes', 8: 'yes', 9: 'yes', 10: 'partial',
+      11: 'yes', 12: 'partial', 13: 'yes', 14: 'yes', 15: 'no',
+      16: 'yes', 17: 'partial', 18: 'yes', 19: 'no', 20: 'partial',
+      21: 'yes', 22: 'yes', 23: 'yes', 24: 'partial', 25: 'yes', 26: 'yes', 27: 'partial', 28: 'no', 29: 'yes', 30: 'partial'
+    });
+
+    const categoryScores2 = JSON.stringify({ 財務: 14, 管理体制: 16, 建物: 12, 防災: 10, 居住環境: 14 });
+    const answers2 = JSON.stringify({
+      1: 'yes', 2: 'partial', 3: 'yes', 4: 'no', 5: 'yes',
+      6: 'yes', 7: 'yes', 8: 'yes', 9: 'partial', 10: 'partial',
+      11: 'yes', 12: 'partial', 13: 'yes', 14: 'yes', 15: 'no',
+      16: 'yes', 17: 'no', 18: 'partial', 19: 'no', 20: 'partial',
+      21: 'yes', 22: 'yes', 23: 'partial', 24: 'partial', 25: 'yes', 26: 'partial', 27: 'partial', 28: 'no', 29: 'yes', 30: 'no'
+    });
+
+    await db.execute(`
+      INSERT INTO evaluation_checks (condominium_id, total_score, max_score, star_rating, category_scores, answers, checked_at, checked_by)
+      VALUES 
+        ('a7af9126-67ff-47d9-9c24-cf4054aeb63c', 76, 100, 4, '${categoryScores1}', '${answers1}', '2025-12-15 10:00:00', '修繕 未来'),
+        ('a7af9126-67ff-47d9-9c24-cf4054aeb63c', 66, 100, 3, '${categoryScores2}', '${answers2}', '2025-06-10 14:00:00', '修繕 未来')
+    `);
+    console.log('Seeded evaluation_checks for メゾンドオプテージ');
+  }
+
+  // Run seed functions
+  seedEvaluationItemsMaster().catch(console.error);
+  seedEvaluationChecks().catch(console.error);
+
+  // GET /api/evaluation/items-master — 30項目マスタ取得
+  app.get("/api/evaluation/items-master", async (req, res) => {
+    try {
+      const result = await db.execute(`
+        SELECT * FROM evaluation_items_master ORDER BY item_number ASC
+      `);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching evaluation items master:', error);
+      res.status(500).json({ error: "Failed to fetch evaluation items master" });
+    }
+  });
+
+  // GET /api/condominiums/:id/evaluation/checks — 評価履歴一覧
+  app.get("/api/condominiums/:id/evaluation/checks", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await db.execute(`
+        SELECT * FROM evaluation_checks 
+        WHERE condominium_id = '${id}'
+        ORDER BY checked_at DESC
+      `);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching evaluation checks:', error);
+      res.status(500).json({ error: "Failed to fetch evaluation checks" });
+    }
+  });
+
+  // POST /api/condominiums/:id/evaluation/checks — 評価結果保存
+  app.post("/api/condominiums/:id/evaluation/checks", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { totalScore, maxScore, starRating, categoryScores, answers, checkedBy } = req.body;
+
+      if (totalScore === undefined || !categoryScores || !answers) {
+        return res.status(400).json({ error: "必須項目が不足しています" });
+      }
+
+      const categoryScoresJson = JSON.stringify(categoryScores).replace(/'/g, "''");
+      const answersJson = JSON.stringify(answers).replace(/'/g, "''");
+      const checkedByValue = checkedBy ? `'${checkedBy}'` : 'NULL';
+
+      const result = await db.execute(`
+        INSERT INTO evaluation_checks (condominium_id, total_score, max_score, star_rating, category_scores, answers, checked_by)
+        VALUES ('${id}', ${totalScore}, ${maxScore || 100}, ${starRating}, '${categoryScoresJson}', '${answersJson}', ${checkedByValue})
+        RETURNING *
+      `);
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error saving evaluation check:', error);
+      res.status(500).json({ error: "Failed to save evaluation check" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

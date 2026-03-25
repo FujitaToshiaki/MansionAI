@@ -300,6 +300,42 @@ export const insertRegulationAnalysisResultSchema = createInsertSchema(regulatio
   updatedAt: true
 });
 
+// 評価項目マスタ
+export const evaluationItemsMaster = pgTable("evaluation_items_master", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: text("category").notNull(), // 財務/管理体制/建物/防災/居住環境
+  itemNumber: integer("item_number").notNull(),
+  question: text("question").notNull(),
+  maxScore: integer("max_score").notNull(),
+  yesScore: integer("yes_score").notNull(),
+  partialScore: integer("partial_score").notNull().default(0),
+  improvementSuggestion: text("improvement_suggestion"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+// 評価チェック履歴
+export const evaluationChecks = pgTable("evaluation_checks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  totalScore: integer("total_score").notNull(),
+  maxScore: integer("max_score").notNull().default(100),
+  starRating: integer("star_rating").notNull(),
+  categoryScores: jsonb("category_scores").notNull(),
+  answers: jsonb("answers").notNull(),
+  checkedAt: timestamp("checked_at").defaultNow(),
+  checkedBy: text("checked_by")
+});
+
+export const insertEvaluationItemsMasterSchema = createInsertSchema(evaluationItemsMaster).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertEvaluationCheckSchema = createInsertSchema(evaluationChecks).omit({
+  id: true,
+  checkedAt: true
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -339,3 +375,9 @@ export type InsertRevisionHeader = z.infer<typeof insertRevisionHeaderSchema>;
 
 export type RegulationRevision = typeof regulation_revisions.$inferSelect;
 export type InsertRegulationRevision = z.infer<typeof insertRegulationRevisionSchema>;
+
+export type EvaluationItemsMaster = typeof evaluationItemsMaster.$inferSelect;
+export type InsertEvaluationItemsMaster = z.infer<typeof insertEvaluationItemsMasterSchema>;
+
+export type EvaluationCheck = typeof evaluationChecks.$inferSelect;
+export type InsertEvaluationCheck = z.infer<typeof insertEvaluationCheckSchema>;
