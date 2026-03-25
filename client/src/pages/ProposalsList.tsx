@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { BookOpen, FileText, Plus, ArrowRight, Sparkles, Edit2 } from "lucide-react";
+import { BookOpen, FileText, Plus, ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { SubNav } from "@/components/SubNav";
 
 export default function ProposalsList() {
@@ -16,46 +16,37 @@ export default function ProposalsList() {
     enabled: !!condominiumId,
   });
 
-  const proposals = [
-    {
-      id: "1",
-      title: "管理規約改訂",
-      category: "規約",
-      categoryColor: "purple",
-      status: "承認済",
-      statusVariant: "default",
-      date: "2026/08/24",
-      description: "2025年区分所有法改正に伴う、ペット飼育細則およびIT活用に関する規定の整備。",
-    },
-    {
-      id: "2",
-      title: "大規模修繕積立金改定",
-      category: "修繕",
-      categoryColor: "orange",
-      status: "審議中",
-      statusVariant: "secondary",
-      date: "2026/08/24",
-      description: "長期修繕計画の見直しに基づく、修繕積立金の月額2,000円値上げ案。",
-    },
-    {
-      id: "3",
-      title: "管理委託契約更新",
-      category: "運営",
-      categoryColor: "green",
-      status: "下書き",
-      statusVariant: "outline",
-      date: "2026/08/24",
-      description: "次期管理委託契約の内容確認および委託費用の据え置きに関する合意。",
-    },
-  ];
+  const { data: proposals = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/condominiums", condominiumId, "proposals"],
+    queryFn: () => fetch(`/api/condominiums/${condominiumId}/proposals`).then(r => r.json()),
+    enabled: !!condominiumId,
+  });
 
   const getCategoryBadge = (category: string) => {
     switch (category) {
-      case "規約": return "bg-purple-100 text-purple-700 border-purple-200";
+      case "規約改訂": return "bg-purple-100 text-purple-700 border-purple-200";
       case "修繕": return "bg-orange-100 text-orange-700 border-orange-200";
-      case "財務": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "管理費": return "bg-blue-100 text-blue-700 border-blue-200";
       case "運営": return "bg-green-100 text-green-700 border-green-200";
       default: return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "draft": return "下書き";
+      case "submitted": return "審議中";
+      case "decided": return "承認済";
+      case "archived": return "総会提示済";
+      default: return status ?? "下書き";
+    }
+  };
+
+  const getStatusVariant = (status: string): "default" | "secondary" | "outline" | "destructive" => {
+    switch (status) {
+      case "decided": return "default";
+      case "submitted": return "secondary";
+      default: return "outline";
     }
   };
 
@@ -86,8 +77,8 @@ export default function ProposalsList() {
               <BookOpen className="text-white w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-orange-900">2026年8月 第42回定期総会</h2>
-              <p className="text-orange-700">開催予定日: 2026年8月24日 (月)</p>
+              <h2 className="text-xl font-bold text-orange-900">2026年10月 第42回定期総会</h2>
+              <p className="text-orange-700">開催予定日: 2026年10月25日（日）</p>
             </div>
           </div>
           <Link href={`/proposals/generate?condominiumId=${condominiumId}`}>
@@ -100,39 +91,45 @@ export default function ProposalsList() {
       </Card>
 
       {/* Proposals List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {proposals.map((proposal) => (
-          <Card key={proposal.id} className="bg-white hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-start justify-between pb-2">
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2">
-                  <Badge variant="outline" className={getCategoryBadge(proposal.category)}>
-                    {proposal.category}
-                  </Badge>
-                  <Badge variant={proposal.statusVariant as any}>
-                    {proposal.status}
-                  </Badge>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-32">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {proposals.map((proposal) => (
+            <Card key={proposal.id} className="bg-white hover:shadow-md transition-shadow" data-testid={`card-proposal-${proposal.id}`}>
+              <CardHeader className="flex flex-row items-start justify-between pb-2">
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="outline" className={getCategoryBadge(proposal.category)}>
+                      {proposal.category}
+                    </Badge>
+                    <Badge variant={getStatusVariant(proposal.status)}>
+                      {getStatusLabel(proposal.status)}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-lg font-bold" data-testid={`text-proposal-title-${proposal.id}`}>{proposal.title}</CardTitle>
                 </div>
-                <CardTitle className="text-lg font-bold">{proposal.title}</CardTitle>
-              </div>
-              <Link href={`/proposals/edit?proposalId=${proposal.id}&condominiumId=${condominiumId}`}>
-                <Button variant="ghost" size="sm" className="text-gray-500 hover:text-orange-600" data-testid={`button-edit-proposal-${proposal.id}`}>
-                  編集・詳細 <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {proposal.description}
-              </p>
-              <div className="mt-4 flex items-center text-xs text-gray-400">
-                <FileText className="w-3 h-3 mr-1" />
-                作成日: {proposal.date}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <Link href={`/proposals/edit?proposalId=${proposal.id}&condominiumId=${condominiumId}`}>
+                  <Button variant="ghost" size="sm" className="text-gray-500 hover:text-orange-600" data-testid={`button-edit-proposal-${proposal.id}`}>
+                    編集・詳細 <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                  {proposal.content ?? "内容未入力"}
+                </p>
+                <div className="mt-4 flex items-center text-xs text-gray-400">
+                  <FileText className="w-3 h-3 mr-1" />
+                  予定日: {proposal.scheduled_date ? new Date(proposal.scheduled_date).toLocaleDateString("ja-JP") : "未定"}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,13 @@
 
 This is a Japanese condominium management regulation AI system designed for property management companies. The application helps automate the process of analyzing meeting minutes, extracting decisions, and generating regulation amendments using OCR technology and AI analysis. The system provides a complete workflow from document upload to final regulation output, with a focus on legal compliance and standardized regulation management.
 
+## Recent Changes (Task-35: 2026-03-25)
+
+✓ **DB拡張**: `proposals` テーブルに `background`（経緯）列を追加。`proposal_related_decisions` 中間テーブルを新規作成（決議スナップショット保存方式）
+✓ **バックエンド API**: `GET/POST /api/proposals/:id/related-decisions`、`DELETE /api/proposals/:id/related-decisions/:decisionId` を追加。`PATCH /api/proposals/:id` に background フィールドを追加。`GET /api/proposals/:id` に relatedDecisions 含める
+✓ **フロントエンド UI**: `ProposalsEdit.tsx` に「経緯」テキストエリアと「過去の関連決議」セクションを追加（インクリメンタル検索、カード表示、追加・削除機能）。`ProposalsList.tsx` をリアルDB データ取得に移行
+✓ **設計**: 決議データは mock IDs（文字列）のため FK なし。リンク時に決議情報スナップショット（title, meetingDate, result, category, votingResults）を保存し表示に利用
+
 ## Recent Changes (2025-08-26)
 
 ✓ **PDF Export Enhancement**: Implemented native PDF generation using browser print dialog with monochrome design optimization

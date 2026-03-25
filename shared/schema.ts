@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, numeric, date } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, numeric, date, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -281,6 +281,7 @@ export const proposals = pgTable("proposals", {
   meetingType: text("meeting_type").default("general"), // general（通常総会）, extraordinary（臨時総会）
   scheduledDate: date("scheduled_date"),
   content: text("content"),                    // 議案内容
+  background: text("background"),              // 経緯・背景テキスト（Task-35）
   result: text("result"),                      // 決議結果: approved, rejected, deferred, pending
   votingResults: jsonb("voting_results"),       // {favor, against, abstain}
   attachmentPath: text("attachment_path"),
@@ -288,6 +289,21 @@ export const proposals = pgTable("proposals", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
+
+// 議案-関連決議 中間テーブル（Task-35）
+// decision_id は mock decisions（文字列ID）も対応するため FK 制約なし
+// 決議情報スナップショットを保存することで決議データのソースを問わず参照可能
+export const proposal_related_decisions = pgTable("proposal_related_decisions", {
+  proposalId: varchar("proposal_id").references(() => proposals.id).notNull(),
+  decisionId: varchar("decision_id").notNull(),
+  decisionTitle: text("decision_title"),
+  decisionMeetingDate: text("decision_meeting_date"),
+  decisionResult: text("decision_result"),
+  decisionCategory: text("decision_category"),
+  decisionVotingResults: jsonb("decision_voting_results"),
+}, (t) => [
+  primaryKey({ columns: [t.proposalId, t.decisionId] }),
+]);
 
 // アクションアイテムテーブル
 export const action_items = pgTable("action_items", {
@@ -569,3 +585,8 @@ export type InsertEvaluationCheck = z.infer<typeof insertEvaluationCheckSchema>;
 
 export type EvaluationItemMaster = typeof evaluation_items_master.$inferSelect;
 export type InsertEvaluationItemMaster = z.infer<typeof insertEvaluationItemMasterSchema>;
+
+// Task-35: 議案-関連決議 中間テーブル スキーマ・型
+export const insertProposalRelatedDecisionSchema = createInsertSchema(proposal_related_decisions);
+export type ProposalRelatedDecision = typeof proposal_related_decisions.$inferSelect;
+export type InsertProposalRelatedDecision = z.infer<typeof insertProposalRelatedDecisionSchema>;

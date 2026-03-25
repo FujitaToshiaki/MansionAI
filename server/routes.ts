@@ -1651,7 +1651,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { rows } = await pool.query("SELECT * FROM proposals WHERE id = $1", [req.params.id]);
       if (rows.length === 0) return res.status(404).json({ error: "Proposal not found" });
-      res.json(rows[0]);
+      const proposal = rows[0];
+      // Include related decisions (snapshot-based)
+      const { rows: relRows } = await pool.query(
+        `SELECT decision_id AS id, decision_title AS title, decision_meeting_date AS "meetingDate",
+                decision_result AS result, decision_category AS category,
+                decision_voting_results AS "votingResults"
+         FROM proposal_related_decisions
+         WHERE proposal_id = $1
+         ORDER BY decision_meeting_date DESC NULLS LAST`,
+        [req.params.id]
+      );
+      res.json({ ...proposal, relatedDecisions: relRows });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch proposal" });
     }
@@ -1678,15 +1689,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `UPDATE proposals SET title=COALESCE($1,title), category=COALESCE($2,category),
          meeting_type=COALESCE($3,meeting_type), scheduled_date=COALESCE($4,scheduled_date),
          content=COALESCE($5,content), result=COALESCE($6,result),
-         voting_results=COALESCE($7,voting_results), status=COALESCE($8,status), updated_at=NOW()
-         WHERE id=$9 RETURNING *`,
+         voting_results=COALESCE($7,voting_results), status=COALESCE($8,status),
+         background=COALESCE($9,background), updated_at=NOW()
+         WHERE id=$10 RETURNING *`,
         [b.title, b.category, b.meetingType, b.scheduledDate, b.content, b.result,
-         b.votingResults ? JSON.stringify(b.votingResults) : null, b.status, req.params.id]
+         b.votingResults ? JSON.stringify(b.votingResults) : null, b.status,
+         b.background !== undefined ? b.background : null, req.params.id]
       );
       if (rows.length === 0) return res.status(404).json({ error: "Proposal not found" });
       res.json(rows[0]);
     } catch (error) {
       res.status(500).json({ error: "Failed to update proposal" });
+    }
+  });
+
+  // =====================================================================
+  // Task-35: 議案-関連決議 API
+  // =====================================================================
+
+  // Get related decisions for a proposal (returns snapshot data stored at link time)
+  app.get("/api/proposals/:id/related-decisions", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        `SELECT decision_id AS id, decision_title AS title, decision_meeting_date AS "meetingDate",
+                decision_result AS result, decision_category AS category,
+                decision_voting_results AS "votingResults"
+         FROM proposal_related_decisions
+         WHERE proposal_id = $1
+         ORDER BY decision_meeting_date DESC NULLS LAST`,
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch related decisions" });
+    }
+  });
+
+  // Add a related decision link (accepts full decision snapshot for display)
+  app.post("/api/proposals/:id/related-decisions", async (req, res) => {
+    try {
+      const { decisionId, title, meetingDate, result, category, votingResults } = req.body;
+      if (!decisionId) return res.status(400).json({ error: "decisionId is required" });
+      await pool.query(
+        `INSERT INTO proposal_related_decisions
+           (proposal_id, decision_id, decision_title, decision_meeting_date, decision_result, decision_category, decision_voting_results)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)
+         ON CONFLICT (proposal_id, decision_id) DO NOTHING`,
+        [req.params.id, decisionId, title ?? null, meetingDate ?? null, result ?? null, category ?? null,
+         votingResults ? JSON.stringify(votingResults) : null]
+      );
+      res.status(201).json({ proposalId: req.params.id, decisionId });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to add related decision" });
+    }
+  });
+
+  // Remove a related decision link
+  app.delete("/api/proposals/:id/related-decisions/:decisionId", async (req, res) => {
+    try {
+      await pool.query(
+        `DELETE FROM proposal_related_decisions WHERE proposal_id=$1 AND decision_id=$2`,
+        [req.params.id, req.params.decisionId]
+      );
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to remove related decision" });
     }
   });
 
