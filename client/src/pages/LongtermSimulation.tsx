@@ -1,90 +1,433 @@
+import { useState, useMemo } from "react";
 import { useSearch } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { Link } from "wouter";
-import { TrendingUp, Info, LayoutDashboard, List, History, BarChart } from "lucide-react";
+import { TrendingUp, Info, LayoutDashboard, List, History, BarChart, AlertTriangle, CheckCircle } from "lucide-react";
 import { SubNav } from "@/components/SubNav";
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from 'recharts';
+import {
+  ComposedChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ReferenceLine,
+  LineChart,
+} from "recharts";
+
+const START_YEAR = 2024;
+const PLAN_YEARS = 30;
+
+const REPAIR_SCHEDULE: { year: number; cost: number; label: string }[] = [
+  { year: 2025, cost: 1200, label: "屋上防水工事" },
+  { year: 2026, cost: 850, label: "消防設備更新" },
+  { year: 2028, cost: 12000, label: "第2回大規模修繕" },
+  { year: 2030, cost: 600, label: "給水管更新" },
+  { year: 2031, cost: 400, label: "排水管清掃・更新" },
+  { year: 2035, cost: 1500, label: "EV設備更新" },
+  { year: 2037, cost: 1200, label: "屋上防水（2回目）" },
+  { year: 2038, cost: 850, label: "電気設備更新" },
+  { year: 2040, cost: 14000, label: "第3回大規模修繕" },
+  { year: 2043, cost: 700, label: "給水管2回目更新" },
+  { year: 2045, cost: 1800, label: "EV設備2回目更新" },
+  { year: 2050, cost: 1000, label: "外構改修" },
+];
+
+const INITIAL_BALANCE = 9600;
+
+function calcSimulation(monthlyFeePerUnit: number, totalUnits: number) {
+  const results: {
+    year: number;
+    income: number;
+    expense: number;
+    netCashflow: number;
+    balance: number;
+    isNegative: boolean;
+  }[] = [];
+
+  let balance = INITIAL_BALANCE;
+
+  for (let i = 0; i < PLAN_YEARS; i++) {
+    const year = START_YEAR + i;
+    const income = Math.round((monthlyFeePerUnit * totalUnits * 12) / 10000);
+    const repairItem = REPAIR_SCHEDULE.find((r) => r.year === year);
+    const expense = repairItem ? repairItem.cost : 0;
+    const netCashflow = income - expense;
+    balance += netCashflow;
+    results.push({
+      year,
+      income,
+      expense,
+      netCashflow,
+      balance,
+      isNegative: balance < 0,
+    });
+  }
+  return results;
+}
+
+function formatManYen(val: number) {
+  if (Math.abs(val) >= 10000) return `${(val / 10000).toFixed(1)}億円`;
+  return `${val.toLocaleString()}万円`;
+}
+
+interface BalanceDotProps {
+  cx?: number;
+  cy?: number;
+  payload?: { isNegative: boolean };
+}
+
+const CustomBalanceDot = ({ cx, cy, payload }: BalanceDotProps) => {
+  if (cx === undefined || cy === undefined) return null;
+  if (payload?.isNegative) {
+    return <circle cx={cx} cy={cy} r={5} fill="#ef4444" stroke="#ef4444" />;
+  }
+  return <circle cx={cx} cy={cy} r={4} fill="#3b82f6" stroke="#3b82f6" />;
+};
 
 export default function LongtermSimulation() {
   const params = new URLSearchParams(useSearch());
   const condominiumId = params.get("condominiumId") ?? "1";
 
-  const data = [
-    { year: '2024', current: 9600, level: 9600, stepwise: 9600 },
-    { year: '2029', current: 11000, level: 12500, stepwise: 11500 },
-    { year: '2034', current: 4500, level: 9500, stepwise: 7500 },
-    { year: '2039', current: -2000, level: 8500, stepwise: 5000 },
-    { year: '2044', current: -8500, level: 7500, stepwise: 2500 },
-    { year: '2049', current: -12000, level: 6500, stepwise: -500 },
-    { year: '2054', current: -15000, level: 5500, stepwise: -2000 },
+  const [monthlyFeePerUnit, setMonthlyFeePerUnit] = useState(12000);
+  const [totalUnits, setTotalUnits] = useState(80);
+
+  const simData = useMemo(
+    () => calcSimulation(monthlyFeePerUnit, totalUnits),
+    [monthlyFeePerUnit, totalUnits]
+  );
+
+  const totalIncome = simData.reduce((s, d) => s + d.income, 0);
+  const totalExpense = simData.reduce((s, d) => s + d.expense, 0);
+  const finalBalance = simData[simData.length - 1]?.balance ?? 0;
+  const deficitYear = simData.find((d) => d.isNegative)?.year ?? null;
+
+  const balanceData = simData.map((d) => ({
+    ...d,
+    balancePositive: d.balance >= 0 ? d.balance : null,
+    balanceNegative: d.balance < 0 ? d.balance : null,
+  }));
+
+  const existingData = [
+    { year: "2024", current: 9600, level: 9600, stepwise: 9600 },
+    { year: "2029", current: 11000, level: 12500, stepwise: 11500 },
+    { year: "2034", current: 4500, level: 9500, stepwise: 7500 },
+    { year: "2039", current: -2000, level: 8500, stepwise: 5000 },
+    { year: "2044", current: -8500, level: 7500, stepwise: 2500 },
+    { year: "2049", current: -12000, level: 6500, stepwise: -500 },
+    { year: "2054", current: -15000, level: 5500, stepwise: -2000 },
   ];
 
   return (
     <div className="space-y-6">
       <nav className="text-sm text-gray-500">
-        <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">マンション詳細</Link>
-        <span className="mx-2">{'>'}</span>
-        <Link href={`/longterm/dashboard?condominiumId=${condominiumId}`} className="hover:text-gray-700">長期修繕計画</Link>
-        <span className="mx-2">{'>'}</span>
+        <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">
+          マンション詳細
+        </Link>
+        <span className="mx-2">{">"}</span>
+        <Link href={`/longterm/dashboard?condominiumId=${condominiumId}`} className="hover:text-gray-700">
+          長期修繕計画
+        </Link>
+        <span className="mx-2">{">"}</span>
         <span>積立金シミュレーション</span>
       </nav>
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">修繕積立金シミュレーション</h1>
-        <SubNav items={[
-          { label: "修繕計画ダッシュボード", path: `/longterm/dashboard?condominiumId=${condominiumId}`, icon: LayoutDashboard },
-          { label: "修繕項目一覧", path: `/longterm/items?condominiumId=${condominiumId}`, icon: List },
-          { label: "修繕履歴", path: `/longterm/history?condominiumId=${condominiumId}`, icon: History },
-          { label: "積立金シミュレーション", path: `/longterm/simulation?condominiumId=${condominiumId}`, icon: TrendingUp },
-          { label: "AI見直し分析", path: `/longterm/analysis?condominiumId=${condominiumId}`, icon: BarChart },
-        ]} />
+        <SubNav
+          items={[
+            { label: "修繕計画ダッシュボード", path: `/longterm/dashboard?condominiumId=${condominiumId}`, icon: LayoutDashboard },
+            { label: "修繕項目一覧", path: `/longterm/items?condominiumId=${condominiumId}`, icon: List },
+            { label: "修繕履歴", path: `/longterm/history?condominiumId=${condominiumId}`, icon: History },
+            { label: "積立金シミュレーション", path: `/longterm/simulation?condominiumId=${condominiumId}`, icon: TrendingUp },
+            { label: "AI見直し分析", path: `/longterm/analysis?condominiumId=${condominiumId}`, icon: BarChart },
+          ]}
+        />
       </div>
 
+      {/* Simulation Input Panel */}
+      <Card className="bg-white border-blue-100">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Info className="w-5 h-5 text-blue-500" />
+            シミュレーション条件設定
+          </CardTitle>
+          <p className="text-sm text-gray-500">入力値を変更するとグラフと集計が自動的に更新されます</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-3">
+              <Label htmlFor="input-monthly-fee" className="text-sm font-medium text-gray-700">
+                戸当たり月額積立金（円）
+              </Label>
+              <div className="flex items-center gap-4">
+                <Slider
+                  data-testid="slider-monthly-fee"
+                  min={5000}
+                  max={30000}
+                  step={500}
+                  value={[monthlyFeePerUnit]}
+                  onValueChange={(v) => setMonthlyFeePerUnit(v[0])}
+                  className="flex-1"
+                />
+                <Input
+                  id="input-monthly-fee"
+                  data-testid="input-monthly-fee"
+                  type="number"
+                  min={5000}
+                  max={30000}
+                  step={500}
+                  value={monthlyFeePerUnit}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!isNaN(v)) setMonthlyFeePerUnit(Math.max(5000, Math.min(30000, v)));
+                  }}
+                  className="w-28 text-right font-semibold"
+                />
+              </div>
+              <p className="text-xs text-gray-400">範囲: 5,000円 〜 30,000円</p>
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="input-total-units" className="text-sm font-medium text-gray-700">
+                総戸数（戸）
+              </Label>
+              <div className="flex items-center gap-4">
+                <Slider
+                  data-testid="slider-total-units"
+                  min={10}
+                  max={500}
+                  step={5}
+                  value={[totalUnits]}
+                  onValueChange={(v) => setTotalUnits(v[0])}
+                  className="flex-1"
+                />
+                <Input
+                  id="input-total-units"
+                  data-testid="input-total-units"
+                  type="number"
+                  min={10}
+                  max={500}
+                  step={1}
+                  value={totalUnits}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!isNaN(v)) setTotalUnits(Math.max(10, Math.min(500, v)));
+                  }}
+                  className="w-28 text-right font-semibold"
+                />
+              </div>
+              <p className="text-xs text-gray-400">範囲: 10戸 〜 500戸</p>
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+            年間収入試算：<span className="font-bold">{formatManYen(Math.round((monthlyFeePerUnit * totalUnits * 12) / 10000))}</span>
+            　（{monthlyFeePerUnit.toLocaleString()}円 × {totalUnits}戸 × 12ヶ月）
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Annual Cashflow Bar Chart */}
       <Card className="bg-white">
         <CardHeader>
-          <CardTitle className="text-lg">30年間積立金残高推移予測</CardTitle>
+          <CardTitle className="text-lg">年間収支グラフ（30年間）</CardTitle>
+          <p className="text-sm text-gray-500">青：積立金収入　オレンジ：修繕工事費支出　折れ線：純収支</p>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[380px] w-full" data-testid="chart-annual-cashflow">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={simData} margin={{ top: 10, right: 20, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="year"
+                  tickFormatter={(y) => `'${String(y).slice(2)}`}
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  tickFormatter={(v) => `${v.toLocaleString()}`}
+                  tick={{ fontSize: 11 }}
+                  unit="万"
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `${value.toLocaleString()}万円`,
+                    name,
+                  ]}
+                  labelFormatter={(label) => `${label}年度`}
+                />
+                <Legend />
+                <Bar dataKey="income" name="積立金収入" fill="#3b82f6" barSize={10} />
+                <Bar dataKey="expense" name="修繕工事費支出" fill="#f97316" barSize={10} />
+                <Line
+                  type="monotone"
+                  dataKey="netCashflow"
+                  name="純収支"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+
+      {/* Balance Line Chart */}
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle className="text-lg">積立金残高推移グラフ（30年間）</CardTitle>
+          <p className="text-sm text-gray-500">残高がマイナスになる年は赤色で表示されます</p>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[380px] w-full" data-testid="chart-balance">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={balanceData} margin={{ top: 10, right: 20, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="year"
+                  tickFormatter={(y) => `'${String(y).slice(2)}`}
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  tickFormatter={(v) => `${v.toLocaleString()}`}
+                  tick={{ fontSize: 11 }}
+                  unit="万"
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `${value.toLocaleString()}万円`,
+                    name,
+                  ]}
+                  labelFormatter={(label) => `${label}年度`}
+                />
+                <Legend />
+                <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="4 4" label={{ value: "残高 0", fill: "#ef4444", fontSize: 11 }} />
+                <Line
+                  type="monotone"
+                  dataKey="balancePositive"
+                  name="積立金残高（黒字）"
+                  stroke="#3b82f6"
+                  strokeWidth={2.5}
+                  dot={<CustomBalanceDot />}
+                  connectNulls={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="balanceNegative"
+                  name="積立金残高（赤字）"
+                  stroke="#ef4444"
+                  strokeWidth={2.5}
+                  dot={<CustomBalanceDot />}
+                  connectNulls={false}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Summary Cards — 4-card canonical block */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className={finalBalance < 0 ? "border-red-200 bg-red-50/30" : "border-green-200 bg-green-50/30"}>
+          <CardContent className="p-4">
+            <p className="text-xs text-gray-500">30年後 最終残高</p>
+            <p
+              className={`text-xl font-bold mt-1 ${finalBalance < 0 ? "text-red-600" : "text-green-600"}`}
+              data-testid="text-final-balance"
+            >
+              {finalBalance >= 0 ? "+" : ""}
+              {formatManYen(finalBalance)}
+            </p>
+            {finalBalance < 0 ? (
+              <Badge className="mt-2 bg-red-100 text-red-700 border-red-200 text-xs" data-testid="badge-deficit-warning">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                資金不足
+              </Badge>
+            ) : (
+              <Badge className="mt-2 bg-green-100 text-green-700 border-green-200 text-xs" data-testid="badge-surplus-ok">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                健全運用
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
+        <Card className={deficitYear ? "border-red-200 bg-red-50/30" : "border-green-200 bg-green-50/30"}>
+          <CardContent className="p-4">
+            <p className="text-xs text-gray-500">資金不足転落年</p>
+            <p
+              className={`text-xl font-bold mt-1 ${deficitYear ? "text-red-600" : "text-green-600"}`}
+              data-testid="text-deficit-year"
+            >
+              {deficitYear ? `${deficitYear}年` : "問題なし"}
+            </p>
+            {deficitYear && (
+              <p className="text-xs text-red-500 mt-1">
+                開始から {deficitYear - START_YEAR}年目
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        <Card className="bg-white">
+          <CardContent className="p-4">
+            <p className="text-xs text-gray-500">30年間 総収入</p>
+            <p className="text-xl font-bold text-blue-600 mt-1" data-testid="text-total-income">
+              {formatManYen(totalIncome)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-white">
+          <CardContent className="p-4">
+            <p className="text-xs text-gray-500">30年間 総支出</p>
+            <p className="text-xl font-bold text-orange-600 mt-1" data-testid="text-total-expense">
+              {formatManYen(totalExpense)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Existing Comparison Section (kept as-is per task) */}
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle className="text-lg">30年間積立金残高推移予測（方式比較）</CardTitle>
           <p className="text-sm text-gray-500">現行方式では2039年頃に資金不足に陥る可能性があります</p>
         </CardHeader>
         <CardContent>
-          <div className="h-[400px] w-full">
+          <div className="h-[380px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data}>
+              <LineChart data={existingData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="year" />
                 <YAxis unit="万円" />
                 <Tooltip />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="current" 
-                  name="現行方式（据置）" 
-                  stroke="#ef4444" 
+                <Line
+                  type="monotone"
+                  dataKey="current"
+                  name="現行方式（据置）"
+                  stroke="#ef4444"
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="level" 
-                  name="均等積立方式（推奨）" 
-                  stroke="#22c55e" 
+                <Line
+                  type="monotone"
+                  dataKey="level"
+                  name="均等積立方式（推奨）"
+                  stroke="#22c55e"
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="stepwise" 
-                  name="段階増額方式" 
-                  stroke="#3b82f6" 
+                <Line
+                  type="monotone"
+                  dataKey="stepwise"
+                  name="段階増額方式"
+                  stroke="#3b82f6"
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
@@ -144,12 +487,18 @@ export default function LongtermSimulation() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {data.map((row, i) => (
+              {existingData.map((row, i) => (
                 <tr key={i} className="hover:bg-gray-50">
                   <td className="py-3 px-4 text-sm text-gray-900 font-medium">{row.year}年度</td>
-                  <td className={`py-3 px-4 text-sm text-right font-medium ${row.current < 0 ? 'text-red-600' : 'text-gray-700'}`}>{row.current.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-sm text-gray-700 text-right font-medium">{row.level.toLocaleString()}</td>
-                  <td className={`py-3 px-4 text-sm text-right font-medium ${row.stepwise < 0 ? 'text-red-600' : 'text-gray-700'}`}>{row.stepwise.toLocaleString()}</td>
+                  <td className={`py-3 px-4 text-sm text-right font-medium ${row.current < 0 ? "text-red-600" : "text-gray-700"}`}>
+                    {row.current.toLocaleString()}
+                  </td>
+                  <td className="py-3 px-4 text-sm text-gray-700 text-right font-medium">
+                    {row.level.toLocaleString()}
+                  </td>
+                  <td className={`py-3 px-4 text-sm text-right font-medium ${row.stepwise < 0 ? "text-red-600" : "text-gray-700"}`}>
+                    {row.stepwise.toLocaleString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
