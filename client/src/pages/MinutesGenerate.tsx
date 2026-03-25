@@ -264,7 +264,7 @@ export default function MinutesGenerate() {
                 <Skeleton className="h-4 w-1/2" />
               </div>
             ) : generatedText ? (
-              <pre data-testid="text-generated-minutes" className="whitespace-pre-wrap font-sans text-sm text-gray-900 leading-relaxed">
+              <pre data-testid="text-generated-minutes" className="whitespace-pre-wrap font-mono text-sm text-gray-900 leading-relaxed">
                 {generatedText}
               </pre>
             ) : (

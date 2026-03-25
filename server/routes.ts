@@ -756,7 +756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const [minutesText] = await Promise.all([
         generateMinutes(parsed.data),
-        new Promise(resolve => setTimeout(resolve, 2500)),
+        new Promise(resolve => setTimeout(resolve, 5500)),
       ]);
       res.json({ minutes: minutesText });
     } catch (error) {
