@@ -101,7 +101,7 @@ export default function EvaluationScore() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Score Chart Card */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-white dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
               <TrendingUp className="w-6 h-6 text-orange-600" />
@@ -155,7 +155,7 @@ export default function EvaluationScore() {
         </Card>
 
         {/* Real-time Score Simulation */}
-        <Card>
+        <Card className="bg-white dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-lg">What-If シミュレーション</CardTitle>
           </CardHeader>
@@ -212,7 +212,7 @@ export default function EvaluationScore() {
       </div>
 
       {/* Improvement Strategy Table */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-900">
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
             <AlertTriangle className="w-6 h-6 text-yellow-500" />

@@ -123,7 +123,7 @@ export default function EvaluationCheck() {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Left Column: Checklists */}
         <div className="flex-1 space-y-6">
-          <Card>
+          <Card className="bg-white dark:bg-gray-900">
             <CardHeader>
               <CardTitle className="text-xl flex items-center gap-2">
                 <ClipboardCheck className="w-6 h-6 text-orange-600" />
@@ -192,7 +192,7 @@ export default function EvaluationCheck() {
 
         {/* Right Column: Score Preview */}
         <div className="w-full md:w-80 space-y-6">
-          <Card className="sticky top-6">
+          <Card className="sticky top-6 bg-white dark:bg-gray-900">
             <CardHeader>
               <CardTitle className="text-lg">現在の推定スコア</CardTitle>
             </CardHeader>
@@ -243,7 +243,7 @@ export default function EvaluationCheck() {
             </CardContent>
           </Card>
 
-          <Card className="bg-orange-50 border-orange-200">
+          <Card className="bg-white dark:bg-gray-900 border-orange-200">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-orange-800">
                 <CheckCircle2 className="w-4 h-4" />

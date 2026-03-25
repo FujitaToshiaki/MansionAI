@@ -78,7 +78,7 @@ export default function EvaluationHistory() {
       </div>
 
       {/* Line Chart Section */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-900">
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
             <History className="w-6 h-6 text-orange-600" />
@@ -120,7 +120,7 @@ export default function EvaluationHistory() {
       </Card>
 
       {/* History Table */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-900">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl">実施履歴一覧</CardTitle>
           <Link href={`/evaluation/check?condominiumId=${condominiumId}`}>
