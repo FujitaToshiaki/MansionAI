@@ -86,6 +86,17 @@ export const regulations = pgTable("regulations", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
+// 改訂グループテーブル（revision_groups）
+export const revision_groups = pgTable("revision_groups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  version: text("version").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
 // 年度別改訂ヘッダテーブル
 export const revision_headers = pgTable("revision_headers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -109,7 +120,8 @@ export const revision_headers = pgTable("revision_headers", {
 // 既存の regulation_revisions テーブルに revision_header_id を追加
 export const regulation_revisions = pgTable("regulation_revisions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  revision_header_id: varchar("revision_header_id").references(() => revision_headers.id), // 新規追加
+  revision_header_id: varchar("revision_header_id").references(() => revision_headers.id),
+  group_id: varchar("group_id").references(() => revision_groups.id),
   category: text("category").notNull(),
   title: text("title").notNull(),
   change_description: text("change_description").notNull(),

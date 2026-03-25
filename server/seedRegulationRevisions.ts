@@ -307,7 +307,7 @@ export async function seedRegulationRevisions() {
     for (const revision of revisions) {
       await pool.query(
         `INSERT INTO regulation_revisions 
-          (category, title, change_description, before_text, after_text, article_number, reference_section, change_type, group_id, creation_date) 
+          (category, title, change_description, before_text, after_text, article_number, reference_section, change_type, group_id, created_at) 
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
         [
           revision.category,
