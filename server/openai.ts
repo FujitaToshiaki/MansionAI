@@ -1,7 +1,12 @@
 import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAIClient(): OpenAI {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY environment variable is not set");
+  }
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 export interface OCRResult {
   text: string;
@@ -18,7 +23,7 @@ export async function extractTextFromImage(imageBuffer: Buffer, mimeType: string
     const base64Image = imageBuffer.toString('base64');
     const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -77,6 +82,55 @@ JSONフォーマットで以下を返してください:
     console.error('OpenAI OCR error:', error);
     throw new Error('OCR処理中にエラーが発生しました: ' + (error as Error).message);
   }
+}
+
+export interface GenerateMinutesInput {
+  meetingType: string;
+  meetingDate: string;
+  location: string;
+  participants: string;
+  notes: string;
+}
+
+export async function generateMinutes(input: GenerateMinutesInput): Promise<string> {
+  const { meetingType, meetingDate, location, participants, notes } = input;
+
+  const systemPrompt = `あなたはマンション管理のプロフェッショナルです。提供された会議情報・メモをもとに、正式なマンション管理用の議事録を作成してください。
+
+議事録のフォーマット:
+- タイトル（会議種別と回次を含む）
+- 日時・場所・出席者
+- 議題一覧
+- 審議内容（各議題の詳細な内容）
+- 決定事項（番号付きリスト）
+- 次回予定
+
+要件:
+- 丁寧で正式な日本語を使用する
+- メモの内容を整理・補完して読みやすい形式にする
+- 決定事項は明確に記載する
+- 出席者情報はそのまま使用する`;
+
+  const userPrompt = `以下の情報をもとに正式な議事録を作成してください。
+
+【会議種別】${meetingType}
+【開催日】${meetingDate}
+【開催場所】${location}
+【出席者】${participants || "記録なし"}
+
+【会議メモ】
+${notes || "メモなし"}`;
+
+  const response = await getOpenAIClient().chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    max_tokens: 2000,
+  });
+
+  return response.choices[0].message.content ?? "";
 }
 
 export async function extractTextFromMultipleImages(imageBuffers: Array<{buffer: Buffer, mimeType: string}>): Promise<OCRResult[]> {

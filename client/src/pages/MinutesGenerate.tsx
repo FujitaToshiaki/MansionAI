@@ -1,37 +1,22 @@
 import { useState, useEffect } from "react";
 import { useSearch, Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sparkles, Save, ArrowRight, Loader2, FileText, Mic, CheckSquare } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Save, ArrowRight, Loader2, FileText, Mic, CheckSquare, Calendar, MapPin, Users } from "lucide-react";
 import { SubNav } from "@/components/SubNav";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
-const mockGeneratedMinutes = `【第12回理事会議事録】
-
-■日時：2025年3月15日 19:00〜20:30
-■場所：マンション集会室
-■出席者：理事長、副理事長、理事3名、監事1名、管理会社担当者
-
-■議題：
-1. 大規模修繕工事の進捗報告
-2. 駐車場空き区画の募集について
-3. 植栽剪定の実施計画
-
-■審議内容：
-・大規模修繕については、予定通り足場架設が完了し、現在は外壁調査を実施中。
-・駐車場の空きが3区画発生しているため、4月号の広報にて再募集を行うことを承認。
-・植栽剪定は、例年通り5月の大型連休明けに実施することで業者と調整済み。
-
-■決定事項：
-1. 駐車場空き区画の募集要項を承認。
-2. 植栽剪定費用（概算15万円）を予備費より支出することを決定。
-3. 次回理事会を4月12日に開催することを決定。
-
-■次回予定：
-2025年4月12日（土） 19:00〜
-`;
+interface ImportData {
+  meetingType: string;
+  meetingDate: string;
+  location: string;
+  participants: string;
+  textContent: string;
+}
 
 export default function MinutesGenerate() {
   const search = useSearch();
@@ -45,16 +30,48 @@ export default function MinutesGenerate() {
     enabled: !!condominiumId,
   });
 
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [importData, setImportData] = useState<ImportData | null>(null);
   const [generatedText, setGeneratedText] = useState("");
 
+  useEffect(() => {
+    const stored = sessionStorage.getItem(`minutesImportData:${condominiumId}`);
+    if (stored) {
+      try {
+        setImportData(JSON.parse(stored));
+      } catch {
+        setImportData(null);
+      }
+    }
+  }, [condominiumId]);
+
+  const generateMutation = useMutation({
+    mutationFn: async () => {
+      if (!importData) throw new Error("入力データがありません");
+      const res = await apiRequest("POST", "/api/minutes/generate", {
+        meetingType: importData.meetingType,
+        meetingDate: importData.meetingDate,
+        location: importData.location,
+        participants: importData.participants,
+        notes: importData.textContent,
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setGeneratedText(data.minutes ?? "");
+      sessionStorage.removeItem(`minutesImportData:${condominiumId}`);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "生成エラー",
+        description: error.message ?? "議事録の生成中にエラーが発生しました。",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleGenerate = () => {
-    setIsGenerating(true);
     setGeneratedText("");
-    setTimeout(() => {
-      setIsGenerating(false);
-      setGeneratedText(mockGeneratedMinutes);
-    }, 2000);
+    generateMutation.mutate();
   };
 
   const handleSave = () => {
@@ -63,6 +80,8 @@ export default function MinutesGenerate() {
       description: "議事録を保存しました。",
     });
   };
+
+  const isGenerating = generateMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -92,22 +111,72 @@ export default function MinutesGenerate() {
         {/* Left Panel: Input Preview */}
         <Card className="flex flex-col">
           <CardHeader className="py-3 bg-gray-50 border-b">
-            <CardTitle className="text-sm font-medium">入力テキストプレビュー</CardTitle>
+            <CardTitle className="text-sm font-medium">入力情報プレビュー</CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 overflow-auto p-4 text-sm text-gray-600 leading-relaxed">
-            <p>
-              3月15日の理事会。参加者は理事長、副理事長、理事3名、監事1名、管理会社の田中さん。集会室で開催。
-              大規模修繕は足場終わって外壁調査中。順調。
-              駐車場3台空いてる。4月のニュースで募集かけることに決定。
-              植栽は5月連休明け。15万くらい予備費から出す。
-              次回は4月12日19時。
-            </p>
+          <CardContent className="flex-1 overflow-auto p-4 space-y-4">
+            {importData ? (
+              <>
+                <div className="space-y-3">
+                  {importData.meetingType && (
+                    <div className="flex items-start gap-2">
+                      <Badge className="bg-orange-100 text-orange-700 border-orange-200 shrink-0">
+                        会議種別
+                      </Badge>
+                      <span data-testid="text-meeting-type" className="text-sm text-gray-800">{importData.meetingType}</span>
+                    </div>
+                  )}
+                  {importData.meetingDate && (
+                    <div className="flex items-start gap-2">
+                      <Calendar className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                      <span data-testid="text-meeting-date" className="text-sm text-gray-700">{importData.meetingDate}</span>
+                    </div>
+                  )}
+                  {importData.location && (
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                      <span data-testid="text-meeting-location" className="text-sm text-gray-700">{importData.location}</span>
+                    </div>
+                  )}
+                  {importData.participants && (
+                    <div className="flex items-start gap-2">
+                      <Users className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                      <span data-testid="text-meeting-participants" className="text-sm text-gray-700">{importData.participants}</span>
+                    </div>
+                  )}
+                </div>
+
+                {importData.textContent ? (
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-500 font-medium">会議メモ</p>
+                    <p data-testid="text-meeting-notes" className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap border border-gray-100 rounded-md p-3 bg-gray-50">
+                      {importData.textContent}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 italic">メモが入力されていません</p>
+                )}
+              </>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-3">
+                <FileText className="w-10 h-10 text-gray-200" />
+                <p className="text-sm text-center">
+                  「音声・メモ取込」画面で入力した情報がここに表示されます。
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation(`/minutes/import?condominiumId=${condominiumId}`)}
+                >
+                  取込画面へ戻る
+                </Button>
+              </div>
+            )}
           </CardContent>
           <div className="p-4 border-t bg-gray-50 flex justify-end">
-            <Button 
-              className="bg-orange-600 hover:bg-orange-700" 
+            <Button
+              className="bg-orange-600 hover:bg-orange-700"
               onClick={handleGenerate}
-              disabled={isGenerating}
+              disabled={isGenerating || !importData}
               data-testid="button-generate-minutes"
             >
               {isGenerating ? (
@@ -140,7 +209,7 @@ export default function MinutesGenerate() {
                 <Skeleton className="h-4 w-1/2" />
               </div>
             ) : generatedText ? (
-              <pre className="whitespace-pre-wrap font-sans text-sm text-gray-900 leading-relaxed">
+              <pre data-testid="text-generated-minutes" className="whitespace-pre-wrap font-sans text-sm text-gray-900 leading-relaxed">
                 {generatedText}
               </pre>
             ) : (
@@ -155,7 +224,7 @@ export default function MinutesGenerate() {
                 <Save className="w-4 h-4 mr-2" />
                 保存
               </Button>
-              <Button 
+              <Button
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => setLocation(`/minutes/actions?condominiumId=${condominiumId}`)}
                 data-testid="button-go-actions"

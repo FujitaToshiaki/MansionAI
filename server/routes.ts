@@ -10,6 +10,7 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { extractTextFromMultipleImages } from "./gemini";
+import { generateMinutes } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
@@ -731,6 +732,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching decisions:", error);
       res.status(500).json({ message: "Failed to fetch decisions" });
+    }
+  });
+
+  // Generate meeting minutes using OpenAI
+  app.post("/api/minutes/generate", async (req, res) => {
+    try {
+      const schema = z.object({
+        meetingType: z.string().min(1, "会議種別は必須です"),
+        meetingDate: z.string().min(1, "開催日は必須です"),
+        location: z.string().default(""),
+        participants: z.string().default(""),
+        notes: z.string().default(""),
+      });
+
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.errors[0].message });
+      }
+
+      const minutesText = await generateMinutes(parsed.data);
+      res.json({ minutes: minutesText });
+    } catch (error) {
+      console.error("Error generating minutes:", error);
+      res.status(500).json({ error: "議事録の生成中にエラーが発生しました" });
     }
   });
 

@@ -20,13 +20,21 @@ export default function MinutesImport() {
   const [meetingType, setMeetingType] = useState("");
   const [meetingDate, setMeetingDate] = useState("");
   const [participants, setParticipants] = useState("");
+  const [location, setLocation] = useState("メゾンドオプテージ 集会室");
   const [textContent, setTextContent] = useState("");
   const [importTab, setImportTab] = useState("text");
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
 
   const handleProceed = () => {
-    const q = new URLSearchParams({ condominiumId, meetingType, meetingDate });
+    sessionStorage.setItem(`minutesImportData:${condominiumId}`, JSON.stringify({
+      meetingType,
+      meetingDate,
+      participants,
+      location,
+      textContent,
+    }));
+    const q = new URLSearchParams({ condominiumId });
     navigate(`/minutes/generate?${q.toString()}`);
   };
 
@@ -137,7 +145,8 @@ export default function MinutesImport() {
               <Input
                 data-testid="input-location"
                 placeholder="例: マンション集会室"
-                defaultValue="メゾンドオプテージ 集会室"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
                 className="border-gray-200"
               />
             </div>
