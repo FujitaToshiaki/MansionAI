@@ -225,7 +225,7 @@ export default function Header() {
           <Link href={`/condominiums/${condominiumId}`}>
             <button
               data-testid="header-btn-detail"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
                 location === `/condominiums/${condominiumId}` || location === `/condominiums/${condominiumId}/`
                   ? "bg-orange-500 text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
@@ -245,7 +245,7 @@ export default function Header() {
               <Link key={btn.label} href={btn.href(condominiumId)}>
                 <button
                   data-testid={`header-btn-${btn.label}`}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
                     active
                       ? "bg-orange-500 text-white shadow-sm"
                       : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
