@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSearch } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +9,6 @@ import {
   Lightbulb, 
   CheckCircle2,
   ChevronRight,
-  FileText,
-  Loader2,
   LayoutDashboard,
   List,
   History,
@@ -19,28 +16,10 @@ import {
   BarChart
 } from "lucide-react";
 import { SubNav } from "@/components/SubNav";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 export default function LongtermAnalysis() {
   const params = new URLSearchParams(useSearch());
   const condominiumId = params.get("condominiumId") ?? "1";
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
-
-  const handleGenerateSummary = () => {
-    setIsGenerating(true);
-    setTimeout(() => {
-      setIsGenerating(false);
-      setShowSummary(true);
-    }, 2000);
-  };
 
   const findings = [
     { title: "建築コスト指数の上昇", description: "計画策定時（2018年）から建築コスト指数が約25%上昇しており、現在の予算枠では不足する可能性が高い。", type: "risk" },
@@ -77,26 +56,6 @@ export default function LongtermAnalysis() {
             { label: "積立金シミュレーション", path: `/longterm/simulation?condominiumId=${condominiumId}`, icon: TrendingUp },
             { label: "AI見直し分析", path: `/longterm/analysis?condominiumId=${condominiumId}`, icon: BarChart },
           ]} />
-      </div>
-
-      <div className="flex justify-end">
-        <Button 
-          onClick={handleGenerateSummary} 
-          disabled={isGenerating}
-          className="bg-orange-600 hover:bg-orange-700"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              要約生成中...
-            </>
-          ) : (
-            <>
-              <FileText className="w-4 h-4 mr-2" />
-              住民説明用要約を生成
-            </>
-          )}
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -210,33 +169,6 @@ export default function LongtermAnalysis() {
           </Card>
         </div>
       </div>
-
-      <Dialog open={showSummary} onOpenChange={setShowSummary}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>住民説明用 要約テキスト</DialogTitle>
-            <DialogDescription>
-              長期修繕計画の見直し必要性について、住民の方々に分かりやすく説明するための文章です。
-            </DialogDescription>
-          </DialogHeader>
-          <div className="bg-gray-50 p-6 rounded-lg space-y-4 text-gray-800 leading-relaxed">
-            <p className="font-bold text-lg border-b pb-2">【重要】将来の修繕積立金不足に関するお知らせとご提案</p>
-            <p>
-              現在の長期修繕計画をAI技術を用いて精査したところ、今後の建築資材および人件費の高騰（計画時より約25%上昇）により、このままでは将来的に約1.2億円の資金不足が生じる可能性が高いことが判明しました。
-            </p>
-            <p>
-              一方で、外壁塗装などの修繕周期を最新技術に基づいて数年延長することや、工事手法の工夫により、合計で約4,000万円程度のコスト抑制も見込めます。
-            </p>
-            <p>
-              皆様の資産価値を維持しつつ、将来の急な一時金徴収を避けるため、「修繕時期の最適化」と「積立金額の均等化」について、次回の理事会および総会にてご提案させていただく予定です。
-            </p>
-          </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" onClick={() => setShowSummary(false)}>閉じる</Button>
-            <Button className="bg-orange-600 hover:bg-orange-700">クリップボードにコピー</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
