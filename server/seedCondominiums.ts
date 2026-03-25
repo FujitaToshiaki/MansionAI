@@ -4,46 +4,6 @@ export async function seedCondominiums() {
   try {
     console.log("[SEED] Starting condominiums seed check...");
 
-    const { rows } = await pool.query("SELECT COUNT(*) FROM condominiums");
-    const count = parseInt(rows[0].count);
-    console.log(`[SEED] Found ${count} existing condominiums records`);
-
-    if (count > 0) {
-      // 既存データがある場合、メゾンドオプテージの新カラムを更新
-      console.log("[SEED] condominiums already has records. Updating extended columns for メゾンドオプテージ...");
-      await pool.query(
-        `UPDATE condominiums SET
-           structure_type = $1,
-           floors = $2,
-           management_type = $3,
-           reserve_fund_balance = $4,
-           reserve_fund_monthly = $5,
-           management_fee_monthly = $6,
-           delinquency_rate = $7,
-           proper_evaluation_score = $8,
-           proper_evaluation_star = $9,
-           long_term_plan_version = $10,
-           long_term_plan_date = $11
-         WHERE id = $12`,
-        [
-          "RC造", 12, "全部委託",
-          9600,    // 積立金残高9,600万円
-          12000,   // 月額積立金12,000円/戸
-          8500,    // 月額管理費8,500円/戸
-          "2.5",   // 滞納率2.5%
-          72,      // 適正評価72点
-          3,       // 適正評価★3
-          "第2版", // 長計バージョン
-          "2018-10-01", // 長計策定日
-          "a7af9126-67ff-47d9-9c24-cf4054aeb63c",
-        ]
-      );
-      console.log("[SEED] condominiums: extended columns updated for メゾンドオプテージ.");
-      return;
-    }
-
-    console.log("[SEED] Seeding condominiums data...");
-
     const condominiums = [
       {
         id: "a7af9126-67ff-47d9-9c24-cf4054aeb63c",
@@ -55,7 +15,6 @@ export async function seedCondominiums() {
         current_regulation_version: "5.0",
         law_revision_status: "completed",
         assigned_manager: "修繕 未来",
-        // 拡張カラム
         structure_type: "RC造",
         floors: 12,
         management_type: "全部委託",
@@ -90,7 +49,185 @@ export async function seedCondominiums() {
         long_term_plan_version: null,
         long_term_plan_date: null,
       },
+      {
+        id: "6aa176b1-0fb6-4217-b334-dccebfb03d68",
+        name: "パークサイドレジデンス立川",
+        address: "東京都立川市錦町3-5-10",
+        units: 120,
+        build_year: 2001,
+        management_start_date: "2015-07-01",
+        current_regulation_version: "4.1",
+        law_revision_status: "completed",
+        assigned_manager: "田中一郎",
+        structure_type: "RC造",
+        floors: 10,
+        management_type: "全部委託",
+        reserve_fund_balance: 4800,
+        reserve_fund_monthly: 10500,
+        management_fee_monthly: 9200,
+        delinquency_rate: "0.8",
+        proper_evaluation_score: 80,
+        proper_evaluation_star: 4,
+        long_term_plan_version: "第3版",
+        long_term_plan_date: "2022-04-01",
+      },
+      {
+        id: "c25d20d2-e3ea-46a7-b866-3ca38d553bf8",
+        name: "サンシャインコート川崎",
+        address: "神奈川県川崎市川崎区砂子1-8-22",
+        units: 56,
+        build_year: 1998,
+        management_start_date: "2012-04-01",
+        current_regulation_version: "2.8",
+        law_revision_status: "pending",
+        assigned_manager: "山田太郎",
+        structure_type: "RC造",
+        floors: 6,
+        management_type: "一部委託",
+        reserve_fund_balance: 1850,
+        reserve_fund_monthly: 7500,
+        management_fee_monthly: 6200,
+        delinquency_rate: "4.1",
+        proper_evaluation_score: 52,
+        proper_evaluation_star: 2,
+        long_term_plan_version: "第1版",
+        long_term_plan_date: "2016-09-01",
+      },
+      {
+        id: "86d64213-2915-4433-a906-bb10138e2823",
+        name: "ライオンズマンション浦和",
+        address: "埼玉県さいたま市浦和区仲町2-12-5",
+        units: 200,
+        build_year: 2010,
+        management_start_date: "2022-01-01",
+        current_regulation_version: "2.0",
+        law_revision_status: "in_progress",
+        assigned_manager: "鈴木美咲",
+        structure_type: "RC造",
+        floors: 15,
+        management_type: "全部委託",
+        reserve_fund_balance: 7200,
+        reserve_fund_monthly: 11000,
+        management_fee_monthly: 9800,
+        delinquency_rate: "1.5",
+        proper_evaluation_score: 78,
+        proper_evaluation_star: 4,
+        long_term_plan_version: "第2版",
+        long_term_plan_date: "2023-03-20",
+      },
+      {
+        id: "7bd45ba6-222f-464f-89bd-3b8f8df8dfa2",
+        name: "コスモポリス千葉中央",
+        address: "千葉県千葉市中央区富士見1-4-8",
+        units: 148,
+        build_year: 2003,
+        management_start_date: "2019-10-01",
+        current_regulation_version: "3.5",
+        law_revision_status: "completed",
+        assigned_manager: "伊藤健二",
+        structure_type: "SRC造",
+        floors: 18,
+        management_type: "全部委託",
+        reserve_fund_balance: 5500,
+        reserve_fund_monthly: 10000,
+        management_fee_monthly: 8800,
+        delinquency_rate: "2.0",
+        proper_evaluation_score: 69,
+        proper_evaluation_star: 3,
+        long_term_plan_version: "第2版",
+        long_term_plan_date: "2020-07-10",
+      },
+      {
+        id: "1af5d112-b4dc-4d7f-8cd8-3e0077cd5e79",
+        name: "グリーンパレス町田",
+        address: "東京都町田市原町田4-6-15",
+        units: 72,
+        build_year: 1994,
+        management_start_date: "2010-06-01",
+        current_regulation_version: "5.3",
+        law_revision_status: "completed",
+        assigned_manager: "渡辺裕子",
+        structure_type: "RC造",
+        floors: 7,
+        management_type: "自主管理",
+        reserve_fund_balance: 2100,
+        reserve_fund_monthly: 6800,
+        management_fee_monthly: 5500,
+        delinquency_rate: "5.2",
+        proper_evaluation_score: 45,
+        proper_evaluation_star: 2,
+        long_term_plan_version: "第4版",
+        long_term_plan_date: "2019-01-15",
+      },
+      {
+        id: "cff09745-0233-4b13-b747-c29ed0d69e54",
+        name: "ベルフォーレ新松戸",
+        address: "千葉県松戸市新松戸3-7-2",
+        units: 96,
+        build_year: 2008,
+        management_start_date: "2021-04-01",
+        current_regulation_version: "1.5",
+        law_revision_status: "in_progress",
+        assigned_manager: "中村雄一",
+        structure_type: "RC造",
+        floors: 9,
+        management_type: "全部委託",
+        reserve_fund_balance: 3600,
+        reserve_fund_monthly: 9500,
+        management_fee_monthly: 8200,
+        delinquency_rate: "1.8",
+        proper_evaluation_score: 61,
+        proper_evaluation_star: 3,
+        long_term_plan_version: "第1版",
+        long_term_plan_date: "2021-09-30",
+      },
+      {
+        id: "09d873ad-3061-438a-8093-278f0df1cbbf",
+        name: "オーシャンビューレジデンス藤沢",
+        address: "神奈川県藤沢市片瀬海岸1-10-3",
+        units: 65,
+        build_year: 2015,
+        management_start_date: "2023-07-01",
+        current_regulation_version: "1.0",
+        law_revision_status: "pending",
+        assigned_manager: "小林さくら",
+        structure_type: "RC造",
+        floors: 11,
+        management_type: "全部委託",
+        reserve_fund_balance: 2800,
+        reserve_fund_monthly: 13000,
+        management_fee_monthly: 11500,
+        delinquency_rate: "0.5",
+        proper_evaluation_score: 85,
+        proper_evaluation_star: 4,
+        long_term_plan_version: "第1版",
+        long_term_plan_date: "2023-07-01",
+      },
+      {
+        id: "55b3d6d2-6b27-4f6a-8a10-b55c7b07306b",
+        name: "ウィンドミル大宮",
+        address: "埼玉県さいたま市大宮区桜木町1-15-9",
+        units: 310,
+        build_year: 1990,
+        management_start_date: "2008-01-01",
+        current_regulation_version: "6.0",
+        law_revision_status: "completed",
+        assigned_manager: "加藤誠司",
+        structure_type: "SRC造",
+        floors: 20,
+        management_type: "全部委託",
+        reserve_fund_balance: 12400,
+        reserve_fund_monthly: 13500,
+        management_fee_monthly: 10200,
+        delinquency_rate: "3.0",
+        proper_evaluation_score: 74,
+        proper_evaluation_star: 3,
+        long_term_plan_version: "第5版",
+        long_term_plan_date: "2024-02-28",
+      },
     ];
+
+    console.log("[SEED] Upserting condominiums data...");
 
     for (const c of condominiums) {
       await pool.query(
@@ -115,7 +252,7 @@ export async function seedCondominiums() {
       );
     }
 
-    console.log(`[SEED] Successfully seeded ${condominiums.length} condominiums.`);
+    console.log(`[SEED] Successfully upserted ${condominiums.length} condominiums.`);
   } catch (error) {
     console.error("[SEED] Error seeding condominiums:", error);
     throw error;
