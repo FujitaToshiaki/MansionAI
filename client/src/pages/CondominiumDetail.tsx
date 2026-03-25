@@ -106,7 +106,7 @@ export default function CondominiumDetail() {
             <Link href={`/condominiums/${id}/issues`}>
               <Button variant="outline" size="sm" className="bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-400 text-orange-700 hover:text-orange-800 w-full" data-testid="btn-incidents">
                 <AlertTriangle className="w-4 h-4 mr-2" />
-                インシデント管理
+                問合せ管理
               </Button>
             </Link>
             {/* Second Row */}
