@@ -15,6 +15,10 @@
  *   3. documents
  *   4. regulation_revisions  (revision_groups → regulation_revisions)
  *   5. regulation_analysis_results
+ *   6. long_term_data        (long_term_plans, repair_items, repair_history)
+ *   7. consultation_data     (consultation_logs, meeting_recordings)
+ *   8. proposals_and_actions (proposals, action_items)
+ *   9. evaluation_data       (evaluation_items_master, evaluation_checks)
  */
 
 import { pool } from "./db";
@@ -23,6 +27,10 @@ import { seedRevisionHeaders } from "./seedRevisionHeaders";
 import { seedDocuments } from "./seedDocuments";
 import { seedRegulationRevisions } from "./seedRegulationRevisions";
 import { seedRegulationAnalysisResults } from "./seedRegulationAnalysisResults";
+import { seedLongTermData } from "./seedLongTermData";
+import { seedConsultationData } from "./seedConsultationData";
+import { seedProposalsAndActions } from "./seedProposalsAndActions";
+import { seedEvaluationData } from "./seedEvaluationData";
 
 async function main() {
   console.log("=================================================");
@@ -35,6 +43,10 @@ async function main() {
     { name: "documents",                   fn: seedDocuments },
     { name: "regulation_revisions",        fn: seedRegulationRevisions },
     { name: "regulation_analysis_results", fn: seedRegulationAnalysisResults },
+    { name: "long_term_data",              fn: seedLongTermData },
+    { name: "consultation_data",           fn: seedConsultationData },
+    { name: "proposals_and_actions",       fn: seedProposalsAndActions },
+    { name: "evaluation_data",             fn: seedEvaluationData },
   ];
 
   let success = 0;

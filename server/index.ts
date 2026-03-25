@@ -6,6 +6,10 @@ import { seedRevisionHeaders } from "./seedRevisionHeaders";
 import { seedDocuments } from "./seedDocuments";
 import { seedRegulationRevisions } from "./seedRegulationRevisions";
 import { seedRegulationAnalysisResults } from "./seedRegulationAnalysisResults";
+import { seedLongTermData } from "./seedLongTermData";
+import { seedConsultationData } from "./seedConsultationData";
+import { seedProposalsAndActions } from "./seedProposalsAndActions";
+import { seedEvaluationData } from "./seedEvaluationData";
 
 const app = express();
 app.use(express.json());
@@ -47,6 +51,10 @@ app.use((req, res, next) => {
   try { await seedDocuments(); } catch (e) { console.error("Failed to seed documents:", e); }
   try { await seedRegulationRevisions(); } catch (e) { console.error("Failed to seed regulation_revisions:", e); }
   try { await seedRegulationAnalysisResults(); } catch (e) { console.error("Failed to seed regulation_analysis_results:", e); }
+  try { await seedLongTermData(); } catch (e) { console.error("Failed to seed long_term_data:", e); }
+  try { await seedConsultationData(); } catch (e) { console.error("Failed to seed consultation_data:", e); }
+  try { await seedProposalsAndActions(); } catch (e) { console.error("Failed to seed proposals_and_actions:", e); }
+  try { await seedEvaluationData(); } catch (e) { console.error("Failed to seed evaluation_data:", e); }
 
   const server = await registerRoutes(app);
 

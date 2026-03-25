@@ -10,7 +10,25 @@ import {
   type Regulation,
   type InsertRegulation,
   type Activity,
-  type InsertActivity
+  type InsertActivity,
+  type LongTermPlan,
+  type InsertLongTermPlan,
+  type RepairItem,
+  type InsertRepairItem,
+  type RepairHistory,
+  type InsertRepairHistory,
+  type ConsultationLog,
+  type InsertConsultationLog,
+  type MeetingRecording,
+  type InsertMeetingRecording,
+  type Proposal,
+  type InsertProposal,
+  type ActionItem,
+  type InsertActionItem,
+  type EvaluationCheck,
+  type InsertEvaluationCheck,
+  type EvaluationItemMaster,
+  type InsertEvaluationItemMaster,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -49,6 +67,53 @@ export interface IStorage {
   
   // Database query method
   query(sql: string, params?: any[]): Promise<any>;
+
+  // Long Term Plan methods
+  getLongTermPlansByCondominiumId(condominiumId: string): Promise<LongTermPlan[]>;
+  getLongTermPlanById(id: string): Promise<LongTermPlan | undefined>;
+  createLongTermPlan(plan: InsertLongTermPlan): Promise<LongTermPlan>;
+  updateLongTermPlan(id: string, updates: Partial<LongTermPlan>): Promise<LongTermPlan>;
+
+  // Repair Item methods
+  getRepairItemsByCondominiumId(condominiumId: string): Promise<RepairItem[]>;
+  getRepairItemById(id: string): Promise<RepairItem | undefined>;
+  createRepairItem(item: InsertRepairItem): Promise<RepairItem>;
+  updateRepairItem(id: string, updates: Partial<RepairItem>): Promise<RepairItem>;
+
+  // Repair History methods
+  getRepairHistoryByCondominiumId(condominiumId: string): Promise<RepairHistory[]>;
+  createRepairHistory(history: InsertRepairHistory): Promise<RepairHistory>;
+
+  // Consultation Log methods
+  getConsultationLogsByCondominiumId(condominiumId: string): Promise<ConsultationLog[]>;
+  getConsultationLogById(id: string): Promise<ConsultationLog | undefined>;
+  createConsultationLog(log: InsertConsultationLog): Promise<ConsultationLog>;
+  updateConsultationLog(id: string, updates: Partial<ConsultationLog>): Promise<ConsultationLog>;
+
+  // Meeting Recording methods
+  getMeetingRecordingsByCondominiumId(condominiumId: string): Promise<MeetingRecording[]>;
+  createMeetingRecording(recording: InsertMeetingRecording): Promise<MeetingRecording>;
+
+  // Proposal methods
+  getProposalsByCondominiumId(condominiumId: string): Promise<Proposal[]>;
+  getProposalById(id: string): Promise<Proposal | undefined>;
+  createProposal(proposal: InsertProposal): Promise<Proposal>;
+  updateProposal(id: string, updates: Partial<Proposal>): Promise<Proposal>;
+
+  // Action Item methods
+  getActionItemsByCondominiumId(condominiumId: string): Promise<ActionItem[]>;
+  getActionItemById(id: string): Promise<ActionItem | undefined>;
+  createActionItem(item: InsertActionItem): Promise<ActionItem>;
+  updateActionItem(id: string, updates: Partial<ActionItem>): Promise<ActionItem>;
+
+  // Evaluation Check methods
+  getEvaluationChecksByCondominiumId(condominiumId: string): Promise<EvaluationCheck[]>;
+  createEvaluationCheck(check: InsertEvaluationCheck): Promise<EvaluationCheck>;
+
+  // Evaluation Items Master methods
+  getAllEvaluationItemsMaster(): Promise<EvaluationItemMaster[]>;
+  getEvaluationItemsMasterByCategory(category: string): Promise<EvaluationItemMaster[]>;
+  createEvaluationItemMaster(item: InsertEvaluationItemMaster): Promise<EvaluationItemMaster>;
 }
 
 export class MemStorage implements IStorage {
@@ -58,6 +123,15 @@ export class MemStorage implements IStorage {
   private decisions: Map<string, Decision>;
   private regulations: Map<string, Regulation>;
   private activities: Map<string, Activity>;
+  private longTermPlans: Map<string, LongTermPlan>;
+  private repairItems: Map<string, RepairItem>;
+  private repairHistories: Map<string, RepairHistory>;
+  private consultationLogs: Map<string, ConsultationLog>;
+  private meetingRecordings: Map<string, MeetingRecording>;
+  private proposals: Map<string, Proposal>;
+  private actionItems: Map<string, ActionItem>;
+  private evaluationChecks: Map<string, EvaluationCheck>;
+  private evaluationItemsMaster: Map<string, EvaluationItemMaster>;
 
   constructor() {
     this.users = new Map();
@@ -66,6 +140,15 @@ export class MemStorage implements IStorage {
     this.decisions = new Map();
     this.regulations = new Map();
     this.activities = new Map();
+    this.longTermPlans = new Map();
+    this.repairItems = new Map();
+    this.repairHistories = new Map();
+    this.consultationLogs = new Map();
+    this.meetingRecordings = new Map();
+    this.proposals = new Map();
+    this.actionItems = new Map();
+    this.evaluationChecks = new Map();
+    this.evaluationItemsMaster = new Map();
     
     // Initialize with mock data
     this.initializeMockData();
@@ -502,9 +585,161 @@ export class MemStorage implements IStorage {
   }
 
   async query(sql: string, params: any[] = []): Promise<any> {
-    // Mock implementation for demonstration
-    // In real implementation, this would connect to the actual database
     throw new Error('Database query method not implemented in MemStorage');
+  }
+
+  // Long Term Plan methods
+  async getLongTermPlansByCondominiumId(condominiumId: string): Promise<LongTermPlan[]> {
+    return Array.from(this.longTermPlans.values()).filter(p => p.condominiumId === condominiumId);
+  }
+  async getLongTermPlanById(id: string): Promise<LongTermPlan | undefined> {
+    return this.longTermPlans.get(id);
+  }
+  async createLongTermPlan(plan: InsertLongTermPlan): Promise<LongTermPlan> {
+    const id = randomUUID();
+    const record: LongTermPlan = { ...plan, id, createdAt: new Date(), updatedAt: new Date() };
+    this.longTermPlans.set(id, record);
+    return record;
+  }
+  async updateLongTermPlan(id: string, updates: Partial<LongTermPlan>): Promise<LongTermPlan> {
+    const existing = this.longTermPlans.get(id);
+    if (!existing) throw new Error("LongTermPlan not found");
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.longTermPlans.set(id, updated);
+    return updated;
+  }
+
+  // Repair Item methods
+  async getRepairItemsByCondominiumId(condominiumId: string): Promise<RepairItem[]> {
+    return Array.from(this.repairItems.values()).filter(i => i.condominiumId === condominiumId);
+  }
+  async getRepairItemById(id: string): Promise<RepairItem | undefined> {
+    return this.repairItems.get(id);
+  }
+  async createRepairItem(item: InsertRepairItem): Promise<RepairItem> {
+    const id = randomUUID();
+    const record: RepairItem = { ...item, id, createdAt: new Date() };
+    this.repairItems.set(id, record);
+    return record;
+  }
+  async updateRepairItem(id: string, updates: Partial<RepairItem>): Promise<RepairItem> {
+    const existing = this.repairItems.get(id);
+    if (!existing) throw new Error("RepairItem not found");
+    const updated = { ...existing, ...updates };
+    this.repairItems.set(id, updated);
+    return updated;
+  }
+
+  // Repair History methods
+  async getRepairHistoryByCondominiumId(condominiumId: string): Promise<RepairHistory[]> {
+    return Array.from(this.repairHistories.values()).filter(h => h.condominiumId === condominiumId);
+  }
+  async createRepairHistory(history: InsertRepairHistory): Promise<RepairHistory> {
+    const id = randomUUID();
+    const record: RepairHistory = { ...history, id, createdAt: new Date() };
+    this.repairHistories.set(id, record);
+    return record;
+  }
+
+  // Consultation Log methods
+  async getConsultationLogsByCondominiumId(condominiumId: string): Promise<ConsultationLog[]> {
+    return Array.from(this.consultationLogs.values()).filter(l => l.condominiumId === condominiumId);
+  }
+  async getConsultationLogById(id: string): Promise<ConsultationLog | undefined> {
+    return this.consultationLogs.get(id);
+  }
+  async createConsultationLog(log: InsertConsultationLog): Promise<ConsultationLog> {
+    const id = randomUUID();
+    const record: ConsultationLog = { ...log, id, createdAt: new Date() };
+    this.consultationLogs.set(id, record);
+    return record;
+  }
+  async updateConsultationLog(id: string, updates: Partial<ConsultationLog>): Promise<ConsultationLog> {
+    const existing = this.consultationLogs.get(id);
+    if (!existing) throw new Error("ConsultationLog not found");
+    const updated = { ...existing, ...updates };
+    this.consultationLogs.set(id, updated);
+    return updated;
+  }
+
+  // Meeting Recording methods
+  async getMeetingRecordingsByCondominiumId(condominiumId: string): Promise<MeetingRecording[]> {
+    return Array.from(this.meetingRecordings.values()).filter(r => r.condominiumId === condominiumId);
+  }
+  async createMeetingRecording(recording: InsertMeetingRecording): Promise<MeetingRecording> {
+    const id = randomUUID();
+    const record: MeetingRecording = { ...recording, id, createdAt: new Date() };
+    this.meetingRecordings.set(id, record);
+    return record;
+  }
+
+  // Proposal methods
+  async getProposalsByCondominiumId(condominiumId: string): Promise<Proposal[]> {
+    return Array.from(this.proposals.values()).filter(p => p.condominiumId === condominiumId);
+  }
+  async getProposalById(id: string): Promise<Proposal | undefined> {
+    return this.proposals.get(id);
+  }
+  async createProposal(proposal: InsertProposal): Promise<Proposal> {
+    const id = randomUUID();
+    const record: Proposal = { ...proposal, id, createdAt: new Date(), updatedAt: new Date() };
+    this.proposals.set(id, record);
+    return record;
+  }
+  async updateProposal(id: string, updates: Partial<Proposal>): Promise<Proposal> {
+    const existing = this.proposals.get(id);
+    if (!existing) throw new Error("Proposal not found");
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.proposals.set(id, updated);
+    return updated;
+  }
+
+  // Action Item methods
+  async getActionItemsByCondominiumId(condominiumId: string): Promise<ActionItem[]> {
+    return Array.from(this.actionItems.values()).filter(a => a.condominiumId === condominiumId);
+  }
+  async getActionItemById(id: string): Promise<ActionItem | undefined> {
+    return this.actionItems.get(id);
+  }
+  async createActionItem(item: InsertActionItem): Promise<ActionItem> {
+    const id = randomUUID();
+    const record: ActionItem = { ...item, id, createdAt: new Date(), updatedAt: new Date() };
+    this.actionItems.set(id, record);
+    return record;
+  }
+  async updateActionItem(id: string, updates: Partial<ActionItem>): Promise<ActionItem> {
+    const existing = this.actionItems.get(id);
+    if (!existing) throw new Error("ActionItem not found");
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.actionItems.set(id, updated);
+    return updated;
+  }
+
+  // Evaluation Check methods
+  async getEvaluationChecksByCondominiumId(condominiumId: string): Promise<EvaluationCheck[]> {
+    return Array.from(this.evaluationChecks.values()).filter(e => e.condominiumId === condominiumId);
+  }
+  async createEvaluationCheck(check: InsertEvaluationCheck): Promise<EvaluationCheck> {
+    const id = randomUUID();
+    const record: EvaluationCheck = { ...check, id, createdAt: new Date() };
+    this.evaluationChecks.set(id, record);
+    return record;
+  }
+
+  // Evaluation Items Master methods
+  async getAllEvaluationItemsMaster(): Promise<EvaluationItemMaster[]> {
+    return Array.from(this.evaluationItemsMaster.values()).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  }
+  async getEvaluationItemsMasterByCategory(category: string): Promise<EvaluationItemMaster[]> {
+    return Array.from(this.evaluationItemsMaster.values())
+      .filter(e => e.category === category)
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  }
+  async createEvaluationItemMaster(item: InsertEvaluationItemMaster): Promise<EvaluationItemMaster> {
+    const id = randomUUID();
+    const record: EvaluationItemMaster = { ...item, id, createdAt: new Date() };
+    this.evaluationItemsMaster.set(id, record);
+    return record;
   }
 }
 

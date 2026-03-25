@@ -5,7 +5,7 @@ import { KnowledgeService } from "./knowledgeService";
 import { z } from "zod";
 import { insertKnowledgeDocumentSchema } from "@shared/schema";
 import multer from "multer";
-import { db } from "./db";
+import { db, pool } from "./db";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
@@ -61,11 +61,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper: map DB snake_case condominium row to camelCase (preserving existing API contract + new fields)
+  function mapCondominiumRow(row: any) {
+    return {
+      id: row.id,
+      name: row.name,
+      address: row.address,
+      units: row.units,
+      buildYear: row.build_year,
+      managementStartDate: row.management_start_date,
+      currentRegulationVersion: row.current_regulation_version,
+      lawRevisionStatus: row.law_revision_status,
+      lastActivity: row.last_activity,
+      assignedManager: row.assigned_manager,
+      createdAt: row.created_at,
+      // Task-17 拡張カラム
+      structureType: row.structure_type,
+      floors: row.floors,
+      managementType: row.management_type,
+      reserveFundBalance: row.reserve_fund_balance,
+      reserveFundMonthly: row.reserve_fund_monthly,
+      managementFeeMonthly: row.management_fee_monthly,
+      delinquencyRate: row.delinquency_rate,
+      properEvaluationScore: row.proper_evaluation_score,
+      properEvaluationStar: row.proper_evaluation_star,
+      longTermPlanVersion: row.long_term_plan_version,
+      longTermPlanDate: row.long_term_plan_date,
+    };
+  }
+
   // Condominiums endpoints
   app.get("/api/condominiums", async (req, res) => {
     try {
-      const condominiums = await storage.getAllCondominiums();
-      res.json(condominiums);
+      const { rows } = await pool.query(
+        "SELECT * FROM condominiums ORDER BY created_at ASC"
+      );
+      res.json(rows.map(mapCondominiumRow));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch condominiums" });
     }
@@ -73,11 +104,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/condominiums/:id", async (req, res) => {
     try {
-      const condominium = await storage.getCondominiumById(req.params.id);
-      if (!condominium) {
+      const { rows } = await pool.query(
+        "SELECT * FROM condominiums WHERE id = $1",
+        [req.params.id]
+      );
+      if (rows.length === 0) {
         return res.status(404).json({ error: "Condominium not found" });
       }
-      res.json(condominium);
+      res.json(mapCondominiumRow(rows[0]));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch condominium" });
     }
@@ -1361,6 +1395,422 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error loading meeting minutes:', error);
       res.status(500).json({ error: 'Failed to load meeting minutes' });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: 長期修繕計画 API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/condominiums/:id/long-term-plans", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM long_term_plans WHERE condominium_id = $1 ORDER BY created_at DESC",
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch long term plans" });
+    }
+  });
+
+  app.get("/api/long-term-plans/:id", async (req, res) => {
+    try {
+      const { rows } = await pool.query("SELECT * FROM long_term_plans WHERE id = $1", [req.params.id]);
+      if (rows.length === 0) return res.status(404).json({ error: "Long term plan not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch long term plan" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/long-term-plans", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO long_term_plans (condominium_id, version, plan_start_year, plan_end_year, total_amount, approved_date, notes)
+         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+        [req.params.id, b.version, b.planStartYear, b.planEndYear, b.totalAmount, b.approvedDate, b.notes]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create long term plan" });
+    }
+  });
+
+  app.patch("/api/long-term-plans/:id", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `UPDATE long_term_plans SET version=COALESCE($1,version), plan_start_year=COALESCE($2,plan_start_year),
+         plan_end_year=COALESCE($3,plan_end_year), total_amount=COALESCE($4,total_amount),
+         approved_date=COALESCE($5,approved_date), notes=COALESCE($6,notes), updated_at=NOW()
+         WHERE id=$7 RETURNING *`,
+        [b.version, b.planStartYear, b.planEndYear, b.totalAmount, b.approvedDate, b.notes, req.params.id]
+      );
+      if (rows.length === 0) return res.status(404).json({ error: "Long term plan not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update long term plan" });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: 修繕項目 API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/condominiums/:id/repair-items", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM repair_items WHERE condominium_id = $1 ORDER BY category, planned_year",
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch repair items" });
+    }
+  });
+
+  app.get("/api/repair-items/:id", async (req, res) => {
+    try {
+      const { rows } = await pool.query("SELECT * FROM repair_items WHERE id = $1", [req.params.id]);
+      if (rows.length === 0) return res.status(404).json({ error: "Repair item not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch repair item" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/repair-items", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO repair_items (condominium_id, long_term_plan_id, category, item_name, planned_year, planned_amount, cycle_years, priority, status, notes)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+        [req.params.id, b.longTermPlanId, b.category, b.itemName, b.plannedYear, b.plannedAmount, b.cycleYears, b.priority, b.status, b.notes]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create repair item" });
+    }
+  });
+
+  app.patch("/api/repair-items/:id", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `UPDATE repair_items SET category=COALESCE($1,category), item_name=COALESCE($2,item_name),
+         planned_year=COALESCE($3,planned_year), planned_amount=COALESCE($4,planned_amount),
+         cycle_years=COALESCE($5,cycle_years), priority=COALESCE($6,priority),
+         status=COALESCE($7,status), notes=COALESCE($8,notes)
+         WHERE id=$9 RETURNING *`,
+        [b.category, b.itemName, b.plannedYear, b.plannedAmount, b.cycleYears, b.priority, b.status, b.notes, req.params.id]
+      );
+      if (rows.length === 0) return res.status(404).json({ error: "Repair item not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update repair item" });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: 修繕履歴 API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/condominiums/:id/repair-history", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM repair_history WHERE condominium_id = $1 ORDER BY implemented_date DESC",
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch repair history" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/repair-history", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO repair_history (condominium_id, repair_item_id, title, category, implemented_date, amount, contractor, outcome)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+        [req.params.id, b.repairItemId, b.title, b.category, b.implementedDate, b.amount, b.contractor, b.outcome]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create repair history" });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: 相談ログ API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/condominiums/:id/consultation-logs", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM consultation_logs WHERE condominium_id = $1 ORDER BY consulted_at DESC",
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch consultation logs" });
+    }
+  });
+
+  app.get("/api/consultation-logs/:id", async (req, res) => {
+    try {
+      const { rows } = await pool.query("SELECT * FROM consultation_logs WHERE id = $1", [req.params.id]);
+      if (rows.length === 0) return res.status(404).json({ error: "Consultation log not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch consultation log" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/consultation-logs", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO consultation_logs (condominium_id, category, title, content, response, responded_by, status, priority, consulted_at, resolved_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9,NOW()),$10) RETURNING *`,
+        [req.params.id, b.category, b.title, b.content, b.response, b.respondedBy, b.status ?? "open", b.priority ?? "medium", b.consultedAt, b.resolvedAt]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create consultation log" });
+    }
+  });
+
+  app.patch("/api/consultation-logs/:id", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `UPDATE consultation_logs SET category=COALESCE($1,category), title=COALESCE($2,title),
+         content=COALESCE($3,content), response=COALESCE($4,response),
+         responded_by=COALESCE($5,responded_by), status=COALESCE($6,status),
+         priority=COALESCE($7,priority), resolved_at=COALESCE($8,resolved_at)
+         WHERE id=$9 RETURNING *`,
+        [b.category, b.title, b.content, b.response, b.respondedBy, b.status, b.priority, b.resolvedAt, req.params.id]
+      );
+      if (rows.length === 0) return res.status(404).json({ error: "Consultation log not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update consultation log" });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: 議事録録音 API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/condominiums/:id/meeting-recordings", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM meeting_recordings WHERE condominium_id = $1 ORDER BY meeting_date DESC",
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch meeting recordings" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/meeting-recordings", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO meeting_recordings (condominium_id, document_id, title, meeting_date, file_path, duration, transcription_status, transcription_text)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+        [req.params.id, b.documentId, b.title, b.meetingDate, b.filePath, b.duration, b.transcriptionStatus ?? "pending", b.transcriptionText]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create meeting recording" });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: 議案書 API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/condominiums/:id/proposals", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM proposals WHERE condominium_id = $1 ORDER BY scheduled_date DESC",
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch proposals" });
+    }
+  });
+
+  app.get("/api/proposals/:id", async (req, res) => {
+    try {
+      const { rows } = await pool.query("SELECT * FROM proposals WHERE id = $1", [req.params.id]);
+      if (rows.length === 0) return res.status(404).json({ error: "Proposal not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch proposal" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/proposals", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO proposals (condominium_id, title, category, meeting_type, scheduled_date, content, result, voting_results, status)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+        [req.params.id, b.title, b.category, b.meetingType ?? "general", b.scheduledDate, b.content, b.result, b.votingResults ? JSON.stringify(b.votingResults) : null, b.status ?? "draft"]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create proposal" });
+    }
+  });
+
+  app.patch("/api/proposals/:id", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `UPDATE proposals SET title=COALESCE($1,title), category=COALESCE($2,category),
+         meeting_type=COALESCE($3,meeting_type), scheduled_date=COALESCE($4,scheduled_date),
+         content=COALESCE($5,content), result=COALESCE($6,result),
+         voting_results=COALESCE($7,voting_results), status=COALESCE($8,status), updated_at=NOW()
+         WHERE id=$9 RETURNING *`,
+        [b.title, b.category, b.meetingType, b.scheduledDate, b.content, b.result,
+         b.votingResults ? JSON.stringify(b.votingResults) : null, b.status, req.params.id]
+      );
+      if (rows.length === 0) return res.status(404).json({ error: "Proposal not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update proposal" });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: アクションアイテム API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/condominiums/:id/action-items", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM action_items WHERE condominium_id = $1 ORDER BY due_date ASC NULLS LAST",
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch action items" });
+    }
+  });
+
+  app.get("/api/action-items/:id", async (req, res) => {
+    try {
+      const { rows } = await pool.query("SELECT * FROM action_items WHERE id = $1", [req.params.id]);
+      if (rows.length === 0) return res.status(404).json({ error: "Action item not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch action item" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/action-items", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO action_items (condominium_id, source_type, source_id, title, description, assignee, due_date, status, priority)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+        [req.params.id, b.sourceType, b.sourceId, b.title, b.description, b.assignee, b.dueDate, b.status ?? "open", b.priority ?? "medium"]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create action item" });
+    }
+  });
+
+  app.patch("/api/action-items/:id", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `UPDATE action_items SET title=COALESCE($1,title), description=COALESCE($2,description),
+         assignee=COALESCE($3,assignee), due_date=COALESCE($4,due_date),
+         status=COALESCE($5,status), priority=COALESCE($6,priority),
+         completed_at=COALESCE($7,completed_at), updated_at=NOW()
+         WHERE id=$8 RETURNING *`,
+        [b.title, b.description, b.assignee, b.dueDate, b.status, b.priority, b.completedAt, req.params.id]
+      );
+      if (rows.length === 0) return res.status(404).json({ error: "Action item not found" });
+      res.json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update action item" });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: 適正評価チェック API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/condominiums/:id/evaluation-checks", async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM evaluation_checks WHERE condominium_id = $1 ORDER BY check_date DESC",
+        [req.params.id]
+      );
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch evaluation checks" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/evaluation-checks", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO evaluation_checks (condominium_id, check_date, total_score, star_rating, check_results, checked_by, notes)
+         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+        [req.params.id, b.checkDate, b.totalScore, b.starRating,
+         b.checkResults ? JSON.stringify(b.checkResults) : null, b.checkedBy, b.notes]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create evaluation check" });
+    }
+  });
+
+  // =====================================================================
+  // Task-17: 評価項目マスタ API (直接DBアクセス)
+  // =====================================================================
+
+  app.get("/api/evaluation-items-master", async (req, res) => {
+    try {
+      const { category } = req.query;
+      let query = "SELECT * FROM evaluation_items_master WHERE is_active = true";
+      const params: any[] = [];
+      if (category) {
+        params.push(category);
+        query += ` AND category = $${params.length}`;
+      }
+      query += " ORDER BY sort_order ASC";
+      const { rows } = await pool.query(query, params);
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch evaluation items master" });
+    }
+  });
+
+  app.post("/api/evaluation-items-master", async (req, res) => {
+    try {
+      const b = req.body;
+      const { rows } = await pool.query(
+        `INSERT INTO evaluation_items_master (category, item_code, item_name, description, max_score, evaluation_criteria, sort_order, is_active)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+        [b.category, b.itemCode, b.itemName, b.description, b.maxScore, b.evaluationCriteria, b.sortOrder ?? 0, b.isActive ?? true]
+      );
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create evaluation item master" });
     }
   });
 
