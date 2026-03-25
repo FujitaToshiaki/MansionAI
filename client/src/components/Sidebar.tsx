@@ -242,7 +242,7 @@ export default function Sidebar() {
                     className="flex-shrink-0 opacity-70"
                     style={{
                       transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)",
-                      transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+                      transition: "transform 500ms cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   />
                 </div>
@@ -251,7 +251,7 @@ export default function Sidebar() {
                     maxHeight: isOpen ? "500px" : "0",
                     opacity: isOpen ? 1 : 0,
                     overflow: "hidden",
-                    transition: "max-height 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms cubic-bezier(0.4, 0, 0.2, 1)",
+                    transition: "max-height 500ms cubic-bezier(0.4, 0, 0.2, 1), opacity 400ms cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
                 >
                   {entry.items.map((sub) => {
