@@ -19,6 +19,7 @@ import StandardRegulations from "@/pages/StandardRegulations";
 import StandardRegulationVersions from "@/pages/StandardRegulationVersions";
 import StandardRegulationDetail from "@/pages/StandardRegulationDetail";
 import MinuteDetail from "@/pages/MinuteDetail";
+import IssueManagement from "@/pages/IssueManagement";
 import AIAgentHistory from "@/pages/AIAgentHistory";
 import AIAgentExecutionDetail from "@/pages/AIAgentExecutionDetail";
 import RevisionYearList from "@/pages/RevisionYearList";
@@ -70,6 +71,7 @@ function Router() {
         <Route path="/standard-regulations" component={StandardRegulationVersions} />
         <Route path="/standard-regulations/:versionId" component={StandardRegulations} />
         <Route path="/standard-regulations/:versionId/:id" component={StandardRegulationDetail} />
+        <Route path="/condominiums/:id/issues" component={IssueManagement} />
         <Route path="/condominiums/:condominiumId/minutes/:minuteId" component={MinuteDetail} />
         <Route path="/revision-years" component={RevisionYearList} />
         <Route path="/revision-years/:id" component={RevisionYearDetail} />
