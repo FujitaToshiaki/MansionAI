@@ -9,8 +9,8 @@ import { db, pool } from "./db";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
-import { extractTextFromMultipleImages } from "./gemini";
-import { generateMinutes, transcribeAudio } from "./openai";
+import { extractTextFromMultipleImages, generateMinutes } from "./gemini";
+import { transcribeAudio } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
