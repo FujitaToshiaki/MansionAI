@@ -18,6 +18,48 @@ interface ImportData {
   textContent: string;
 }
 
+const DEMO_IMPORT_DATA: ImportData = {
+  meetingType: "第42回 定期総会",
+  meetingDate: "2026年3月25日（水） 19:00〜20:45",
+  location: "サンシャインマンション 集会室（1階）",
+  participants: "田中理事長、鈴木副理事長、佐藤会計理事、山田理事、小林理事、住民出席者：18名（委任状：7名）",
+  textContent: `【開会】
+田中理事長：本日は第42回定期総会にお集まりいただきありがとうございます。出席者18名、委任状7名で定足数を満たしているため、これより開会いたします。
+
+【第1号議案：前期活動報告および会計報告】
+佐藤会計理事：前期の収支を報告いたします。収入合計は管理費・修繕積立金あわせて2,480万円、支出合計は2,310万円で、繰越金は170万円となりました。
+住民（大野様）：修繕積立金の残高はいくらですか？
+佐藤会計理事：現在の積立残高は4,850万円です。
+住民（大野様）：わかりました。ありがとうございます。
+田中理事長：前期活動報告および会計報告について承認をお諮りします。賛成の方は挙手をお願いします。
+→ 賛成多数（挙手25名中23名）で承認。
+
+【第2号議案：次期管理費・修繕積立金の改定について】
+鈴木副理事長：エレベーターのオーバーホールと外壁塗装を次年度に予定しており、修繕積立金を現行の月額4,500円から5,200円に改定することを提案します。
+住民（中村様）：突然の値上げは困ります。もう少し段階的に上げられませんか？
+鈴木副理事長：ご意見はもっともです。ただし、エレベーターの法定点検費用が想定を上回っており、一括改定が必要な状況です。来期以降の追加値上げは当面見込んでいません。
+住民（渡辺様）：改定後も他マンションと比べて妥当な水準でしょうか？
+佐藤会計理事：近隣同規模マンションの平均は約5,000〜5,500円ですので、適正範囲内です。
+田中理事長：第2号議案について採決をお諮りします。
+→ 賛成19名、反対4名、棄権2名で可決。
+
+【第3号議案：次期役員選任】
+田中理事長：任期満了に伴い、次期役員候補を発表します。理事長：田中（再任）、副理事長：鈴木（再任）、会計理事：佐藤（再任）、理事：山田・中村（新任）。
+住民（大野様）：新任の中村さんにどのような活動を期待していますか？
+中村様（新任理事）：駐輪場の整理とゴミ置き場のルール徹底を優先して取り組みたいと思います。
+田中理事長：第3号議案について採決をお諮りします。
+→ 全員賛成で可決。
+
+【その他・質疑応答】
+住民（加藤様）：駐車場の空き待ちリストについて現状を教えてください。
+山田理事：現在6名が順番待ちです。空き区画が出次第、順次ご案内します。
+住民（渡辺様）：エントランスのオートロックが先月不具合を起こしましたが、対策は取られましたか？
+鈴木副理事長：管理会社を通じて修理済みです。再発防止のため月次点検を追加しました。
+
+【閉会】
+田中理事長：以上をもちまして第42回定期総会を閉会いたします。本日はご参加ありがとうございました。`,
+};
+
 export default function MinutesGenerate() {
   const search = useSearch();
   const params = new URLSearchParams(search);
@@ -31,6 +73,7 @@ export default function MinutesGenerate() {
   });
 
   const [importData, setImportData] = useState<ImportData | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
 
   useEffect(() => {
@@ -38,9 +81,14 @@ export default function MinutesGenerate() {
     if (stored) {
       try {
         setImportData(JSON.parse(stored));
+        setIsDemo(false);
       } catch {
-        setImportData(null);
+        setImportData(DEMO_IMPORT_DATA);
+        setIsDemo(true);
       }
+    } else {
+      setImportData(DEMO_IMPORT_DATA);
+      setIsDemo(true);
     }
   }, [condominiumId]);
 
@@ -111,7 +159,14 @@ export default function MinutesGenerate() {
         {/* Left Panel: Input Preview */}
         <Card className="flex flex-col">
           <CardHeader className="py-3 bg-gray-50 border-b">
-            <CardTitle className="text-sm font-medium">入力情報プレビュー</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              入力情報プレビュー
+              {isDemo && (
+                <Badge data-testid="badge-demo" className="bg-blue-100 text-blue-600 border-blue-200 text-xs font-normal">
+                  デモ
+                </Badge>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 overflow-auto p-4 space-y-4">
             {importData ? (
