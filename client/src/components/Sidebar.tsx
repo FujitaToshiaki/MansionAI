@@ -63,7 +63,6 @@ const navEntries: NavEntry[] = [
     icon: FileEdit,
     label: "管理規約管理",
     paths: [
-      "/condominiums",
       "/standard-regulations",
       "/ai-revision",
       "/revision-years",
