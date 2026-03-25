@@ -257,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 NULL::text     AS impact,
                 NULL::text     AS status,
                 revision_header_id,
-                creation_date
+                created_at
          FROM regulation_revisions
          WHERE revision_header_id = '${headerId}'
          ORDER BY id ASC`
@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const query = `
         SELECT * FROM regulation_revisions 
-        ORDER BY creation_date DESC, id ASC
+        ORDER BY created_at DESC, id ASC
       `;
       const result = await db.execute(query);
       res.json(result.rows);
