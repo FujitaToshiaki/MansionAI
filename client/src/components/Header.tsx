@@ -90,13 +90,10 @@ interface FeatureBtn {
 
 const FEATURE_BUTTONS: FeatureBtn[] = [
   {
-    label: "規約改訂",
-    icon: FileText,
-    href: (id) => `/condominiums/${id}/analysis`,
-    activePatterns: [
-      (loc) => /^\/condominiums\/[^/]+\/(analysis|regulation-analysis|ai-revision|knowledge|wiki)/.test(loc),
-      (loc) => ["/ai-revision", "/knowledge", "/standard-regulations", "/revision-years"].some(p => loc === p || loc.startsWith(p + "/")),
-    ],
+    label: "問合せ管理",
+    icon: AlertTriangle,
+    href: (id) => `/condominiums/${id}/issues`,
+    activePatterns: [(loc) => /^\/condominiums\/[^/]+\/issues/.test(loc)],
   },
   {
     label: "議案管理",
@@ -105,22 +102,25 @@ const FEATURE_BUTTONS: FeatureBtn[] = [
     activePatterns: [(loc) => loc.startsWith("/proposals")],
   },
   {
-    label: "問合せ管理",
-    icon: AlertTriangle,
-    href: (id) => `/condominiums/${id}/issues`,
-    activePatterns: [(loc) => /^\/condominiums\/[^/]+\/issues/.test(loc)],
+    label: "議事録管理",
+    icon: FileOutput,
+    href: (id) => `/minutes/list?condominiumId=${id}`,
+    activePatterns: [(loc) => loc.startsWith("/minutes")],
   },
   {
-    label: "長期修繕計画",
+    label: "長期修繕計画管理",
     icon: BarChart3,
     href: (id) => `/longterm/dashboard?condominiumId=${id}`,
     activePatterns: [(loc) => loc.startsWith("/longterm")],
   },
   {
-    label: "議事録管理",
-    icon: FileOutput,
-    href: (id) => `/minutes/list?condominiumId=${id}`,
-    activePatterns: [(loc) => loc.startsWith("/minutes")],
+    label: "規約改訂",
+    icon: FileText,
+    href: (id) => `/condominiums/${id}/analysis`,
+    activePatterns: [
+      (loc) => /^\/condominiums\/[^/]+\/(analysis|regulation-analysis|ai-revision|knowledge|wiki)/.test(loc),
+      (loc) => ["/ai-revision", "/knowledge", "/standard-regulations", "/revision-years"].some(p => loc === p || loc.startsWith(p + "/")),
+    ],
   },
   {
     label: "管理適正評価",
