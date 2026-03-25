@@ -42,10 +42,10 @@ const MOCK_CATEGORIES = [
     name: "管理組合会計・地方公共団体等との連携",
     score: 40,
     items: [
-      { id: "f1", name: "収支報告の適正性", points: 10, hint: "予算・決算の承認状況" },
-      { id: "f2", name: "滞納管理の状況", points: 10, hint: "管理費等の滞納月数・件数" },
-      { id: "f3", name: "修繕積立金の積立状況", points: 10, hint: "計画に対する充足度" },
-      { id: "f4", name: "会計監査の実施", points: 10, hint: "監事による監査状況" },
+      { id: "f1", name: "収支報告の適正性", points: 10, hint: "予算・決算の承認状況", defaultValue: "full", autoFilled: true },
+      { id: "f2", name: "滞納管理の状況", points: 10, hint: "管理費等の滞納月数・件数", defaultValue: "partial", autoFilled: true },
+      { id: "f3", name: "修繕積立金の積立状況", points: 10, hint: "計画に対する充足度", defaultValue: "full", autoFilled: true },
+      { id: "f4", name: "会計監査の実施", points: 10, hint: "監事による監査状況", defaultValue: "partial", autoFilled: true },
     ]
   },
   {
@@ -53,10 +53,10 @@ const MOCK_CATEGORIES = [
     name: "管理組合の運営体制",
     score: 20,
     items: [
-      { id: "o1", name: "理事会の開催頻度", points: 5, hint: "年間の開催回数" },
-      { id: "o2", name: "総会の開催状況", points: 5, hint: "定期総会の開催時期" },
-      { id: "o3", name: "管理者等の選任", points: 5, hint: "理事・監事の選任状況" },
-      { id: "o4", name: "名簿の備付け・更新", points: 5, hint: "組合員名簿の整備" },
+      { id: "o1", name: "理事会の開催頻度", points: 5, hint: "年間の開催回数", defaultValue: "full", autoFilled: true },
+      { id: "o2", name: "総会の開催状況", points: 5, hint: "定期総会の開催時期", defaultValue: "full", autoFilled: true },
+      { id: "o3", name: "管理者等の選任", points: 5, hint: "理事・監事の選任状況", defaultValue: "full", autoFilled: true },
+      { id: "o4", name: "名簿の備付け・更新", points: 5, hint: "組合員名簿の整備", defaultValue: "partial", autoFilled: true },
     ]
   },
   {
@@ -64,10 +64,10 @@ const MOCK_CATEGORIES = [
     name: "管理規約・共用部分の管理状態",
     score: 20,
     items: [
-      { id: "b1", name: "管理規約の整備", points: 5, hint: "最新の標準管理規約への準拠" },
-      { id: "b2", name: "長期修繕計画の作成", points: 5, hint: "計画の期間・更新頻度" },
-      { id: "b3", name: "法定点検の実施", points: 5, hint: "エレベーター・消防設備等" },
-      { id: "b4", name: "図書の保管状況", points: 5, hint: "設計図書・修繕履歴" },
+      { id: "b1", name: "管理規約の整備", points: 5, hint: "最新の標準管理規約への準拠", defaultValue: "full", autoFilled: true },
+      { id: "b2", name: "長期修繕計画の作成", points: 5, hint: "計画の期間・更新頻度", defaultValue: "partial", autoFilled: true },
+      { id: "b3", name: "法定点検の実施", points: 5, hint: "エレベーター・消防設備等", defaultValue: "full", autoFilled: true },
+      { id: "b4", name: "図書の保管状況", points: 5, hint: "設計図書・修繕履歴", defaultValue: "none", autoFilled: true },
     ]
   },
   {
@@ -75,8 +75,8 @@ const MOCK_CATEGORIES = [
     name: "耐震性",
     score: 10,
     items: [
-      { id: "e1", name: "耐震診断の実施", points: 5, hint: "耐震基準への適合性確認" },
-      { id: "e2", name: "耐震補強の計画", points: 5, hint: "必要に応じた補強実施" },
+      { id: "e1", name: "耐震診断の実施", points: 5, hint: "耐震基準への適合性確認", defaultValue: "full", autoFilled: true },
+      { id: "e2", name: "耐震補強の計画", points: 5, hint: "必要に応じた補強実施", defaultValue: "partial", autoFilled: true },
     ]
   },
   {
@@ -84,8 +84,8 @@ const MOCK_CATEGORIES = [
     name: "居住環境・防犯",
     score: 10,
     items: [
-      { id: "l1", name: "防犯対策の実施", points: 5, hint: "防犯カメラ・照明の整備" },
-      { id: "l2", name: "防災対策の実施", points: 5, hint: "備蓄品・防災訓練の状況" },
+      { id: "l1", name: "防犯対策の実施", points: 5, hint: "防犯カメラ・照明の整備", defaultValue: "full", autoFilled: true },
+      { id: "l2", name: "防災対策の実施", points: 5, hint: "備蓄品・防災訓練の状況", defaultValue: "partial", autoFilled: true },
     ]
   }
 ];
@@ -158,7 +158,7 @@ export default function EvaluationCheck() {
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
-                              {Math.random() > 0.5 && (
+                              {item.autoFilled && (
                                 <Badge variant="outline" className="text-[10px] py-0 px-1 border-blue-200 bg-blue-50 text-blue-700 flex items-center gap-1">
                                   <RefreshCw className="w-2 h-2" />
                                   自動入力済
@@ -168,7 +168,7 @@ export default function EvaluationCheck() {
                             <p className="text-xs text-gray-500">配点: {item.points}点</p>
                           </div>
                           <div className="md:col-span-6">
-                            <Select defaultValue="unselected">
+                            <Select defaultValue={item.defaultValue}>
                               <SelectTrigger className="w-full" data-testid={`select-item-${item.id}`}>
                                 <SelectValue placeholder="選択してください" />
                               </SelectTrigger>
@@ -198,7 +198,7 @@ export default function EvaluationCheck() {
             </CardHeader>
             <CardContent className="space-y-6 text-center">
               <div className="relative inline-flex items-center justify-center">
-                <div className="text-5xl font-bold text-orange-600">72</div>
+                <div className="text-5xl font-bold text-orange-600">73</div>
                 <div className="text-sm text-gray-500 absolute -bottom-6">/ 100点</div>
               </div>
               
@@ -212,18 +212,18 @@ export default function EvaluationCheck() {
               <div className="space-y-2 text-left">
                 <div className="flex justify-between text-xs">
                   <span>収支・会計</span>
-                  <span className="font-medium">32/40</span>
+                  <span className="font-medium">30/40</span>
                 </div>
                 <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-orange-500" style={{ width: '80%' }}></div>
+                  <div className="h-full bg-orange-500" style={{ width: '75%' }}></div>
                 </div>
                 
                 <div className="flex justify-between text-xs">
                   <span>運営体制</span>
-                  <span className="font-medium">15/20</span>
+                  <span className="font-medium">17/20</span>
                 </div>
                 <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-orange-500" style={{ width: '75%' }}></div>
+                  <div className="h-full bg-orange-500" style={{ width: '85%' }}></div>
                 </div>
                 
                 <div className="flex justify-between text-xs">
@@ -232,6 +232,22 @@ export default function EvaluationCheck() {
                 </div>
                 <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                   <div className="h-full bg-orange-500" style={{ width: '60%' }}></div>
+                </div>
+
+                <div className="flex justify-between text-xs">
+                  <span>耐震性</span>
+                  <span className="font-medium">7/10</span>
+                </div>
+                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-500" style={{ width: '70%' }}></div>
+                </div>
+
+                <div className="flex justify-between text-xs">
+                  <span>居住環境・防犯</span>
+                  <span className="font-medium">7/10</span>
+                </div>
+                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-500" style={{ width: '70%' }}></div>
                 </div>
               </div>
 
