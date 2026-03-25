@@ -165,20 +165,17 @@ export default function Sidebar() {
   );
 
   useEffect(() => {
-    setOpenGroups((prev) => {
-      const activeGroups = computeOpenGroups(location);
-      const next = { ...prev };
-      navEntries.forEach((entry, idx) => {
-        if (entry.type === "accordion" && activeGroups[idx]) {
-          next[idx] = true;
-        }
-      });
-      return next;
-    });
+    setOpenGroups(computeOpenGroups(location));
   }, [location]);
 
   function toggleGroup(idx: number) {
-    setOpenGroups((prev) => ({ ...prev, [idx]: !prev[idx] }));
+    setOpenGroups((prev) => {
+      const isCurrentlyOpen = !!prev[idx];
+      // Close all groups, then toggle the clicked one
+      const next: Record<number, boolean> = {};
+      if (!isCurrentlyOpen) next[idx] = true;
+      return next;
+    });
   }
 
   return (
