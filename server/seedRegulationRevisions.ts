@@ -303,12 +303,18 @@ export async function seedRegulationRevisions() {
       }
     ];
 
+    // group_id → revision_header_id のマッピング
+    const groupToHeader: Record<string, string> = {
+      "5584b0ff-6215-4511-9aa5-b7bfa13dae15": "3125710f-b498-4949-86e2-b01bc9fcc13a",
+    };
+
     // 全データを挿入
     for (const revision of revisions) {
+      const revision_header_id = groupToHeader[revision.group_id] ?? null;
       await pool.query(
         `INSERT INTO regulation_revisions 
-          (category, title, change_description, before_text, after_text, article_number, reference_section, change_type, group_id, created_at) 
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+          (category, title, change_description, before_text, after_text, article_number, reference_section, change_type, group_id, revision_header_id, created_at) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
         [
           revision.category,
           revision.title,
@@ -318,7 +324,8 @@ export async function seedRegulationRevisions() {
           revision.article_number,
           revision.reference_section,
           revision.change_type,
-          revision.group_id
+          revision.group_id,
+          revision_header_id
         ]
       );
     }
