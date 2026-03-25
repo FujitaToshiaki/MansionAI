@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { Link } from "wouter";
 import {
@@ -161,10 +161,6 @@ export default function Sidebar() {
   const [openGroups, setOpenGroups] = useState<Record<number, boolean>>(() =>
     computeOpenGroups(location)
   );
-
-  useEffect(() => {
-    setOpenGroups(computeOpenGroups(location));
-  }, [location]);
 
   function toggleGroup(idx: number) {
     setOpenGroups((prev) => {
