@@ -458,7 +458,7 @@ export default function IssueManagement() {
                 filteredIssues.map((issue) => (
                   <TableRow
                     key={issue.id}
-                    className="cursor-pointer hover:bg-orange-50 transition-colors"
+                    className="bg-white cursor-pointer hover:bg-orange-50 transition-colors"
                     onClick={() => handleRowClick(issue)}
                     data-testid={`row-issue-${issue.id}`}
                   >
