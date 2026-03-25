@@ -10,11 +10,7 @@ import {
   type Regulation,
   type InsertRegulation,
   type Activity,
-  type InsertActivity,
-  type MeetingRecording,
-  type InsertMeetingRecording,
-  type ActionItem,
-  type InsertActionItem
+  type InsertActivity
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -51,18 +47,6 @@ export interface IStorage {
   // Dashboard methods
   getDashboardStats(): Promise<any>;
   
-  // Meeting Recording methods
-  getMeetingRecordingsByCondominiumId(condominiumId: string): Promise<MeetingRecording[]>;
-  getMeetingRecordingById(id: string): Promise<MeetingRecording | undefined>;
-  createMeetingRecording(recording: InsertMeetingRecording): Promise<MeetingRecording>;
-  updateMeetingRecording(id: string, updates: Partial<MeetingRecording>): Promise<MeetingRecording>;
-  
-  // Action Item methods
-  getActionItemsByCondominiumId(condominiumId: string): Promise<ActionItem[]>;
-  getActionItemById(id: string): Promise<ActionItem | undefined>;
-  createActionItem(item: InsertActionItem): Promise<ActionItem>;
-  updateActionItem(id: string, updates: Partial<ActionItem>): Promise<ActionItem>;
-  
   // Database query method
   query(sql: string, params?: any[]): Promise<any>;
 }
@@ -74,8 +58,6 @@ export class MemStorage implements IStorage {
   private decisions: Map<string, Decision>;
   private regulations: Map<string, Regulation>;
   private activities: Map<string, Activity>;
-  private meetingRecordings: Map<string, MeetingRecording>;
-  private actionItems: Map<string, ActionItem>;
 
   constructor() {
     this.users = new Map();
@@ -84,8 +66,6 @@ export class MemStorage implements IStorage {
     this.decisions = new Map();
     this.regulations = new Map();
     this.activities = new Map();
-    this.meetingRecordings = new Map();
-    this.actionItems = new Map();
     
     // Initialize with mock data
     this.initializeMockData();
@@ -343,107 +323,6 @@ export class MemStorage implements IStorage {
     mockDecisions.forEach(decision => {
       this.decisions.set(decision.id, decision);
     });
-
-    // Seed meeting recordings for メゾンドオプテージ
-    const maisonCondoId = "a7af9126-67ff-47d9-9c24-cf4054aeb63c";
-    const rec1Id = randomUUID();
-    const rec2Id = randomUUID();
-    const mockRecordings: MeetingRecording[] = [
-      {
-        id: rec1Id,
-        condominiumId: maisonCondoId,
-        meetingType: "理事会",
-        meetingDate: new Date("2026-01-15"),
-        title: "第41期 第1回理事会",
-        memoText: "出席者：理事長 修繕未来、副理事長 佐藤花子、理事4名、管理会社担当\n議題1：修繕積立金の見直しについて\n議題2：エントランス照明LED化工事の承認\n議題3：管理会社との契約更新について\n決定事項：LED化工事を承認、予算180万円。積立金は次期総会で1000円値上げ提案。",
-        audioFilePath: null,
-        generatedMinutesMarkdown: `# 第41期 第1回理事会 議事録\n\n**開催日時**: 令和8年1月15日（水）午後7時00分〜午後8時30分\n**開催場所**: メゾンドオプテージ集会室\n**出席者**: 理事長 修繕未来、副理事長 佐藤花子、理事4名、管理会社担当\n\n---\n\n## 1. 修繕積立金の見直しについて\n\n### 審議内容\n管理会社より、現行の修繕積立金（月額5,000円）が長期修繕計画の必要額に対して不足する可能性があるとの報告があった。\n\n### 決定事項\n次期通常総会において、1戸あたり月額1,000円の値上げ（月額6,000円）を提案することを決定した。\n\n---\n\n## 2. エントランス照明LED化工事の承認\n\n### 審議内容\nエネルギーコスト削減のため、エントランス・廊下の照明をLEDに切り替える工事について審議した。見積額：180万円。\n\n### 決定事項\n**可決**：予算180万円の範囲でLED化工事を承認する。施工時期は令和8年3月。\n\n---\n\n## 3. 管理会社との契約更新\n\n### 決定事項\n現行条件で1年間の契約を更新する。\n\n---\n\n## アクションアイテム\n- 理事長：積立金値上げ議案の作成\n- 管理会社：LED工事業者への発注（3月着工）\n\n以上`,
-        generationStatus: "completed",
-        documentId: null,
-        createdAt: new Date("2026-01-15"),
-        updatedAt: new Date("2026-01-15")
-      },
-      {
-        id: rec2Id,
-        condominiumId: maisonCondoId,
-        meetingType: "理事会",
-        meetingDate: new Date("2026-03-10"),
-        title: "第41期 第2回理事会",
-        memoText: "出席者：理事長 修繕未来、副理事長 佐藤花子、理事3名\n議題1：LED化工事の進捗確認\n議題2：総会の日程確認（10月予定）\n議題3：住民からの苦情対応（駐輪場マナー）",
-        audioFilePath: null,
-        generatedMinutesMarkdown: null,
-        generationStatus: "pending",
-        documentId: null,
-        createdAt: new Date("2026-03-10"),
-        updatedAt: new Date("2026-03-10")
-      }
-    ];
-    mockRecordings.forEach(r => this.meetingRecordings.set(r.id, r));
-
-    // Seed action items
-    const mockActionItems: ActionItem[] = [
-      {
-        id: randomUUID(),
-        condominiumId: maisonCondoId,
-        recordingId: rec1Id,
-        title: "積立金値上げ議案の作成",
-        description: "次期通常総会向けに修繕積立金値上げ（月額1,000円）の議案書を作成する",
-        assignee: "修繕 未来",
-        dueDate: new Date("2026-04-30"),
-        status: "in_progress",
-        createdAt: new Date("2026-01-15"),
-        updatedAt: new Date("2026-01-15")
-      },
-      {
-        id: randomUUID(),
-        condominiumId: maisonCondoId,
-        recordingId: rec1Id,
-        title: "LED工事業者への発注",
-        description: "エントランス・廊下のLED化工事を3月着工で発注する（予算180万円）",
-        assignee: "管理会社担当",
-        dueDate: new Date("2026-02-28"),
-        status: "done",
-        createdAt: new Date("2026-01-15"),
-        updatedAt: new Date("2026-02-20")
-      },
-      {
-        id: randomUUID(),
-        condominiumId: maisonCondoId,
-        recordingId: rec1Id,
-        title: "管理会社との契約更新書類の準備",
-        description: "現行条件での1年間契約更新に必要な書類を準備する",
-        assignee: "佐藤 花子",
-        dueDate: new Date("2026-02-15"),
-        status: "done",
-        createdAt: new Date("2026-01-15"),
-        updatedAt: new Date("2026-02-10")
-      },
-      {
-        id: randomUUID(),
-        condominiumId: maisonCondoId,
-        recordingId: rec2Id,
-        title: "総会開催日程の告知",
-        description: "10月開催の通常総会について、住民に日程を通知する",
-        assignee: "修繕 未来",
-        dueDate: new Date("2026-08-31"),
-        status: "todo",
-        createdAt: new Date("2026-03-10"),
-        updatedAt: new Date("2026-03-10")
-      },
-      {
-        id: randomUUID(),
-        condominiumId: maisonCondoId,
-        recordingId: rec2Id,
-        title: "駐輪場マナー向上のためのお知らせ掲示",
-        description: "住民からの苦情を受け、駐輪場のマナーに関するお知らせを掲示板に掲示する",
-        assignee: "管理会社担当",
-        dueDate: new Date("2026-03-31"),
-        status: "todo",
-        createdAt: new Date("2026-03-10"),
-        updatedAt: new Date("2026-03-10")
-      }
-    ];
-    mockActionItems.forEach(a => this.actionItems.set(a.id, a));
   }
 
   // User methods
@@ -620,78 +499,6 @@ export class MemStorage implements IStorage {
     } else {
       return "1時間以内";
     }
-  }
-
-  async getMeetingRecordingsByCondominiumId(condominiumId: string): Promise<MeetingRecording[]> {
-    return Array.from(this.meetingRecordings.values())
-      .filter(r => r.condominiumId === condominiumId)
-      .sort((a, b) => b.meetingDate.getTime() - a.meetingDate.getTime());
-  }
-
-  async getMeetingRecordingById(id: string): Promise<MeetingRecording | undefined> {
-    return this.meetingRecordings.get(id);
-  }
-
-  async createMeetingRecording(recording: InsertMeetingRecording): Promise<MeetingRecording> {
-    const id = randomUUID();
-    const now = new Date();
-    const rec: MeetingRecording = {
-      ...recording,
-      id,
-      createdAt: now,
-      updatedAt: now,
-      audioFilePath: recording.audioFilePath ?? null,
-      memoText: recording.memoText ?? null,
-      generatedMinutesMarkdown: recording.generatedMinutesMarkdown ?? null,
-      documentId: recording.documentId ?? null,
-      generationStatus: recording.generationStatus ?? "pending"
-    };
-    this.meetingRecordings.set(id, rec);
-    return rec;
-  }
-
-  async updateMeetingRecording(id: string, updates: Partial<MeetingRecording>): Promise<MeetingRecording> {
-    const existing = this.meetingRecordings.get(id);
-    if (!existing) throw new Error("MeetingRecording not found");
-    const updated = { ...existing, ...updates, updatedAt: new Date() };
-    this.meetingRecordings.set(id, updated);
-    return updated;
-  }
-
-  async getActionItemsByCondominiumId(condominiumId: string): Promise<ActionItem[]> {
-    return Array.from(this.actionItems.values())
-      .filter(a => a.condominiumId === condominiumId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
-
-  async getActionItemById(id: string): Promise<ActionItem | undefined> {
-    return this.actionItems.get(id);
-  }
-
-  async createActionItem(item: InsertActionItem): Promise<ActionItem> {
-    const id = randomUUID();
-    const now = new Date();
-    const ai: ActionItem = {
-      ...item,
-      id,
-      createdAt: now,
-      updatedAt: now,
-      description: item.description ?? null,
-      assignee: item.assignee ?? null,
-      dueDate: item.dueDate ?? null,
-      recordingId: item.recordingId ?? null,
-      status: item.status ?? "todo"
-    };
-    this.actionItems.set(id, ai);
-    return ai;
-  }
-
-  async updateActionItem(id: string, updates: Partial<ActionItem>): Promise<ActionItem> {
-    const existing = this.actionItems.get(id);
-    if (!existing) throw new Error("ActionItem not found");
-    const updated = { ...existing, ...updates, updatedAt: new Date() };
-    this.actionItems.set(id, updated);
-    return updated;
   }
 
   async query(sql: string, params: any[] = []): Promise<any> {

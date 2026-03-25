@@ -18,12 +18,7 @@ import {
   FileOutput,
   Search,
   BarChart3,
-  BookOpen,
-  ClipboardCheck,
-  Wrench,
-  MessageSquare,
-  ScrollText,
-  BookMarked
+  BookOpen
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -207,7 +202,6 @@ export default function CondominiumDetail() {
           <TabsTrigger value="decisions">決議履歴</TabsTrigger>
           <TabsTrigger value="minutes">議事録</TabsTrigger>
           <TabsTrigger value="files">その他ファイル</TabsTrigger>
-          <TabsTrigger value="ai-features" data-testid="tab-ai-features">AI機能</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic">
@@ -526,105 +520,6 @@ export default function CondominiumDetail() {
                   <p>ファイルがアップロードされていません</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="ai-features">
-          <Card className="bg-white">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bot className="w-5 h-5 text-blue-500" />
-                AI機能
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Link href={`/condominiums/${id}/evaluation/check`}>
-                  <div
-                    data-testid="card-ai-evaluation"
-                    className="border rounded-lg p-5 hover:bg-blue-50 hover:border-blue-300 cursor-pointer transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                        <ClipboardCheck className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900">適正評価</h3>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      管理組合の運営状況をAIがセルフチェック形式で評価し、スコアと改善提案を提供します。
-                    </p>
-                  </div>
-                </Link>
-
-                <Link href={`/condominiums/${id}/longterm/dashboard`}>
-                  <div
-                    data-testid="card-ai-longterm"
-                    className="border rounded-lg p-5 hover:bg-green-50 hover:border-green-300 cursor-pointer transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
-                        <Wrench className="w-5 h-5 text-green-600" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900">長期修繕計画</h3>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      修繕項目・積立金のシミュレーションや、AIによる計画の見直し分析を行います。
-                    </p>
-                  </div>
-                </Link>
-
-                <Link href={`/condominiums/${id}/consultation/chat`}>
-                  <div
-                    data-testid="card-ai-consultation"
-                    className="border rounded-lg p-5 hover:bg-purple-50 hover:border-purple-300 cursor-pointer transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                        <MessageSquare className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900">AI相談</h3>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      この物件に関する管理・規約・修繕の疑問をAIにチャット形式で相談できます。
-                    </p>
-                  </div>
-                </Link>
-
-                <Link href={`/condominiums/${id}/minutes/list`}>
-                  <div
-                    data-testid="card-ai-minutes"
-                    className="border rounded-lg p-5 hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
-                        <ScrollText className="w-5 h-5 text-orange-600" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900">AI議事録</h3>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      音声・メモから議事録を自動生成し、決定事項を管理・追跡します。
-                    </p>
-                  </div>
-                </Link>
-
-                <Link href={`/condominiums/${id}/proposals/list`}>
-                  <div
-                    data-testid="card-ai-proposals"
-                    className="border rounded-lg p-5 hover:bg-red-50 hover:border-red-300 cursor-pointer transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
-                        <BookMarked className="w-5 h-5 text-red-600" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900">AI議案書</h3>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      総会・理事会向けの議案書をAIが自動生成し、編集・管理します。
-                    </p>
-                  </div>
-                </Link>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
