@@ -1149,7 +1149,7 @@ export default function MinuteDetail() {
   });
 
   const handleBack = () => {
-    setLocation(`/condominiums/${condominiumId}`);
+    setLocation(`/minutes/list?condominiumId=${condominiumId}`);
   };
 
   const handlePrint = () => {
