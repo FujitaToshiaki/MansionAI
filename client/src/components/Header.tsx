@@ -90,12 +90,6 @@ interface FeatureBtn {
 
 const FEATURE_BUTTONS: FeatureBtn[] = [
   {
-    label: "問合せ管理",
-    icon: AlertTriangle,
-    href: (id) => `/condominiums/${id}/issues`,
-    activePatterns: [(loc) => /^\/condominiums\/[^/]+\/issues/.test(loc)],
-  },
-  {
     label: "議案管理",
     icon: BookOpen,
     href: (id) => `/proposals/list?condominiumId=${id}`,
@@ -127,6 +121,12 @@ const FEATURE_BUTTONS: FeatureBtn[] = [
       (loc) => /^\/condominiums\/[^/]+\/(analysis|regulation-analysis|ai-revision|knowledge|wiki)/.test(loc),
       (loc) => ["/ai-revision", "/knowledge", "/standard-regulations", "/revision-years"].some(p => loc === p || loc.startsWith(p + "/")),
     ],
+  },
+  {
+    label: "問合せ管理",
+    icon: AlertTriangle,
+    href: (id) => `/condominiums/${id}/issues`,
+    activePatterns: [(loc) => /^\/condominiums\/[^/]+\/issues/.test(loc)],
   },
   {
     label: "AIチャット",
