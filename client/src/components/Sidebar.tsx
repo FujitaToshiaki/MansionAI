@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Building,
   ChevronDown,
-  ChevronRight,
   ClipboardCheck,
   FileEdit,
   Wrench,
@@ -226,31 +225,33 @@ export default function Sidebar() {
           if (entry.type === "accordion") {
             const Icon = entry.icon;
             const isOpen = !!openGroups[idx];
-            const groupActive = isGroupActive(entry, location);
 
             return (
               <div key={`accordion-${idx}`}>
                 <div
                   data-testid={`nav-accordion-${idx}`}
                   className={`menu-item py-3 px-6 flex items-center cursor-pointer relative select-none ${
-                    groupActive ? "menu-item-active" : ""
+                    isOpen ? "menu-item-active" : ""
                   }`}
                   onClick={() => toggleGroup(idx)}
                 >
                   <Icon className="mr-3 flex-shrink-0" size={20} />
                   <span className="font-inter text-sm font-medium flex-1">{entry.label}</span>
-                  {isOpen ? (
-                    <ChevronDown size={16} className="flex-shrink-0 opacity-70" />
-                  ) : (
-                    <ChevronRight size={16} className="flex-shrink-0 opacity-70" />
-                  )}
+                  <ChevronDown
+                    size={16}
+                    className="flex-shrink-0 opacity-70"
+                    style={{
+                      transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)",
+                      transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  />
                 </div>
                 <div
                   style={{
                     maxHeight: isOpen ? "500px" : "0",
                     opacity: isOpen ? 1 : 0,
                     overflow: "hidden",
-                    transition: "max-height 200ms ease, opacity 200ms ease",
+                    transition: "max-height 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
                 >
                   {entry.items.map((sub) => {
