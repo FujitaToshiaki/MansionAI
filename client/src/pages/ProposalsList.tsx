@@ -62,14 +62,16 @@ export default function ProposalsList() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
+      <nav className="text-sm text-gray-500">
+        <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">
+          {condominium?.name || "マンション詳細"}
+        </Link>
+        <span className="mx-2">{">"}</span>
+        <span>総会議案書管理</span>
+      </nav>
+
       <div className="flex items-center justify-between">
-        <nav className="text-sm text-gray-500">
-          <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">
-            {condominium?.name || "マンション詳細"}
-          </Link>
-          <span className="mx-2">{">"}</span>
-          <span>総会議案書管理</span>
-        </nav>
+        <h1 className="text-2xl font-bold text-gray-900">総会議案書管理</h1>
         <SubNav items={[
           { label: "議案書一覧", path: `/proposals/list?condominiumId=${condominiumId}`, icon: FileText },
           { label: "AI議案書生成", path: `/proposals/generate?condominiumId=${condominiumId}`, icon: Sparkles },

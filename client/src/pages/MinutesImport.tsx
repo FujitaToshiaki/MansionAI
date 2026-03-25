@@ -59,10 +59,7 @@ export default function MinutesImport() {
       </div>
 
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">音声・メモ取込</h1>
-          <p className="text-sm text-gray-500 mt-1">会議の録音や手書きメモを取り込みAIが議事録を自動生成します</p>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900">音声・メモ取込</h1>
         <SubNav items={[
           { label: "議事録一覧", path: `/minutes/list?condominiumId=${condominiumId}`, icon: FileText },
           { label: "音声・メモ取込", path: `/minutes/import?condominiumId=${condominiumId}`, icon: Mic },
