@@ -116,7 +116,7 @@ export default function MinutesActions() {
         ]} />
       </div>
 
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle>アクションアイテム一覧</CardTitle>
         </CardHeader>
