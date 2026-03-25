@@ -127,12 +127,12 @@ export default function ConsultationChat() {
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`flex max-w-[80%] items-start gap-3 ${
+                    className={`flex max-w-[80%] items-end gap-2 ${
                       msg.role === "user" ? "flex-row-reverse" : "flex-row"
                     }`}
                   >
-                    <div className={`mt-1 rounded-full p-2 ${
-                      msg.role === "user" ? "bg-gray-100" : "bg-orange-100"
+                    <div className={`rounded-full flex items-center justify-center h-8 w-8 flex-shrink-0 ${
+                      msg.role === "user" ? "bg-gray-200" : "bg-orange-100"
                     }`}>
                       {msg.role === "user" ? (
                         <User className="h-4 w-4 text-gray-600" />
@@ -140,15 +140,17 @@ export default function ConsultationChat() {
                         <Bot className="h-4 w-4 text-orange-600" />
                       )}
                     </div>
-                    <div
-                      className={`rounded-lg p-3 text-sm shadow-sm ${
-                        msg.role === "user"
-                          ? "bg-gray-100 text-gray-900"
-                          : "bg-white border-l-4 border-orange-500 text-gray-900"
-                      }`}
-                    >
-                      {msg.content}
-                      <div className="mt-1 text-[10px] text-gray-400">
+                    <div className="flex flex-col gap-1">
+                      <div
+                        className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${
+                          msg.role === "user"
+                            ? "bg-orange-500 text-white"
+                            : "bg-gray-100 text-gray-900"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                      <div className={`text-[10px] text-gray-400 ${msg.role === "user" ? "text-right" : "text-left"}`}>
                         {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </div>
@@ -157,11 +159,11 @@ export default function ConsultationChat() {
               ))}
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1 rounded-full p-2 bg-orange-100">
+                  <div className="flex items-end gap-2">
+                    <div className="rounded-full flex items-center justify-center h-8 w-8 flex-shrink-0 bg-orange-100">
                       <Bot className="h-4 w-4 text-orange-600" />
                     </div>
-                    <div className="bg-white border-l-4 border-orange-500 rounded-lg p-3 text-sm shadow-sm animate-pulse">
+                    <div className="bg-gray-100 rounded-2xl px-4 py-2 text-sm shadow-sm animate-pulse text-gray-900">
                       入力中...
                     </div>
                   </div>
