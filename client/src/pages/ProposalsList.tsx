@@ -102,7 +102,7 @@ export default function ProposalsList() {
       {/* Proposals List */}
       <div className="grid grid-cols-1 gap-4">
         {proposals.map((proposal) => (
-          <Card key={proposal.id} className="hover:shadow-md transition-shadow">
+          <Card key={proposal.id} className="bg-white hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-start justify-between pb-2">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
