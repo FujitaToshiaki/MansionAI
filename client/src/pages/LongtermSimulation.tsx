@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Link } from "wouter";
 import { TrendingUp, Info, LayoutDashboard, List, History, BarChart, AlertTriangle, CheckCircle } from "lucide-react";
 import { SubNav } from "@/components/SubNav";
@@ -96,8 +95,8 @@ export default function LongtermSimulation() {
   const params = new URLSearchParams(useSearch());
   const condominiumId = params.get("condominiumId") ?? "1";
 
-  const [monthlyFeePerUnit, setMonthlyFeePerUnit] = useState(12000);
-  const [totalUnits, setTotalUnits] = useState(80);
+  const [monthlyFeePerUnit, setMonthlyFeePerUnit] = useState(200);
+  const [totalUnits] = useState(80);
 
   const simData = useMemo(
     () => calcSimulation(monthlyFeePerUnit, totalUnits),
@@ -167,63 +166,33 @@ export default function LongtermSimulation() {
               <Label htmlFor="input-monthly-fee" className="text-sm font-medium text-gray-700">
                 戸当たり月額積立金（円）
               </Label>
-              <div className="flex items-center gap-4">
-                <Slider
-                  data-testid="slider-monthly-fee"
-                  min={5000}
-                  max={30000}
-                  step={500}
-                  value={[monthlyFeePerUnit]}
-                  onValueChange={(v) => setMonthlyFeePerUnit(v[0])}
-                  className="flex-1"
-                />
-                <Input
-                  id="input-monthly-fee"
-                  data-testid="input-monthly-fee"
-                  type="number"
-                  min={5000}
-                  max={30000}
-                  step={500}
-                  value={monthlyFeePerUnit}
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value, 10);
-                    if (!isNaN(v)) setMonthlyFeePerUnit(Math.max(5000, Math.min(30000, v)));
-                  }}
-                  className="w-28 text-right font-semibold"
-                />
-              </div>
-              <p className="text-xs text-gray-400">範囲: 5,000円 〜 30,000円</p>
+              <Input
+                id="input-monthly-fee"
+                data-testid="input-monthly-fee"
+                type="number"
+                min={100}
+                max={500}
+                step={10}
+                value={monthlyFeePerUnit}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  if (!isNaN(v)) setMonthlyFeePerUnit(Math.max(100, Math.min(500, v)));
+                }}
+                className="w-36 text-right font-semibold"
+              />
+              <p className="text-xs text-gray-400">相場: 100円 〜 500円</p>
             </div>
             <div className="space-y-3">
-              <Label htmlFor="input-total-units" className="text-sm font-medium text-gray-700">
+              <Label className="text-sm font-medium text-gray-700">
                 総戸数（戸）
               </Label>
-              <div className="flex items-center gap-4">
-                <Slider
-                  data-testid="slider-total-units"
-                  min={10}
-                  max={500}
-                  step={5}
-                  value={[totalUnits]}
-                  onValueChange={(v) => setTotalUnits(v[0])}
-                  className="flex-1"
-                />
-                <Input
-                  id="input-total-units"
-                  data-testid="input-total-units"
-                  type="number"
-                  min={10}
-                  max={500}
-                  step={1}
-                  value={totalUnits}
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value, 10);
-                    if (!isNaN(v)) setTotalUnits(Math.max(10, Math.min(500, v)));
-                  }}
-                  className="w-28 text-right font-semibold"
-                />
-              </div>
-              <p className="text-xs text-gray-400">範囲: 10戸 〜 500戸</p>
+              <p
+                data-testid="text-total-units"
+                className="text-2xl font-semibold text-gray-900"
+              >
+                {totalUnits}戸
+              </p>
+              <p className="text-xs text-gray-400">物件固有の固定値</p>
             </div>
           </div>
           <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
