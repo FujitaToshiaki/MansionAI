@@ -19,7 +19,7 @@ export function SubNav({ items }: SubNavProps) {
     <div className="flex gap-2 flex-wrap">
       {items.map((item) => {
         const basePath = item.path.split("?")[0];
-        const isActive = location === basePath;
+        const isActive = location.startsWith(basePath);
         const Icon = item.icon;
         return (
           <Link href={item.path} key={item.label}>

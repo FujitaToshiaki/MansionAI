@@ -1,5 +1,5 @@
 import { Search, Bell, ChevronDown, User, Building, ChevronRight,
-  FileText, AlertTriangle, BarChart3, FileOutput, Upload, BookOpen } from "lucide-react";
+  FileText, AlertTriangle, BarChart3, FileOutput, Upload, BookOpen, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,8 +31,8 @@ const EXACT_MAP: Record<string, NavInfo> = {
   "/longterm/history":          { parent: "長期修繕計画管理", title: "修繕履歴" },
   "/longterm/simulation":       { parent: "長期修繕計画管理", title: "積立金シミュレーション" },
   "/longterm/analysis":         { parent: "長期修繕計画管理", title: "AI見直し分析" },
-  "/consultation/chat":         { parent: "管理業務相談",     title: "チャット相談" },
-  "/consultation/history":      { parent: "管理業務相談",     title: "相談履歴" },
+  "/consultation/chat":         { parent: "AIチャット",       title: "チャット相談" },
+  "/consultation/history":      { parent: "AIチャット",       title: "相談履歴" },
   "/minutes/list":              { parent: "議事録管理",       title: "議事録一覧" },
   "/minutes/import":            { parent: "議事録管理",       title: "音声・メモ取込" },
   "/minutes/generate":          { parent: "議事録管理",       title: "AI議事録生成" },
@@ -127,6 +127,12 @@ const FEATURE_BUTTONS: FeatureBtn[] = [
       (loc) => /^\/condominiums\/[^/]+\/(analysis|regulation-analysis|ai-revision|knowledge|wiki)/.test(loc),
       (loc) => ["/ai-revision", "/knowledge", "/standard-regulations", "/revision-years"].some(p => loc === p || loc.startsWith(p + "/")),
     ],
+  },
+  {
+    label: "AIチャット",
+    icon: MessageSquare,
+    href: (id) => `/consultation/chat?condominiumId=${id}`,
+    activePatterns: [(loc) => loc.startsWith("/consultation")],
   },
 ];
 

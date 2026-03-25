@@ -64,6 +64,8 @@ export default function ConsultationHistory() {
       <nav className="text-sm text-gray-500">
         <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">マンション詳細</Link>
         <span className="mx-2">{'>'}</span>
+        <span className="text-gray-400">AIチャット</span>
+        <span className="mx-2">{'>'}</span>
         <span>相談履歴</span>
       </nav>
 

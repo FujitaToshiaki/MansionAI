@@ -9,12 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { AlertTriangle, MessageSquare, Clock, CheckCircle2, Plus, Bot, Filter, History } from "lucide-react";
+import { AlertTriangle, MessageSquare, Clock, CheckCircle2, Plus, Bot, Filter } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { SubNav } from "@/components/SubNav";
-import type { SubNavItem } from "@/components/SubNav";
 
 interface Issue {
   id: number;
@@ -186,11 +184,6 @@ function getUrgencyBadge(urgency: Issue["urgency"]) {
   }
 }
 
-const SUBNAV_ITEMS: SubNavItem[] = [
-  { label: "チャット相談", path: "/consultation/chat", icon: MessageSquare },
-  { label: "相談履歴", path: "/consultation/history", icon: History },
-];
-
 export default function IssueManagement() {
   const { id } = useParams();
   const { toast } = useToast();
@@ -278,7 +271,6 @@ export default function IssueManagement() {
             <p className="text-sm text-gray-500">{condominium?.name ?? ""}</p>
           </div>
         </div>
-        <SubNav items={SUBNAV_ITEMS} />
       </div>
 
       {/* Summary Cards */}
