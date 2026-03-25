@@ -8,21 +8,21 @@ import { FileText, Users, Wrench, Shield, Megaphone, Leaf } from "lucide-react";
 import { Link } from "wouter";
 
 const MEMBERS_DEMO = [
-  { room: "101", name: "田中 一郎", area: "68.5", votingRatio: "3.2%", email: "tanaka@example.com", note: "" },
-  { room: "102", name: "鈴木 花子", area: "72.0", votingRatio: "3.4%", email: "suzuki@example.com", note: "理事長" },
-  { room: "201", name: "佐藤 次郎", area: "65.0", votingRatio: "3.1%", email: "sato@example.com", note: "" },
-  { room: "202", name: "山田 美咲", area: "80.3", votingRatio: "3.8%", email: "yamada@example.com", note: "副理事長" },
-  { room: "301", name: "伊藤 健一", area: "68.5", votingRatio: "3.2%", email: "ito@example.com", note: "" },
-  { room: "302", name: "渡辺 由美", area: "72.0", votingRatio: "3.4%", email: "watanabe@example.com", note: "" },
-  { room: "401", name: "中村 大介", area: "65.0", votingRatio: "3.1%", email: "nakamura@example.com", note: "会計担当" },
-  { room: "402", name: "小林 さくら", area: "80.3", votingRatio: "3.8%", email: "kobayashi@example.com", note: "" },
-  { room: "501", name: "加藤 誠", area: "68.5", votingRatio: "3.2%", email: "kato@example.com", note: "" },
-  { room: "502", name: "吉田 真理子", area: "72.0", votingRatio: "3.4%", email: "yoshida@example.com", note: "" },
-  { room: "601", name: "山本 拓也", area: "95.0", votingRatio: "4.5%", email: "yamamoto@example.com", note: "監事" },
-  { room: "602", name: "松本 春香", area: "65.0", votingRatio: "3.1%", email: "matsumoto@example.com", note: "" },
-  { room: "701", name: "井上 浩", area: "68.5", votingRatio: "3.2%", email: "inoue@example.com", note: "" },
-  { room: "702", name: "木村 めぐみ", area: "72.0", votingRatio: "3.4%", email: "kimura@example.com", note: "" },
-  { room: "801", name: "林 隆司", area: "80.3", votingRatio: "3.8%", email: "hayashi@example.com", note: "" },
+  { room: "101", name: "田中 一郎", term: "1期", specialNote: "", email: "tanaka@example.com", note: "" },
+  { room: "102", name: "鈴木 花子", term: "3期", specialNote: "理事長経験者", email: "suzuki@example.com", note: "理事長" },
+  { room: "201", name: "佐藤 次郎", term: "2期", specialNote: "", email: "sato@example.com", note: "" },
+  { room: "202", name: "山田 美咲", term: "5期", specialNote: "長期居住", email: "yamada@example.com", note: "副理事長" },
+  { room: "301", name: "伊藤 健一", term: "1期", specialNote: "", email: "ito@example.com", note: "" },
+  { room: "302", name: "渡辺 由美", term: "2期", specialNote: "", email: "watanabe@example.com", note: "" },
+  { room: "401", name: "中村 大介", term: "4期", specialNote: "", email: "nakamura@example.com", note: "会計担当" },
+  { room: "402", name: "小林 さくら", term: "1期", specialNote: "", email: "kobayashi@example.com", note: "" },
+  { room: "501", name: "加藤 誠", term: "3期", specialNote: "", email: "kato@example.com", note: "" },
+  { room: "502", name: "吉田 真理子", term: "2期", specialNote: "", email: "yoshida@example.com", note: "" },
+  { room: "601", name: "山本 拓也", term: "6期", specialNote: "区分所有者代表", email: "yamamoto@example.com", note: "監事" },
+  { room: "602", name: "松本 春香", term: "1期", specialNote: "", email: "matsumoto@example.com", note: "" },
+  { room: "701", name: "井上 浩", term: "2期", specialNote: "", email: "inoue@example.com", note: "" },
+  { room: "702", name: "木村 めぐみ", term: "3期", specialNote: "", email: "kimura@example.com", note: "" },
+  { room: "801", name: "林 隆司", term: "4期", specialNote: "ペット飼育申請中", email: "hayashi@example.com", note: "" },
 ];
 
 const COMMITTEES_DEMO = [
@@ -287,8 +287,8 @@ export default function CondominiumDetail() {
                     <tr className="border-b bg-gray-50">
                       <th className="text-left p-3 font-medium text-gray-700 w-16">部屋番号</th>
                       <th className="text-left p-3 font-medium text-gray-700 w-28">氏名</th>
-                      <th className="text-left p-3 font-medium text-gray-700 w-24">専有面積（㎡）</th>
-                      <th className="text-left p-3 font-medium text-gray-700 w-24">議決権割合</th>
+                      <th className="text-left p-3 font-medium text-gray-700 w-24">何期目</th>
+                      <th className="text-left p-3 font-medium text-gray-700 w-36">特記事項</th>
                       <th className="text-left p-3 font-medium text-gray-700">メールアドレス</th>
                       <th className="text-left p-3 font-medium text-gray-700 w-28">備考</th>
                     </tr>
@@ -298,8 +298,8 @@ export default function CondominiumDetail() {
                       <tr key={member.room} className="border-b hover:bg-gray-50" data-testid={`row-member-${member.room}`}>
                         <td className="p-3 text-gray-900 font-medium">{member.room}</td>
                         <td className="p-3 text-gray-900">{member.name}</td>
-                        <td className="p-3 text-gray-700 text-right pr-6">{member.area}</td>
-                        <td className="p-3 text-gray-700 text-right pr-6">{member.votingRatio}</td>
+                        <td className="p-3 text-gray-700">{member.term}</td>
+                        <td className="p-3 text-gray-700">{member.specialNote}</td>
                         <td className="p-3 text-gray-600">{member.email}</td>
                         <td className="p-3">
                           {member.note ? (
