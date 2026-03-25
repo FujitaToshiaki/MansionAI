@@ -10,21 +10,7 @@ import {
   type Regulation,
   type InsertRegulation,
   type Activity,
-  type InsertActivity,
-  type ActionItem,
-  type InsertActionItem,
-  type ConsultationLog,
-  type InsertConsultationLog,
-  type Proposal,
-  type InsertProposal,
-  type EvaluationCheck,
-  type InsertEvaluationCheck,
-  type LongTermPlan,
-  type InsertLongTermPlan,
-  type RepairItem,
-  type RepairHistory,
-  type MeetingRecording,
-  type InsertMeetingRecording,
+  type InsertActivity
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -63,36 +49,6 @@ export interface IStorage {
   
   // Database query method
   query(sql: string, params?: any[]): Promise<any>;
-
-  // Action Items
-  getActionItemsByCondominiumId(condominiumId: string): Promise<ActionItem[]>;
-  createActionItem(item: InsertActionItem): Promise<ActionItem>;
-  updateActionItem(id: string, updates: Partial<ActionItem>): Promise<ActionItem>;
-
-  // Consultation Logs
-  getConsultationLogs(condominiumId?: string): Promise<ConsultationLog[]>;
-  createConsultationLog(log: InsertConsultationLog): Promise<ConsultationLog>;
-
-  // Proposals
-  getProposalsByCondominiumId(condominiumId: string): Promise<Proposal[]>;
-  createProposal(proposal: InsertProposal): Promise<Proposal>;
-  updateProposal(id: string, updates: Partial<Proposal>): Promise<Proposal>;
-
-  // Evaluation Checks
-  getEvaluationChecksByCondominiumId(condominiumId: string): Promise<EvaluationCheck[]>;
-  createEvaluationCheck(check: InsertEvaluationCheck): Promise<EvaluationCheck>;
-
-  // Long Term Plans
-  getLongTermPlansByCondominiumId(condominiumId: string): Promise<LongTermPlan[]>;
-  createLongTermPlan(plan: InsertLongTermPlan): Promise<LongTermPlan>;
-
-  // Repair Items & History
-  getRepairItemsByCondominiumId(condominiumId: string): Promise<RepairItem[]>;
-  getRepairHistoryByCondominiumId(condominiumId: string): Promise<RepairHistory[]>;
-
-  // Meeting Recordings
-  getMeetingRecordingsByCondominiumId(condominiumId: string): Promise<MeetingRecording[]>;
-  createMeetingRecording(recording: InsertMeetingRecording): Promise<MeetingRecording>;
 }
 
 export class MemStorage implements IStorage {
@@ -546,70 +502,9 @@ export class MemStorage implements IStorage {
   }
 
   async query(sql: string, params: any[] = []): Promise<any> {
+    // Mock implementation for demonstration
+    // In real implementation, this would connect to the actual database
     throw new Error('Database query method not implemented in MemStorage');
-  }
-
-  // ── 新テーブル スタブ実装 ─────────────────────────────────────────────────
-
-  async getActionItemsByCondominiumId(condominiumId: string): Promise<ActionItem[]> {
-    return [];
-  }
-  async createActionItem(item: InsertActionItem): Promise<ActionItem> {
-    const record = { ...item, id: randomUUID(), createdAt: new Date(), updatedAt: new Date() } as ActionItem;
-    return record;
-  }
-  async updateActionItem(id: string, updates: Partial<ActionItem>): Promise<ActionItem> {
-    throw new Error('Not implemented in MemStorage');
-  }
-
-  async getConsultationLogs(condominiumId?: string): Promise<ConsultationLog[]> {
-    return [];
-  }
-  async createConsultationLog(log: InsertConsultationLog): Promise<ConsultationLog> {
-    const record = { ...log, id: randomUUID(), createdAt: new Date(), updatedAt: new Date() } as ConsultationLog;
-    return record;
-  }
-
-  async getProposalsByCondominiumId(condominiumId: string): Promise<Proposal[]> {
-    return [];
-  }
-  async createProposal(proposal: InsertProposal): Promise<Proposal> {
-    const record = { ...proposal, id: randomUUID(), createdAt: new Date(), updatedAt: new Date() } as Proposal;
-    return record;
-  }
-  async updateProposal(id: string, updates: Partial<Proposal>): Promise<Proposal> {
-    throw new Error('Not implemented in MemStorage');
-  }
-
-  async getEvaluationChecksByCondominiumId(condominiumId: string): Promise<EvaluationCheck[]> {
-    return [];
-  }
-  async createEvaluationCheck(check: InsertEvaluationCheck): Promise<EvaluationCheck> {
-    const record = { ...check, id: randomUUID(), createdAt: new Date() } as EvaluationCheck;
-    return record;
-  }
-
-  async getLongTermPlansByCondominiumId(condominiumId: string): Promise<LongTermPlan[]> {
-    return [];
-  }
-  async createLongTermPlan(plan: InsertLongTermPlan): Promise<LongTermPlan> {
-    const record = { ...plan, id: randomUUID(), createdAt: new Date(), updatedAt: new Date() } as LongTermPlan;
-    return record;
-  }
-
-  async getRepairItemsByCondominiumId(condominiumId: string): Promise<RepairItem[]> {
-    return [];
-  }
-  async getRepairHistoryByCondominiumId(condominiumId: string): Promise<RepairHistory[]> {
-    return [];
-  }
-
-  async getMeetingRecordingsByCondominiumId(condominiumId: string): Promise<MeetingRecording[]> {
-    return [];
-  }
-  async createMeetingRecording(recording: InsertMeetingRecording): Promise<MeetingRecording> {
-    const record = { ...recording, id: randomUUID(), createdAt: new Date(), updatedAt: new Date() } as MeetingRecording;
-    return record;
   }
 }
 

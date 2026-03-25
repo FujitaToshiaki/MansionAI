@@ -1,15 +1,6 @@
 # Overview
 
-マンション管理AIツールプラットフォーム。マンション管理業協会とオプテージの共同研究開発向け。5つのAI機能（01規約改訂AI・02長期修繕計画AI・03業務相談Bot・04議事録作成AI・05総会議案書AI）と適正評価セルフチェックを提供するプラットフォーム。
-
-## Recent Changes (2026-03-25)
-
-✓ **サイドバー全面再構築**: 8メニューから「管理AIプラットフォーム」構成に。1サブメニューの項目はダイレクトリンク化（物件管理など）
-✓ **9テーブル新規追加**: long_term_plans, repair_items, repair_history, consultation_logs, meeting_recordings, proposals, action_items, evaluation_checks, evaluation_items_master
-✓ **condominiums テーブル拡張**: structure_type, floors, management_type, reserve_fund_balance など11カラム追加
-✓ **プレースホルダーページ18画面**: 適正評価(3), 02長計(5), 03相談Bot(2), 04議事録(4), 05議案書(4)
-✓ **基本 CRUD API**: 全新テーブル向けの GET/POST/PATCH エンドポイント追加
-✓ **タスク計画 #1〜#8**: 7機能実装タスク + デモデータ投入タスクをプロジェクトに登録済み
+This is a Japanese condominium management regulation AI system designed for property management companies. The application helps automate the process of analyzing meeting minutes, extracting decisions, and generating regulation amendments using OCR technology and AI analysis. The system provides a complete workflow from document upload to final regulation output, with a focus on legal compliance and standardized regulation management.
 
 ## Recent Changes (2025-08-26)
 
