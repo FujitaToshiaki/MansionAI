@@ -5,21 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Building, 
-  Calendar, 
-  Users, 
-  FileText, 
-  Upload, 
-  Bot, 
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  FileOutput,
-  Search,
-  BarChart3,
-  BookOpen
-} from "lucide-react";
+import { FileText, Upload, Search, BookOpen } from "lucide-react";
 import { Link } from "wouter";
 
 import { MinutesTab } from "@/components/MinutesTab";
@@ -88,47 +74,6 @@ export default function CondominiumDetail() {
             </div>
           </div>
           
-          {/* Button Group - 3x2 Grid Layout */}
-          <div className="grid grid-cols-3 gap-3">
-            {/* First Row */}
-            <Link href={`/condominiums/${id}/analysis`}>
-              <Button variant="outline" size="sm" className="bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-400 text-orange-700 hover:text-orange-800 w-full" data-testid="btn-regulation-revision">
-                <FileText className="w-4 h-4 mr-2" />
-                規約改訂
-              </Button>
-            </Link>
-            <Link href={`/proposals/list?condominiumId=${id}`}>
-              <Button variant="outline" size="sm" className="bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-400 text-orange-700 hover:text-orange-800 w-full" data-testid="btn-proposals">
-                <Search className="w-4 h-4 mr-2" />
-                議案管理
-              </Button>
-            </Link>
-            <Link href={`/condominiums/${id}/issues`}>
-              <Button variant="outline" size="sm" className="bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-400 text-orange-700 hover:text-orange-800 w-full" data-testid="btn-incidents">
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                問合せ管理
-              </Button>
-            </Link>
-            {/* Second Row */}
-            <Link href={`/longterm/dashboard?condominiumId=${id}`}>
-              <Button variant="outline" size="sm" className="bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-400 text-orange-700 hover:text-orange-800 w-full" data-testid="btn-longterm">
-                <BarChart3 className="w-4 h-4 mr-2" />
-                長期修繕計画
-              </Button>
-            </Link>
-            <Link href={`/minutes/list?condominiumId=${id}`}>
-              <Button variant="outline" size="sm" className="bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-400 text-orange-700 hover:text-orange-800 w-full" data-testid="btn-minutes">
-                <FileOutput className="w-4 h-4 mr-2" />
-                議事録管理
-              </Button>
-            </Link>
-            <Link href={`/evaluation/check?condominiumId=${id}`}>
-              <Button variant="outline" size="sm" className="bg-orange-50 hover:bg-orange-100 border-orange-200 hover:border-orange-400 text-orange-700 hover:text-orange-800 w-full" data-testid="btn-evaluation">
-                <Upload className="w-4 h-4 mr-2" />
-                管理適正評価
-              </Button>
-            </Link>
-          </div>
         </div>
 
         {/* Info Cards */}
