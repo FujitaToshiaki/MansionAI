@@ -278,86 +278,8 @@ export default function IssueManagement() {
             <p className="text-sm text-gray-500">{condominium?.name ?? ""}</p>
           </div>
         </div>
-        <Dialog open={newIssueOpen} onOpenChange={setNewIssueOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="bg-orange-500 hover:bg-orange-600 text-white"
-              data-testid="button-new-issue"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              新規登録
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>問合せ新規登録</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleNewIssueSubmit} className="space-y-4 mt-2">
-              <div className="space-y-1">
-                <Label htmlFor="new-category">カテゴリ</Label>
-                <Select value={newCategory} onValueChange={setNewCategory}>
-                  <SelectTrigger id="new-category" data-testid="select-new-category">
-                    <SelectValue placeholder="カテゴリを選択" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="new-content">内容</Label>
-                <Textarea
-                  id="new-content"
-                  placeholder="問合せの内容を入力してください"
-                  value={newContent}
-                  onChange={(e) => setNewContent(e.target.value)}
-                  rows={4}
-                  data-testid="textarea-new-content"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="new-urgency">緊急度</Label>
-                <Select value={newUrgency} onValueChange={setNewUrgency}>
-                  <SelectTrigger id="new-urgency" data-testid="select-new-urgency">
-                    <SelectValue placeholder="緊急度を選択" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {URGENCIES.map((u) => (
-                      <SelectItem key={u} value={u}>
-                        {u}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setNewIssueOpen(false)}
-                  data-testid="button-cancel-new-issue"
-                >
-                  キャンセル
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
-                  data-testid="button-submit-new-issue"
-                >
-                  登録
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <SubNav items={SUBNAV_ITEMS} />
       </div>
-
-      {/* SubNav */}
-      <SubNav items={SUBNAV_ITEMS} />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-4">
@@ -442,6 +364,82 @@ export default function IssueManagement() {
                   ))}
                 </SelectContent>
               </Select>
+              <Dialog open={newIssueOpen} onOpenChange={setNewIssueOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    className="bg-orange-500 hover:bg-orange-600 text-white h-8 text-sm"
+                    data-testid="button-new-issue"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    新規登録
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>問合せ新規登録</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleNewIssueSubmit} className="space-y-4 mt-2">
+                    <div className="space-y-1">
+                      <Label htmlFor="new-category">カテゴリ</Label>
+                      <Select value={newCategory} onValueChange={setNewCategory}>
+                        <SelectTrigger id="new-category" data-testid="select-new-category">
+                          <SelectValue placeholder="カテゴリを選択" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.map((c) => (
+                            <SelectItem key={c} value={c}>
+                              {c}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="new-content">内容</Label>
+                      <Textarea
+                        id="new-content"
+                        placeholder="問合せの内容を入力してください"
+                        value={newContent}
+                        onChange={(e) => setNewContent(e.target.value)}
+                        rows={4}
+                        data-testid="textarea-new-content"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="new-urgency">緊急度</Label>
+                      <Select value={newUrgency} onValueChange={setNewUrgency}>
+                        <SelectTrigger id="new-urgency" data-testid="select-new-urgency">
+                          <SelectValue placeholder="緊急度を選択" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {URGENCIES.map((u) => (
+                            <SelectItem key={u} value={u}>
+                              {u}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setNewIssueOpen(false)}
+                        data-testid="button-cancel-new-issue"
+                      >
+                        キャンセル
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                        data-testid="button-submit-new-issue"
+                      >
+                        登録
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardHeader>
