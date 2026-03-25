@@ -80,32 +80,12 @@ export default function MinutesGenerate() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">AI議事録生成</h1>
-        <div className="flex items-center gap-3">
-          <SubNav items={[
-            { label: "議事録一覧", path: `/minutes/list?condominiumId=${condominiumId}`, icon: FileText },
-            { label: "音声・メモ取込", path: `/minutes/import?condominiumId=${condominiumId}`, icon: Mic },
-            { label: "AI議事録生成", path: `/minutes/generate?condominiumId=${condominiumId}`, icon: Sparkles },
-            { label: "決定事項管理", path: `/minutes/actions?condominiumId=${condominiumId}`, icon: CheckSquare },
-          ]} />
-          <Button 
-            className="bg-orange-600 hover:bg-orange-700" 
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            data-testid="button-generate-minutes"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                生成中...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI議事録を生成
-              </>
-            )}
-          </Button>
-        </div>
+        <SubNav items={[
+          { label: "議事録一覧", path: `/minutes/list?condominiumId=${condominiumId}`, icon: FileText },
+          { label: "音声・メモ取込", path: `/minutes/import?condominiumId=${condominiumId}`, icon: Mic },
+          { label: "AI議事録生成", path: `/minutes/generate?condominiumId=${condominiumId}`, icon: Sparkles },
+          { label: "決定事項管理", path: `/minutes/actions?condominiumId=${condominiumId}`, icon: CheckSquare },
+        ]} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-250px)]">
@@ -123,6 +103,26 @@ export default function MinutesGenerate() {
               次回は4月12日19時。
             </p>
           </CardContent>
+          <div className="p-4 border-t bg-gray-50 flex justify-end">
+            <Button 
+              className="bg-orange-600 hover:bg-orange-700" 
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              data-testid="button-generate-minutes"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  生成中...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  AI議事録を生成
+                </>
+              )}
+            </Button>
+          </div>
         </Card>
 
         {/* Right Panel: Generated Output */}
@@ -145,7 +145,7 @@ export default function MinutesGenerate() {
               </pre>
             ) : (
               <div className="h-full flex items-center justify-center text-gray-400">
-                上のボタンを押して生成を開始してください
+                左カード下部のボタンを押して生成を開始してください
               </div>
             )}
           </CardContent>
