@@ -34,8 +34,8 @@ const COMMITTEES_DEMO = [
     members: 5,
     activities: "長期修繕計画の見直し、外壁塗装工事の調査・入札管理、大規模修繕工事の準備",
     nextMeeting: "2026年4月10日（金）19:00",
-    color: "text-orange-600",
-    bgColor: "bg-orange-50 border-orange-200",
+    color: "text-gray-700",
+    bgColor: "bg-white border-gray-200",
   },
   {
     id: 2,
@@ -45,8 +45,8 @@ const COMMITTEES_DEMO = [
     members: 4,
     activities: "年1回の防災訓練企画・運営、防災用品の点検・補充、避難経路の確認および掲示更新",
     nextMeeting: "2026年4月18日（土）10:00",
-    color: "text-red-600",
-    bgColor: "bg-red-50 border-red-200",
+    color: "text-gray-700",
+    bgColor: "bg-white border-gray-200",
   },
   {
     id: 3,
@@ -56,8 +56,8 @@ const COMMITTEES_DEMO = [
     members: 3,
     activities: "月次管理組合だよりの作成・配布、掲示板管理、総会資料の作成サポート",
     nextMeeting: "2026年4月22日（水）19:30",
-    color: "text-blue-600",
-    bgColor: "bg-blue-50 border-blue-200",
+    color: "text-gray-700",
+    bgColor: "bg-white border-gray-200",
   },
   {
     id: 4,
@@ -67,8 +67,8 @@ const COMMITTEES_DEMO = [
     members: 6,
     activities: "共用部清掃スケジュール管理、植栽の手入れ・季節の花植え、ゴミ置き場の美化活動",
     nextMeeting: "2026年5月3日（日）9:00",
-    color: "text-green-600",
-    bgColor: "bg-green-50 border-green-200",
+    color: "text-gray-700",
+    bgColor: "bg-white border-gray-200",
   },
 ];
 
