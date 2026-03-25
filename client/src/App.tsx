@@ -25,8 +25,25 @@ import AIAgentExecutionDetail from "@/pages/AIAgentExecutionDetail";
 import RevisionYearList from "@/pages/RevisionYearList";
 import RevisionYearDetail from "@/pages/RevisionYearDetail";
 import Reports from "@/pages/Reports";
-import NotFound from "@/pages/not-found";
 import PlaceholderPage from "@/pages/PlaceholderPage";
+import EvaluationCheck from "@/pages/EvaluationCheck";
+import EvaluationScore from "@/pages/EvaluationScore";
+import EvaluationHistory from "@/pages/EvaluationHistory";
+import LongtermDashboard from "@/pages/LongtermDashboard";
+import LongtermItems from "@/pages/LongtermItems";
+import LongtermHistory from "@/pages/LongtermHistory";
+import LongtermSimulation from "@/pages/LongtermSimulation";
+import LongtermAnalysis from "@/pages/LongtermAnalysis";
+import ConsultationChat from "@/pages/ConsultationChat";
+import ConsultationHistory from "@/pages/ConsultationHistory";
+import MinutesList from "@/pages/MinutesList";
+import MinutesImport from "@/pages/MinutesImport";
+import MinutesGenerate from "@/pages/MinutesGenerate";
+import MinutesActions from "@/pages/MinutesActions";
+import ProposalsList from "@/pages/ProposalsList";
+import ProposalsGenerate from "@/pages/ProposalsGenerate";
+import ProposalsEdit from "@/pages/ProposalsEdit";
+import NotFound from "@/pages/not-found";
 import {
   ClipboardCheck,
   BarChart2,
@@ -77,15 +94,9 @@ function Router() {
         <Route path="/revision-years/:id" component={RevisionYearDetail} />
         <Route path="/reports" component={Reports} />
 
-        <Route path="/evaluation/check">
-          {() => <PlaceholderPage title="セルフチェック実施" icon={ClipboardCheck} />}
-        </Route>
-        <Route path="/evaluation/score">
-          {() => <PlaceholderPage title="スコア詳細・改善提案" icon={BarChart2} />}
-        </Route>
-        <Route path="/evaluation/history">
-          {() => <PlaceholderPage title="評価履歴・推移" icon={History} />}
-        </Route>
+        <Route path="/evaluation/check" component={EvaluationCheck} />
+        <Route path="/evaluation/score" component={EvaluationScore} />
+        <Route path="/evaluation/history" component={EvaluationHistory} />
 
         <Route path="/ai-revision">
           {() => <PlaceholderPage title="AI改訂案生成" icon={Sparkles} />}
@@ -94,51 +105,23 @@ function Router() {
           {() => <PlaceholderPage title="ナレッジベース" icon={BookOpen} />}
         </Route>
 
-        <Route path="/longterm/dashboard">
-          {() => <PlaceholderPage title="修繕計画ダッシュボード" icon={Wrench} />}
-        </Route>
-        <Route path="/longterm/items">
-          {() => <PlaceholderPage title="修繕項目一覧" icon={List} />}
-        </Route>
-        <Route path="/longterm/history">
-          {() => <PlaceholderPage title="修繕履歴" icon={FileStack} />}
-        </Route>
-        <Route path="/longterm/simulation">
-          {() => <PlaceholderPage title="積立金シミュレーション" icon={TrendingUp} />}
-        </Route>
-        <Route path="/longterm/analysis">
-          {() => <PlaceholderPage title="AI見直し分析" icon={BarChart} />}
-        </Route>
+        <Route path="/longterm/dashboard" component={LongtermDashboard} />
+        <Route path="/longterm/items" component={LongtermItems} />
+        <Route path="/longterm/history" component={LongtermHistory} />
+        <Route path="/longterm/simulation" component={LongtermSimulation} />
+        <Route path="/longterm/analysis" component={LongtermAnalysis} />
 
-        <Route path="/consultation/chat">
-          {() => <PlaceholderPage title="チャット相談" icon={MessageSquare} />}
-        </Route>
-        <Route path="/consultation/history">
-          {() => <PlaceholderPage title="相談履歴" icon={History} />}
-        </Route>
+        <Route path="/consultation/chat" component={ConsultationChat} />
+        <Route path="/consultation/history" component={ConsultationHistory} />
 
-        <Route path="/minutes/list">
-          {() => <PlaceholderPage title="議事録一覧" icon={FileText} />}
-        </Route>
-        <Route path="/minutes/import">
-          {() => <PlaceholderPage title="音声・メモ取込" icon={Mic} />}
-        </Route>
-        <Route path="/minutes/generate">
-          {() => <PlaceholderPage title="AI議事録生成" icon={Sparkles} />}
-        </Route>
-        <Route path="/minutes/actions">
-          {() => <PlaceholderPage title="決定事項管理" icon={CheckSquare} />}
-        </Route>
+        <Route path="/minutes/list" component={MinutesList} />
+        <Route path="/minutes/import" component={MinutesImport} />
+        <Route path="/minutes/generate" component={MinutesGenerate} />
+        <Route path="/minutes/actions" component={MinutesActions} />
 
-        <Route path="/proposals/list">
-          {() => <PlaceholderPage title="議案書一覧" icon={BookOpen} />}
-        </Route>
-        <Route path="/proposals/generate">
-          {() => <PlaceholderPage title="AI議案書生成" icon={Sparkles} />}
-        </Route>
-        <Route path="/proposals/edit">
-          {() => <PlaceholderPage title="議案書編集" icon={FilePen} />}
-        </Route>
+        <Route path="/proposals/list" component={ProposalsList} />
+        <Route path="/proposals/generate" component={ProposalsGenerate} />
+        <Route path="/proposals/edit" component={ProposalsEdit} />
 
         <Route path="/settings">
           {() => <PlaceholderPage title="設定" icon={Settings} />}
