@@ -102,7 +102,7 @@ export default function MinutesList() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {mockMinutes.map((minute) => (
               <Card key={minute.id} className="bg-white hover:bg-gray-50 transition-colors cursor-pointer" data-testid={`card-minute-${minute.id}`}>
                 <CardContent className="p-4">
