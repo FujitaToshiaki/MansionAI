@@ -351,45 +351,45 @@ export default function IssueManagement() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-4">
-        <Card className="border-gray-100 shadow-sm">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+        <Card className="border-0 shadow-md bg-red-500 text-white">
+          <CardContent className="pt-6 pb-5">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <AlertTriangle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">未対応件数</p>
-                <p className="text-3xl font-bold text-red-600" data-testid="text-count-unresolved">
+                <p className="text-sm text-white/80 font-medium">未対応件数</p>
+                <p className="text-4xl font-bold text-white leading-tight" data-testid="text-count-unresolved">
                   {unresolved}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-gray-100 shadow-sm">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="w-5 h-5 text-yellow-600" />
+        <Card className="border-0 shadow-md bg-yellow-500 text-white">
+          <CardContent className="pt-6 pb-5">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <Clock className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">対応中</p>
-                <p className="text-3xl font-bold text-yellow-600" data-testid="text-count-inprogress">
+                <p className="text-sm text-white/80 font-medium">対応中</p>
+                <p className="text-4xl font-bold text-white leading-tight" data-testid="text-count-inprogress">
                   {inProgress}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-gray-100 shadow-sm">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <CheckCircle2 className="w-5 h-5 text-orange-600" />
+        <Card className="border-0 shadow-md bg-orange-500 text-white">
+          <CardContent className="pt-6 pb-5">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">今月受付件数</p>
-                <p className="text-3xl font-bold text-orange-600" data-testid="text-count-thismonth">
+                <p className="text-sm text-white/80 font-medium">今月受付件数</p>
+                <p className="text-4xl font-bold text-white leading-tight" data-testid="text-count-thismonth">
                   {thisMonth}
                 </p>
               </div>
@@ -400,13 +400,14 @@ export default function IssueManagement() {
 
       {/* Filter + Table */}
       <Card className="border-gray-100 shadow-sm">
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">問合せ一覧</CardTitle>
-            <div className="flex items-center gap-3">
+            <CardTitle className="text-lg font-semibold text-gray-900">問合せ一覧</CardTitle>
+            <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-500 mr-1">絞込み：</span>
               <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-36" data-testid="select-filter-category">
+                <SelectTrigger className="w-36 h-8 text-sm" data-testid="select-filter-category">
                   <SelectValue placeholder="カテゴリ" />
                 </SelectTrigger>
                 <SelectContent>
@@ -419,7 +420,7 @@ export default function IssueManagement() {
                 </SelectContent>
               </Select>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-32" data-testid="select-filter-status">
+                <SelectTrigger className="w-32 h-8 text-sm" data-testid="select-filter-status">
                   <SelectValue placeholder="ステータス" />
                 </SelectTrigger>
                 <SelectContent>
@@ -437,20 +438,20 @@ export default function IssueManagement() {
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50">
-                <TableHead className="pl-6">受付日</TableHead>
-                <TableHead>カテゴリ</TableHead>
-                <TableHead>問合せ概要</TableHead>
-                <TableHead>問合せ者</TableHead>
-                <TableHead>ステータス</TableHead>
-                <TableHead>緊急度</TableHead>
-                <TableHead className="pr-6">担当者</TableHead>
+              <TableRow className="bg-orange-50 border-b border-orange-100 hover:bg-orange-50">
+                <TableHead className="pl-6 py-3 text-xs font-semibold text-orange-700 uppercase tracking-wide">受付日</TableHead>
+                <TableHead className="py-3 text-xs font-semibold text-orange-700 uppercase tracking-wide">カテゴリ</TableHead>
+                <TableHead className="py-3 text-xs font-semibold text-orange-700 uppercase tracking-wide">問合せ概要</TableHead>
+                <TableHead className="py-3 text-xs font-semibold text-orange-700 uppercase tracking-wide">問合せ者</TableHead>
+                <TableHead className="py-3 text-xs font-semibold text-orange-700 uppercase tracking-wide">ステータス</TableHead>
+                <TableHead className="py-3 text-xs font-semibold text-orange-700 uppercase tracking-wide">緊急度</TableHead>
+                <TableHead className="pr-6 py-3 text-xs font-semibold text-orange-700 uppercase tracking-wide">担当者</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredIssues.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-gray-400">
+                  <TableCell colSpan={7} className="text-center py-10 text-gray-400">
                     該当する問合せがありません
                   </TableCell>
                 </TableRow>
@@ -458,27 +459,27 @@ export default function IssueManagement() {
                 filteredIssues.map((issue) => (
                   <TableRow
                     key={issue.id}
-                    className="bg-white cursor-pointer hover:bg-orange-50 transition-colors"
+                    className="cursor-pointer hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-0"
                     onClick={() => handleRowClick(issue)}
                     data-testid={`row-issue-${issue.id}`}
                   >
-                    <TableCell className="pl-6 text-sm text-gray-600">{issue.receivedDate}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs" data-testid={`badge-category-${issue.id}`}>
+                    <TableCell className="pl-6 py-3.5 text-sm text-gray-600 font-medium">{issue.receivedDate}</TableCell>
+                    <TableCell className="py-3.5">
+                      <Badge variant="outline" className="text-xs font-medium border-gray-300 text-gray-600" data-testid={`badge-category-${issue.id}`}>
                         {issue.category}
                       </Badge>
                     </TableCell>
-                    <TableCell className="max-w-xs">
-                      <span className="text-sm text-gray-800 line-clamp-1" data-testid={`text-summary-${issue.id}`}>
+                    <TableCell className="max-w-xs py-3.5">
+                      <span className="text-sm text-gray-800 font-medium line-clamp-1" data-testid={`text-summary-${issue.id}`}>
                         {issue.summary}
                       </span>
                     </TableCell>
-                    <TableCell className="text-sm text-gray-500" data-testid={`text-requester-${issue.id}`}>
+                    <TableCell className="py-3.5 text-sm text-gray-500" data-testid={`text-requester-${issue.id}`}>
                       {issue.requester}
                     </TableCell>
-                    <TableCell>{getStatusBadge(issue.status)}</TableCell>
-                    <TableCell>{getUrgencyBadge(issue.urgency)}</TableCell>
-                    <TableCell className="pr-6 text-sm text-gray-600" data-testid={`text-assignee-${issue.id}`}>
+                    <TableCell className="py-3.5">{getStatusBadge(issue.status)}</TableCell>
+                    <TableCell className="py-3.5">{getUrgencyBadge(issue.urgency)}</TableCell>
+                    <TableCell className="pr-6 py-3.5 text-sm text-gray-600" data-testid={`text-assignee-${issue.id}`}>
                       {issue.assignee}
                     </TableCell>
                   </TableRow>
@@ -494,50 +495,50 @@ export default function IssueManagement() {
         <DialogContent className="max-w-lg">
           {selectedIssue && (
             <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
+              <DialogHeader className="pb-2">
+                <DialogTitle className="flex items-center gap-2 text-gray-900">
                   <MessageSquare className="w-5 h-5 text-orange-500" />
                   問合せ詳細
                 </DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 mt-2">
+              <div className="space-y-5 mt-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline">{selectedIssue.category}</Badge>
+                  <Badge variant="outline" className="border-gray-300 text-gray-600 font-medium">{selectedIssue.category}</Badge>
                   {getStatusBadge(selectedIssue.status)}
                   {getUrgencyBadge(selectedIssue.urgency)}
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-lg p-4">
                   <div>
-                    <p className="text-gray-400 text-xs">受付日</p>
-                    <p className="text-gray-800 font-medium">{selectedIssue.receivedDate}</p>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">受付日</p>
+                    <p className="text-sm text-gray-800 font-semibold">{selectedIssue.receivedDate}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-xs">担当者</p>
-                    <p className="text-gray-800 font-medium">{selectedIssue.assignee}</p>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">担当者</p>
+                    <p className="text-sm text-gray-800 font-semibold">{selectedIssue.assignee}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-xs">問合せ者</p>
-                    <p className="text-gray-800 font-medium">{selectedIssue.requester}</p>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">問合せ者</p>
+                    <p className="text-sm text-gray-800 font-semibold">{selectedIssue.requester}</p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-xs mb-1">概要</p>
-                  <p className="text-gray-800 text-sm font-medium">{selectedIssue.summary}</p>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">概要</p>
+                  <p className="text-sm text-gray-900 font-semibold">{selectedIssue.summary}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-xs mb-1">詳細内容</p>
-                  <p className="text-gray-700 text-sm leading-relaxed bg-gray-50 rounded-md p-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">詳細内容</p>
+                  <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-4 border border-gray-100">
                     {selectedIssue.detail}
                   </p>
                 </div>
-                <div className="pt-2 border-t border-gray-100">
+                <div className="pt-3 border-t border-gray-100">
                   <Link
                     href="/consultation/chat"
-                    className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-800 text-sm font-medium transition-colors"
+                    className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 text-sm font-medium transition-colors"
                     data-testid="link-consultation-chat"
                   >
                     <Bot className="w-4 h-4" />
-                    相談チャットボットで対応案を生成→
+                    相談チャットボットで対応案を生成 →
                   </Link>
                 </div>
               </div>
