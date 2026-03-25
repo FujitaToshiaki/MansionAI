@@ -176,6 +176,8 @@ export default function Sidebar() {
     });
   }
 
+  const anyGroupOpen = Object.values(openGroups).some(Boolean);
+
   return (
     <div
       className="sidebar-gradient text-white flex flex-col overflow-y-auto"
@@ -201,9 +203,10 @@ export default function Sidebar() {
 
           if (entry.type === "single") {
             const Icon = entry.icon;
-            const isActive =
+            const routeMatch =
               location === entry.path ||
               (entry.path !== "/" && location.startsWith(entry.path + "/"));
+            const isActive = routeMatch && !anyGroupOpen;
             return (
               <div key={`single-${idx}`}>
                 <Link href={entry.path}>
