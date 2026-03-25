@@ -130,7 +130,7 @@ export default function MinutesGenerate() {
           <CardHeader className="py-3 bg-orange-50 border-b">
             <CardTitle className="text-sm font-medium text-orange-800">生成された議事録</CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 overflow-auto p-4">
+          <CardContent className="flex-1 overflow-auto p-4 bg-white">
             {isGenerating ? (
               <div className="space-y-4">
                 <Skeleton className="h-4 w-3/4" />
