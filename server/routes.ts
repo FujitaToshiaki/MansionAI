@@ -216,44 +216,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Revision headers endpoints
   app.get("/api/revision-headers", async (req, res) => {
     try {
-      // Mock data for now to avoid database issues
-      const mockHeaders = [
-        {
-          id: "3125710f-b498-4949-86e2-b01bc9fcc13a",
-          year: 7,
-          title: "令和7年度改訂対応",
-          status: "in_progress",
-          total_items: 8,
-          completed_items: 6,
-          assignee: "修繕 未来",
-          actual_total_items: 8,
-          actual_completed_items: 6
-        },
-        {
-          id: "2125710f-b498-4949-86e2-b01bc9fcc13b",
-          year: 6,
-          title: "令和6年度改訂対応",
-          status: "completed",
-          total_items: 8,
-          completed_items: 8,
-          assignee: "佐藤花子",
-          actual_total_items: 8,
-          actual_completed_items: 8
-        },
-        {
-          id: "1125710f-b498-4949-86e2-b01bc9fcc13c",
-          year: 5,
-          title: "令和5年度改訂対応",
-          status: "completed",
-          total_items: 5,
-          completed_items: 5,
-          assignee: "山田次郎",
-          actual_total_items: 5,
-          actual_completed_items: 5
-        }
-      ];
-      
-      res.json(mockHeaders);
+      const result = await db.execute(`
+        SELECT
+          id, year, title, description, status,
+          total_items, completed_items,
+          total_items   AS actual_total_items,
+          completed_items AS actual_completed_items,
+          start_date, target_completion_date, actual_completion_date,
+          revision_type, priority_level,
+          assigned_manager, assigned_manager AS assignee,
+          notes, created_at, updated_at
+        FROM revision_headers
+        ORDER BY year DESC
+      `);
+      res.json(result.rows);
     } catch (error) {
       console.error('Error fetching revision headers:', error);
       res.status(500).json({ error: "Failed to fetch revision headers" });
@@ -262,198 +238,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/revision-headers/:id", async (req, res) => {
     try {
-      const mockHeaders = {
-        "3125710f-b498-4949-86e2-b01bc9fcc13a": {
-          header: {
-            id: "3125710f-b498-4949-86e2-b01bc9fcc13a",
-            year: "令和7年度",
-            title: "建替え・大規模修繕の決議要件緩和",
-            status: "in_progress",
-            total_items: 15,
-            completed_items: 8,
-            assignee: "修繕 未来"
-          },
-          revisions: [
-            {
-              id: 1,
-              title: "住宅宿泊事業法の具体的明記",
-              category: "住宅宿泊事業",
-              article_number: "第12条",
-              current_text: "区分所有者は、その専有部分を住宅宿泊事業法第3条第1項の届出を行うことなく、同法第2条第3項に規定する住宅宿泊事業に使用してはならない。",
-              proposed_text: "区分所有者は、その専有部分を住宅宿泊事業法第3条第1項の届出を行うことなく、同法第2条第3項に規定する住宅宿泊事業に使用してはならない。ただし、旅館業法の許可を受けている場合は、この限りでない。",
-              reason: "本マンションは、平成30年の住宅宿泊事業法施行時に規約改正を行っているが、旅館業法の許可を受けた場合の例外規定が未整備である。令和7年度標準管理規約では、この点を明確化している。管理組合として、法的整合性を保つため改正を提案する。",
-              impact: "住宅宿泊事業と旅館業の区別が明確になり、法的リスクが軽減されます。",
-              status: "completed"
-            },
-            {
-              id: 2,
-              title: "オンライン総会開催規定",
-              category: "総会関連",
-              article_number: "第15条",
-              current_text: "総会は、区分所有者全員で構成し、管理者が招集する。",
-              proposed_text: "総会は、区分所有者全員で構成し、管理者が招集する。総会は、区分所有者が一堂に会する方法のほか、区分所有者のうち一人又は複数人が電磁的方法により出席する方法によることができる。",
-              reason: "コロナ禍を契機としたオンライン総会の需要が高まっており、令和7年度標準管理規約でも電磁的方法による出席が明文化された。本マンションでは既に実施している実績があるが、規約上の根拠が不明確であった。この機会に規約整備を行う。",
-              impact: "オンライン総会の実施根拠が明確になり、参加率向上が期待できます。",
-              status: "in_progress"
-            },
-            {
-              id: 3,
-              title: "電気自動車充電設備に関する駐車場規定",
-              category: "駐車場関連",
-              article_number: "第15条",
-              current_text: "駐車場の使用料、使用方法等に関する事項は、使用細則で定める。",
-              proposed_text: "駐車場の使用料、使用方法等に関する事項は、使用細則で定める。電気自動車等の充電設備の設置及び使用に関する事項についても、同様とする。",
-              reason: "本マンションでは平成27年に電気自動車充電設備を導入したが、規約上の位置づけが曖昧であった。近年の電気自動車普及を受け、令和7年度標準管理規約では充電設備に関する規定が明文化された。管理組合として規約整備が必要。",
-              impact: "電気自動車充電設備の運用ルールが明確になります。",
-              status: "in_progress"
-            },
-            {
-              id: 4,
-              title: "電子投票システム導入規定",
-              category: "電子システム",
-              article_number: "第16条",
-              current_text: "議決権は、総会に出席して行使するほか、書面又は代理人によって行使することができる。",
-              proposed_text: "議決権は、総会に出席して行使するほか、書面、電磁的方法又は代理人によって行使することができる。",
-              reason: "デジタル化推進の観点から、電子投票システムの導入検討が求められている。令和7年度標準管理規約では電磁的方法による議決権行使が明文化された。本マンションでも将来的な導入を見据え、規約整備を行う。",
-              impact: "電子投票の導入により、議決権行使の利便性が向上します。",
-              status: "pending"
-            },
-            {
-              id: 5,
-              title: "デジタル議事録管理",
-              category: "議事録管理",
-              article_number: "第18条",
-              current_text: "議事録は、管理者が作成し、議事録、出席者名簿及び代理人選任届を保管する。",
-              proposed_text: "議事録は、管理者が作成し、議事録、出席者名簿及び代理人選任届を書面又は電磁的記録により保管する。",
-              reason: "文書の電子化推進により、議事録の電子保管が一般的になっている。令和7年度標準管理規約では電磁的記録による保管が明文化された。本マンションでも電子化を進めており、規約上の根拠を整備する必要がある。",
-              impact: "議事録の電子保管により、文書管理の効率化が図れます。",
-              status: "pending"
-            },
-            {
-              id: 6,
-              title: "総会決議における多数決原則の見直し",
-              category: "総会決議要件",
-              article_number: "第47条",
-              current_text: "総会の会議（WEB会議システム等を用いて開催する会議を含む。）は、前条第1項に定める議決権総数の半数以上を有する組合員が出席しなければならない。\n　2 総会の議事は、出席組合員の議決権の過半数で決する。\n　3 次の各号に掲げる事項に関する総会の議事は、前項にかかわらず、組合員総数の4分の3以上及び議決権総数の4分の3以上で決する。\n　一 規約の制定、変更又は廃止",
-              proposed_text: "第47条 総会の会議（WEB会議システム等を用いて開催する会議を含む。）は、前条第1項に定める議決権総数の半数以上を有する組合員が出席しなければならない。\n\n2 総会の議事は、出席組合員の議決権の過半数で決する。\n\n3 次の各号に掲げる事項に関する総会の議事は、前2項にかかわらず、組合員総数及び議決権総数の各半数以上を有する組合員の出席を要し、出席組合員及びその議決権の各4分の3以上で決する。\n\n一 規約の制定、変更又は廃止\n\n二 敷地及び共用部分の変更（その形状又は効用の著しい変更を伴わないもの及び建築物の改良又は設備の改良に関する法律第25条第2項に掲げる変更を受けた建築物の改良改修を除く。）\n\n三 敷地及び共用部分の変更に伴って必要となる専有部分の管理\n\n四 区分所有者法第58条第1項、第59条第1項又は第60条第1項の各々の建設",
-              reason: "令和7年改正区分所有法により多数決原則が見直され、一定の軽微な共用部分の変更について過半数決議で可能となった。また、建物の建築や大規模な共用部分変更については2分の1以上の承諾が必要となる改正に対応。",
-              impact: "軽微な変更の決議要件緩和により、管理組合の意思決定が迅速化されます。",
-              status: "in_progress"
-            },
-            {
-              id: 7,
-              title: "マンション内での暴力団関係者に関するルールの整備",
-              category: "反社会的勢力排除",
-              article_number: "第20条",
-              current_text: "区分所有者の責務について規定されている。",
-              proposed_text: "区分所有者は、その専有部分を暴力団員による不当な行為の防止等に関する法律第2条第6号に規定する暴力団員又は同法第2条第2号に規定する暴力団と社会的に非難されるべき関係を有する者に使用させてはならない。",
-              reason: "本マンションは、標準管理規約の暴排条項に全く準拠しておらず、管理組合団体の出している憲法上の居住権への疑義があるものとなっている。管理組合として、あえて置いているとも考えられるが、管理組合役員の代替わりも考えられるため、この機会に標準への準拠を提案すべき。実務上で管理会社としての提案漏れを指摘される可能性は比較的低いと想定される。",
-              impact: "反社会的勢力の排除により、居住環境の安全性が向上します。",
-              status: "pending"
-            },
-            {
-              id: 8,
-              title: "区分所有者の責務",
-              category: "区分所有者関連",
-              article_number: "第21条",
-              current_text: "区分所有者は、建物の保存に有害な行為その他建物の管理又は使用に関し区分所有者の共同の利益に反する行為をしてはならない。",
-              proposed_text: "区分所有者は、建物の保存に有害な行為その他建物の管理又は使用に関し区分所有者の共同の利益に反する行為をしてはならない。専有部分を使用する者に対しても、この規定を遵守させる責任を負う。",
-              reason: "専有部分の使用者に対する区分所有者の責任を明確化する改正。令和7年度標準管理規約では、賃借人等の使用者に対する区分所有者の監督責任が強化された。管理組合として、住環境の維持向上のため改正を提案する。",
-              impact: "賃貸住戸における問題行為の抑制効果が期待できます。",
-              status: "in_progress"
-            },
-            {
-              id: 9,
-              title: "共用部分等に係る損害保険契約の代行取得",
-              category: "損害保険",
-              article_number: "第24条、第67条",
-              current_text: "管理組合は、共用部分等について損害保険契約を締結する。",
-              proposed_text: "管理組合は、共用部分等について損害保険契約を締結する。区分所有者は、専有部分について、管理組合が区分所有者を被保険者とする損害保険契約を代行して締結することを承諾する。",
-              reason: "本マンションは、平成9年以前から専有部分の修繕の事前申請が定められており、現行の管理規約の規定も管理組合独自のものとなっている。しかしながら、専有部分を含んだ工事を管理組合として実施する場合も、区分所有法の改正によっておかれたことから、あらためて審議することを提案してはどうか。",
-              impact: "保険契約の一括処理により、管理の効率化と保険料削減が期待できます。",
-              status: "pending"
-            },
-            {
-              id: 10,
-              title: "修繕積立金の保全措置の促進",
-              category: "修繕積立金",
-              article_number: "第28条",
-              current_text: "修繕積立金は、修繕積立金口座に積み立てる。",
-              proposed_text: "修繕積立金は、修繕積立金口座に積み立てる。修繕積立金は、保全措置を講じた金融機関の口座で管理するものとする。",
-              reason: "令和7年度標準管理規約に準拠した改正。修繕積立金の保全措置強化により、管理組合の資産保護を図る。",
-              impact: "修繕積立金の安全性が向上し、管理組合の財務リスクが軽減されます。",
-              status: "completed"
-            },
-            {
-              id: 11,
-              title: "ITシステム活用規定の追加",
-              category: "IT・デジタル化",
-              article_number: "第30条",
-              current_text: "管理組合の事務処理に関する規定",
-              proposed_text: "管理組合は、業務の効率化を図るため、情報通信技術を活用したシステムを導入することができる。システムの導入及び運用に関する事項は、理事会で決定する。",
-              reason: "デジタル化推進により、管理組合業務の効率化が求められている。令和7年度標準管理規約では、ITシステム活用に関する規定が新設された。本マンションでも管理システムの導入を検討しており、規約整備が必要。",
-              impact: "ITシステム導入により、管理業務の効率化と透明性向上が図れます。",
-              status: "in_progress"
-            },
-            {
-              id: 12,
-              title: "国際管理人制度の活用に係る手続き",
-              category: "管理人制度",
-              article_number: "第31条の3",
-              current_text: "現行規約には規定なし",
-              proposed_text: "理事又は監事のなり手不足その他の事情により、理事会の運営に支障が生じるおそれがある場合は、外部の専門家等を活用することができる。",
-              reason: "管理組合の担い手不足が深刻化している中、外部専門家の活用が重要になっている。令和7年度標準管理規約では、国際管理人制度の活用手続きが明文化された。本マンションでも将来的な検討が必要。",
-              impact: "外部専門家の活用により、管理組合運営の継続性が確保されます。",
-              status: "pending"
-            },
-            {
-              id: 13,
-              title: "防火管理者の選任",
-              category: "防火・防災",
-              article_number: "第32条の2",
-              current_text: "防火管理に関する規定",
-              proposed_text: "管理組合は、消防法の規定により防火管理者を選任しなければならない場合は、理事会の決議により防火管理者を選任し、消防署長に届け出る。",
-              reason: "令和7年度標準管理規約に準拠した改正。防火管理体制の明確化により、居住者の安全確保を図る。",
-              impact: "防火管理体制が明確になり、災害時の対応力が向上します。",
-              status: "completed"
-            },
-            {
-              id: 14,
-              title: "クラウドストレージ活用規定",
-              category: "データ管理",
-              article_number: "第33条",
-              current_text: "文書の保管に関する規定",
-              proposed_text: "管理組合は、文書及びデータの保管に当たり、クラウドストレージサービスを活用することができる。ただし、個人情報の取扱いについては、個人情報保護法を遵守するものとする。",
-              reason: "クラウド技術の普及により、文書管理の効率化と災害対策が可能になっている。令和7年度標準管理規約では、クラウド活用に関する規定が新設された。本マンションでも文書の電子化と併せて検討が必要。",
-              impact: "クラウド活用により、文書管理の効率化と災害対策が強化されます。",
-              status: "pending"
-            },
-            {
-              id: 15,
-              title: "外部専門家活用パターンの改訂",
-              category: "外部専門家活用詳細",
-              article_number: "別添1",
-              current_text: "外部専門家の活用方法に関する規定",
-              proposed_text: "理事・監事外部専門家型、理事長外部専門家型、外部管理者型の3類型について、それぞれの特徴と適用場面を明確化し、管理組合の実情に応じた選択ができるよう整備する。",
-              reason: "管理組合の多様化に対応し、外部専門家活用の選択肢を拡大する必要がある。令和7年度標準管理規約では、3つの活用パターンが詳細化された。本マンションの将来的な運営方針として検討が必要。",
-              impact: "管理組合の実情に応じた専門家活用により、適切な管理体制が構築できます。",
-              status: "pending"
-            }
-          ]
-        }
-      };
-      
-      const result = mockHeaders[req.params.id as keyof typeof mockHeaders];
-      if (!result) {
+      const headerId = req.params.id.replace(/[^a-f0-9\-]/gi, '');
+      const headerResult = await db.execute(
+        `SELECT id, year, title, description, status, total_items, completed_items,
+                assigned_manager AS assignee, notes, created_at, updated_at
+         FROM revision_headers WHERE id = '${headerId}'`
+      );
+      if (headerResult.rows.length === 0) {
         return res.status(404).json({ error: "Revision header not found" });
       }
-      
-      res.json(result);
+      const header = headerResult.rows[0];
+
+      const revisionsResult = await db.execute(
+        `SELECT id, title, category, article_number,
+                before_text    AS current_text,
+                after_text     AS proposed_text,
+                change_description AS reason,
+                NULL::text     AS impact,
+                NULL::text     AS status,
+                revision_header_id,
+                creation_date
+         FROM regulation_revisions
+         WHERE revision_header_id = '${headerId}'
+         ORDER BY id ASC`
+      );
+
+      res.json({ header, revisions: revisionsResult.rows });
     } catch (error) {
-      console.error('Error fetching revision header:', error);
+      console.error('Error fetching revision header detail:', error);
       res.status(500).json({ error: "Failed to fetch revision header" });
     }
   });
+
 
   // Regulation revisions endpoint
   app.get("/api/regulation-revisions", async (req, res) => {
