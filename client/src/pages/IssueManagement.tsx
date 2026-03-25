@@ -448,7 +448,7 @@ export default function IssueManagement() {
                 <TableHead className="pr-6 py-3 text-xs font-semibold text-orange-700 uppercase tracking-wide">担当者</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="bg-white">
               {filteredIssues.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-10 text-gray-400">
