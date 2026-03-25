@@ -70,19 +70,21 @@ export default function LongtermAnalysis() {
           <Sparkles className="w-6 h-6 mr-2 text-orange-500" />
           AI長期修繕計画見直し分析
         </h1>
-        <div className="flex items-center gap-3">
-          <SubNav items={[
+        <SubNav items={[
             { label: "修繕計画ダッシュボード", path: `/longterm/dashboard?condominiumId=${condominiumId}`, icon: LayoutDashboard },
             { label: "修繕項目一覧", path: `/longterm/items?condominiumId=${condominiumId}`, icon: List },
             { label: "修繕履歴", path: `/longterm/history?condominiumId=${condominiumId}`, icon: History },
             { label: "積立金シミュレーション", path: `/longterm/simulation?condominiumId=${condominiumId}`, icon: TrendingUp },
             { label: "AI見直し分析", path: `/longterm/analysis?condominiumId=${condominiumId}`, icon: BarChart },
           ]} />
-          <Button 
-            onClick={handleGenerateSummary} 
-            disabled={isGenerating}
-            className="bg-orange-600 hover:bg-orange-700"
-          >
+      </div>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleGenerateSummary} 
+          disabled={isGenerating}
+          className="bg-orange-600 hover:bg-orange-700"
+        >
           {isGenerating ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -95,7 +97,6 @@ export default function LongtermAnalysis() {
             </>
           )}
         </Button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
