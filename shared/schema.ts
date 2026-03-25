@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, bigint, real, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -19,10 +19,22 @@ export const condominiums = pgTable("condominiums", {
   buildYear: integer("build_year").notNull(),
   managementStartDate: timestamp("management_start_date").notNull(),
   currentRegulationVersion: text("current_regulation_version").default("1.0"),
-  lawRevisionStatus: text("law_revision_status").notNull().default("pending"), // completed, in_progress, pending, not_required
+  lawRevisionStatus: text("law_revision_status").notNull().default("pending"),
   lastActivity: timestamp("last_activity").defaultNow(),
   assignedManager: text("assigned_manager"),
-  createdAt: timestamp("created_at").defaultNow()
+  createdAt: timestamp("created_at").defaultNow(),
+  // 新追加カラム（§3.1）
+  structureType: text("structure_type"),
+  floors: integer("floors"),
+  managementType: text("management_type").default("full"),
+  reserveFundBalance: bigint("reserve_fund_balance", { mode: "number" }),
+  reserveFundMonthly: integer("reserve_fund_monthly"),
+  managementFeeMonthly: integer("management_fee_monthly"),
+  delinquencyRate: real("delinquency_rate"),
+  properEvaluationScore: integer("proper_evaluation_score"),
+  properEvaluationStar: integer("proper_evaluation_star"),
+  longTermPlanVersion: text("long_term_plan_version"),
+  longTermPlanDate: timestamp("long_term_plan_date"),
 });
 
 export const documents = pgTable("documents", {
@@ -339,3 +351,180 @@ export type InsertRevisionHeader = z.infer<typeof insertRevisionHeaderSchema>;
 
 export type RegulationRevision = typeof regulation_revisions.$inferSelect;
 export type InsertRegulationRevision = z.infer<typeof insertRegulationRevisionSchema>;
+
+// ─── 新規テーブル群（§3.2〜§3.10） ────────────────────────────────────────
+
+// 02 長期修繕計画
+export const long_term_plans = pgTable("long_term_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  version: text("version").notNull(),
+  planPeriodYears: integer("plan_period_years").notNull().default(30),
+  createdYear: integer("created_year"),
+  lastReviewedAt: timestamp("last_reviewed_at"),
+  nextReviewDue: timestamp("next_review_due"),
+  totalRepairCost: bigint("total_repair_cost", { mode: "number" }),
+  fundData: jsonb("fund_data"),   // 年次積立金データ
+  aiAnalysisResult: jsonb("ai_analysis_result"),
+  status: text("status").default("active"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const repair_items = pgTable("repair_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  longTermPlanId: varchar("long_term_plan_id").references(() => long_term_plans.id),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // exterior, interior, equipment, common_area, other
+  plannedYear: integer("planned_year"),
+  plannedCost: bigint("planned_cost", { mode: "number" }),
+  cycleYears: integer("cycle_years"),
+  priority: text("priority").default("medium"),
+  status: text("status").default("planned"), // planned, completed, deferred, cancelled
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const repair_history = pgTable("repair_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  repairItemId: varchar("repair_item_id").references(() => repair_items.id),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  completedAt: timestamp("completed_at").notNull(),
+  actualCost: bigint("actual_cost", { mode: "number" }),
+  contractor: text("contractor"),
+  description: text("description"),
+  documents: jsonb("documents"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 03 業務相談チャットボット
+export const consultation_logs = pgTable("consultation_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id),
+  sessionId: varchar("session_id").notNull(),
+  category: text("category"), // delinquency, noise, pet, law, other
+  messages: jsonb("messages").notNull(), // [{role: user|assistant, content, timestamp}]
+  summary: text("summary"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 04 議事録作成AI
+export const meeting_recordings = pgTable("meeting_recordings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  title: text("title").notNull(),
+  meetingDate: timestamp("meeting_date").notNull(),
+  meetingType: text("meeting_type").default("board"), // board, general, committee
+  audioFilePath: text("audio_file_path"),
+  memoText: text("memo_text"),
+  transcription: text("transcription"),
+  generatedMinutes: text("generated_minutes"),
+  attendees: jsonb("attendees"),
+  status: text("status").default("uploaded"), // uploaded, transcribed, generated, approved
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const action_items = pgTable("action_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  meetingRecordingId: varchar("meeting_recording_id").references(() => meeting_recordings.id),
+  content: text("content").notNull(),
+  assignee: text("assignee"),
+  dueDate: timestamp("due_date"),
+  source: text("source").default("minutes"), // minutes, regulation_ai, manual
+  status: text("status").default("pending"), // pending, in_progress, completed
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 05 総会議案書
+export const proposals = pgTable("proposals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  meetingRecordingId: varchar("meeting_recording_id").references(() => meeting_recordings.id),
+  proposalNumber: integer("proposal_number"),
+  title: text("title").notNull(),
+  resolutionType: text("resolution_type").default("ordinary"), // ordinary, special
+  body: text("body"),
+  qaList: jsonb("qa_list"),         // [{question, answer}]
+  explanationDraft: text("explanation_draft"),
+  status: text("status").default("draft"), // draft, in_progress, approved
+  generalMeetingDate: timestamp("general_meeting_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 適正評価セルフチェック
+export const evaluation_checks = pgTable("evaluation_checks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  checkType: text("check_type").default("self"), // self, official
+  totalScore: integer("total_score"),
+  starRating: integer("star_rating"),
+  categoryScores: jsonb("category_scores"), // {cat1: score, cat2: score, ...}
+  itemResults: jsonb("item_results"),       // [{itemId, passed, notes}]
+  aiSuggestions: jsonb("ai_suggestions"),
+  checkedAt: timestamp("checked_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const evaluation_items_master = pgTable("evaluation_items_master", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryNumber: integer("category_number").notNull(), // 1-5
+  categoryName: text("category_name").notNull(),
+  itemNumber: integer("item_number").notNull(),
+  itemName: text("item_name").notNull(),
+  description: text("description"),
+  maxScore: integer("max_score").default(1),
+  checkMethod: text("check_method"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ─── Insert schemas ────────────────────────────────────────────────────────
+
+export const insertLongTermPlanSchema = createInsertSchema(long_term_plans).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertRepairItemSchema = createInsertSchema(repair_items).omit({ id: true, createdAt: true });
+export const insertRepairHistorySchema = createInsertSchema(repair_history).omit({ id: true, createdAt: true });
+export const insertConsultationLogSchema = createInsertSchema(consultation_logs).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertMeetingRecordingSchema = createInsertSchema(meeting_recordings).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertActionItemSchema = createInsertSchema(action_items).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertProposalSchema = createInsertSchema(proposals).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEvaluationCheckSchema = createInsertSchema(evaluation_checks).omit({ id: true, createdAt: true });
+export const insertEvaluationItemMasterSchema = createInsertSchema(evaluation_items_master).omit({ id: true, createdAt: true });
+
+// ─── Types ─────────────────────────────────────────────────────────────────
+
+export type LongTermPlan = typeof long_term_plans.$inferSelect;
+export type InsertLongTermPlan = z.infer<typeof insertLongTermPlanSchema>;
+
+export type RepairItem = typeof repair_items.$inferSelect;
+export type InsertRepairItem = z.infer<typeof insertRepairItemSchema>;
+
+export type RepairHistory = typeof repair_history.$inferSelect;
+export type InsertRepairHistory = z.infer<typeof insertRepairHistorySchema>;
+
+export type ConsultationLog = typeof consultation_logs.$inferSelect;
+export type InsertConsultationLog = z.infer<typeof insertConsultationLogSchema>;
+
+export type MeetingRecording = typeof meeting_recordings.$inferSelect;
+export type InsertMeetingRecording = z.infer<typeof insertMeetingRecordingSchema>;
+
+export type ActionItem = typeof action_items.$inferSelect;
+export type InsertActionItem = z.infer<typeof insertActionItemSchema>;
+
+export type Proposal = typeof proposals.$inferSelect;
+export type InsertProposal = z.infer<typeof insertProposalSchema>;
+
+export type EvaluationCheck = typeof evaluation_checks.$inferSelect;
+export type InsertEvaluationCheck = z.infer<typeof insertEvaluationCheckSchema>;
+
+export type EvaluationItemMaster = typeof evaluation_items_master.$inferSelect;
+export type InsertEvaluationItemMaster = z.infer<typeof insertEvaluationItemMasterSchema>;

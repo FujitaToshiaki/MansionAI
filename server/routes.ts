@@ -1364,6 +1364,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ── 新機能 基本エンドポイント ───────────────────────────────────────────────
+
+  // アクションアイテム
+  app.get("/api/condominiums/:id/action-items", async (req, res) => {
+    try {
+      const items = await storage.getActionItemsByCondominiumId(req.params.id);
+      res.json(items);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch action items" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/action-items", async (req, res) => {
+    try {
+      const item = await storage.createActionItem({ ...req.body, condominiumId: req.params.id });
+      res.status(201).json(item);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to create action item" });
+    }
+  });
+
+  app.patch("/api/action-items/:id", async (req, res) => {
+    try {
+      const item = await storage.updateActionItem(req.params.id, req.body);
+      res.json(item);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to update action item" });
+    }
+  });
+
+  // 相談ログ
+  app.get("/api/consultation-logs", async (req, res) => {
+    try {
+      const logs = await storage.getConsultationLogs(req.query.condominiumId as string | undefined);
+      res.json(logs);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch consultation logs" });
+    }
+  });
+
+  app.post("/api/consultation-logs", async (req, res) => {
+    try {
+      const log = await storage.createConsultationLog(req.body);
+      res.status(201).json(log);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to create consultation log" });
+    }
+  });
+
+  // 議案書
+  app.get("/api/condominiums/:id/proposals", async (req, res) => {
+    try {
+      const proposals = await storage.getProposalsByCondominiumId(req.params.id);
+      res.json(proposals);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch proposals" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/proposals", async (req, res) => {
+    try {
+      const proposal = await storage.createProposal({ ...req.body, condominiumId: req.params.id });
+      res.status(201).json(proposal);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to create proposal" });
+    }
+  });
+
+  app.patch("/api/condominiums/:condoId/proposals/:id", async (req, res) => {
+    try {
+      const proposal = await storage.updateProposal(req.params.id, req.body);
+      res.json(proposal);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to update proposal" });
+    }
+  });
+
+  // 適正評価
+  app.get("/api/condominiums/:id/evaluation-checks", async (req, res) => {
+    try {
+      const checks = await storage.getEvaluationChecksByCondominiumId(req.params.id);
+      res.json(checks);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch evaluation checks" });
+    }
+  });
+
+  app.post("/api/condominiums/:id/evaluation-checks", async (req, res) => {
+    try {
+      const check = await storage.createEvaluationCheck({ ...req.body, condominiumId: req.params.id });
+      res.status(201).json(check);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to create evaluation check" });
+    }
+  });
+
+  // 長期修繕計画
+  app.get("/api/condominiums/:id/long-term-plans", async (req, res) => {
+    try {
+      const plans = await storage.getLongTermPlansByCondominiumId(req.params.id);
+      res.json(plans);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch long term plans" });
+    }
+  });
+
+  app.get("/api/condominiums/:id/repair-items", async (req, res) => {
+    try {
+      const items = await storage.getRepairItemsByCondominiumId(req.params.id);
+      res.json(items);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch repair items" });
+    }
+  });
+
+  app.get("/api/condominiums/:id/repair-history", async (req, res) => {
+    try {
+      const history = await storage.getRepairHistoryByCondominiumId(req.params.id);
+      res.json(history);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch repair history" });
+    }
+  });
+
+  // 議事録録音
+  app.get("/api/condominiums/:id/meeting-recordings", async (req, res) => {
+    try {
+      const recordings = await storage.getMeetingRecordingsByCondominiumId(req.params.id);
+      res.json(recordings);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch meeting recordings" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
