@@ -1,6 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { seedCondominiums } from "./seedCondominiums";
+import { seedRevisionHeaders } from "./seedRevisionHeaders";
+import { seedDocuments } from "./seedDocuments";
 import { seedRegulationRevisions } from "./seedRegulationRevisions";
 import { seedRegulationAnalysisResults } from "./seedRegulationAnalysisResults";
 
@@ -39,19 +42,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Seed regulation revisions data if not present
-  try {
-    await seedRegulationRevisions();
-  } catch (error) {
-    console.error("Failed to seed regulation revisions:", error);
-  }
-
-  // Seed regulation analysis results data if not present
-  try {
-    await seedRegulationAnalysisResults();
-  } catch (error) {
-    console.error("Failed to seed regulation analysis results:", error);
-  }
+  try { await seedCondominiums(); } catch (e) { console.error("Failed to seed condominiums:", e); }
+  try { await seedRevisionHeaders(); } catch (e) { console.error("Failed to seed revision_headers:", e); }
+  try { await seedDocuments(); } catch (e) { console.error("Failed to seed documents:", e); }
+  try { await seedRegulationRevisions(); } catch (e) { console.error("Failed to seed regulation_revisions:", e); }
+  try { await seedRegulationAnalysisResults(); } catch (e) { console.error("Failed to seed regulation_analysis_results:", e); }
 
   const server = await registerRoutes(app);
 
