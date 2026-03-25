@@ -1518,6 +1518,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== AI Minutes Feature Endpoints =====
+
+  // GET /api/condominiums/:id/minutes/recordings — 録音・メモ一覧
+  app.get("/api/condominiums/:id/minutes/recordings", async (req, res) => {
+    try {
+      const recordings = await storage.getMeetingRecordingsByCondominiumId(req.params.id);
+      res.json(recordings);
+    } catch (error) {
+      console.error("Error fetching recordings:", error);
+      res.status(500).json({ error: "Failed to fetch recordings" });
+    }
+  });
+
+  // POST /api/condominiums/:id/minutes/recordings — 録音・メモ登録
+  app.post("/api/condominiums/:id/minutes/recordings", async (req, res) => {
+    try {
+      const { meetingType, meetingDate, title, memoText } = req.body;
+      if (!meetingType || !meetingDate || !title) {
+        return res.status(400).json({ error: "meetingType, meetingDate, title are required" });
+      }
+      const recording = await storage.createMeetingRecording({
+        condominiumId: req.params.id,
+        meetingType,
+        meetingDate: new Date(meetingDate),
+        title,
+        memoText: memoText ?? null,
+        generationStatus: "pending"
+      });
+      res.json(recording);
+    } catch (error) {
+      console.error("Error creating recording:", error);
+      res.status(500).json({ error: "Failed to create recording" });
+    }
+  });
+
+  // POST /api/condominiums/:id/minutes/generate — AI議事録生成
+  app.post("/api/condominiums/:id/minutes/generate", async (req, res) => {
+    const { recordingId, memoText, meetingType, meetingDate, title } = req.body;
+    try {
+      if (!memoText) {
+        return res.status(400).json({ error: "memoText is required" });
+      }
+
+      const { GoogleGenAI } = await import("@google/genai");
+      const geminiAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
+      const prompt = `あなたはマンション管理組合の専門家です。以下の会議メモから、正式な議事録をMarkdown形式で作成してください。
+
+【会議情報】
+- 会議種別: ${meetingType || "理事会"}
+- 開催日: ${meetingDate ? new Date(meetingDate).toLocaleDateString("ja-JP") : ""}
+- 件名: ${title || ""}
+
+【会議メモ】
+${memoText}
+
+【出力形式】
+以下の構成でMarkdown形式の議事録を作成してください：
+1. タイトル（H1）
+2. 開催情報（開催日時・場所・出席者）
+3. 議題ごとの審議内容（H2で各議題）
+4. 各議題の決定事項
+5. アクションアイテム一覧（担当者・期限を含む）
+
+マンション管理組合らしい丁寧な文体で記述してください。`;
+
+      const response = await geminiAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: prompt }] }]
+      });
+
+      const markdown = response.text || "";
+
+      if (recordingId) {
+        await storage.updateMeetingRecording(recordingId, {
+          generatedMinutesMarkdown: markdown,
+          generationStatus: "completed"
+        });
+      }
+
+      res.json({ markdown, recordingId });
+    } catch (error) {
+      console.error("Error generating minutes:", error);
+      if (recordingId) {
+        try { await storage.updateMeetingRecording(recordingId, { generationStatus: "failed" }); } catch (_) {}
+      }
+      res.status(500).json({ error: "Failed to generate minutes", details: (error as Error).message });
+    }
+  });
+
+  // GET /api/condominiums/:id/action-items — アクションアイテム一覧
+  app.get("/api/condominiums/:id/action-items", async (req, res) => {
+    try {
+      const items = await storage.getActionItemsByCondominiumId(req.params.id);
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching action items:", error);
+      res.status(500).json({ error: "Failed to fetch action items" });
+    }
+  });
+
+  // PATCH /api/condominiums/:id/action-items/:itemId — アクションアイテム更新
+  app.patch("/api/condominiums/:id/action-items/:itemId", async (req, res) => {
+    try {
+      const updated = await storage.updateActionItem(req.params.itemId, req.body);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating action item:", error);
+      res.status(500).json({ error: "Failed to update action item" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

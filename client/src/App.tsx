@@ -19,6 +19,11 @@ import StandardRegulations from "@/pages/StandardRegulations";
 import StandardRegulationVersions from "@/pages/StandardRegulationVersions";
 import StandardRegulationDetail from "@/pages/StandardRegulationDetail";
 import MinuteDetail from "@/pages/MinuteDetail";
+import MinutesList from "@/pages/MinutesList";
+import MinutesImport from "@/pages/MinutesImport";
+import MinutesGenerate from "@/pages/MinutesGenerate";
+import MinutesActions from "@/pages/MinutesActions";
+import CondominiumSearchPanel from "@/components/CondominiumSearchPanel";
 import AIAgentHistory from "@/pages/AIAgentHistory";
 import AIAgentExecutionDetail from "@/pages/AIAgentExecutionDetail";
 import RevisionYearList from "@/pages/RevisionYearList";
@@ -116,17 +121,22 @@ function Router() {
         </Route>
 
         <Route path="/minutes/list">
-          {() => <PlaceholderPage title="議事録一覧" icon={FileText} />}
+          {() => <CondominiumSearchPanel redirectPath="/minutes/list" />}
         </Route>
         <Route path="/minutes/import">
-          {() => <PlaceholderPage title="音声・メモ取込" icon={Mic} />}
+          {() => <CondominiumSearchPanel redirectPath="/minutes/import" />}
         </Route>
         <Route path="/minutes/generate">
-          {() => <PlaceholderPage title="AI議事録生成" icon={Sparkles} />}
+          {() => <CondominiumSearchPanel redirectPath="/minutes/list" />}
         </Route>
         <Route path="/minutes/actions">
-          {() => <PlaceholderPage title="決定事項管理" icon={CheckSquare} />}
+          {() => <CondominiumSearchPanel redirectPath="/minutes/actions" />}
         </Route>
+
+        <Route path="/condominiums/:id/minutes/list" component={MinutesList} />
+        <Route path="/condominiums/:id/minutes/import" component={MinutesImport} />
+        <Route path="/condominiums/:id/minutes/generate" component={MinutesGenerate} />
+        <Route path="/condominiums/:id/minutes/actions" component={MinutesActions} />
 
         <Route path="/proposals/list">
           {() => <PlaceholderPage title="議案書一覧" icon={BookOpen} />}

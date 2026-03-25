@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Building, MapPin, Users, Search, ClipboardCheck } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Condominium {
   id: string;
@@ -15,7 +16,8 @@ interface Condominium {
 }
 
 interface CondominiumSearchPanelProps {
-  targetPath: string;
+  targetPath?: string;
+  redirectPath?: string;
   onSelect?: (condominiumId: string) => void;
   placeholder?: string;
   title?: string;
@@ -25,6 +27,7 @@ interface CondominiumSearchPanelProps {
 
 export default function CondominiumSearchPanel({
   targetPath,
+  redirectPath,
   onSelect,
   placeholder = "マンション名・住所で検索...",
   title,
@@ -34,6 +37,8 @@ export default function CondominiumSearchPanel({
   const [query, setQuery] = useState("");
   const [, navigate] = useLocation();
 
+  const effectivePath = targetPath ?? redirectPath ?? "";
+
   const { data: condominiums = [], isLoading } = useQuery<Condominium[]>({
     queryKey: ["/api/condominiums"],
   });
@@ -41,7 +46,9 @@ export default function CondominiumSearchPanel({
   const filtered = condominiums.filter((c) => {
     const q = query.toLowerCase();
     return (
-      c.name.toLowerCase().includes(q) || c.address.toLowerCase().includes(q)
+      q === "" ||
+      c.name.toLowerCase().includes(q) ||
+      c.address.toLowerCase().includes(q)
     );
   });
 
@@ -49,10 +56,10 @@ export default function CondominiumSearchPanel({
     if (onSelect) {
       onSelect(condominium.id);
     }
-    navigate(`/condominiums/${condominium.id}${targetPath}`);
+    navigate(`/condominiums/${condominium.id}${effectivePath}`);
   };
 
-  if (standalone) {
+  if (standalone || (!targetPath && redirectPath)) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center space-y-2">
@@ -82,7 +89,11 @@ export default function CondominiumSearchPanel({
             </div>
 
             {isLoading ? (
-              <div className="text-center py-6 text-gray-500">読み込み中...</div>
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-6 text-gray-500">物件が見つかりません</div>
             ) : (
@@ -100,7 +111,12 @@ export default function CondominiumSearchPanel({
                           <Building className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{condo.name}</p>
+                          <p
+                            data-testid={`text-condo-name-${condo.id}`}
+                            className="font-medium text-gray-900"
+                          >
+                            {condo.name}
+                          </p>
                           <p className="text-sm text-gray-500">{condo.address}</p>
                         </div>
                       </div>

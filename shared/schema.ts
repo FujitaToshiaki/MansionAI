@@ -284,6 +284,48 @@ export const regulationAnalysisResults = pgTable("regulation_analysis_results", 
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
+// Meeting Recordings Table (§3.6)
+export const meetingRecordings = pgTable("meeting_recordings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  meetingType: text("meeting_type").notNull(), // 理事会/総会/委員会
+  meetingDate: timestamp("meeting_date").notNull(),
+  title: text("title").notNull(),
+  memoText: text("memo_text"),
+  audioFilePath: text("audio_file_path"),
+  generatedMinutesMarkdown: text("generated_minutes_markdown"),
+  generationStatus: text("generation_status").notNull().default("pending"), // pending/generating/completed/failed
+  documentId: varchar("document_id").references(() => documents.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Action Items Table (§3.8)
+export const actionItems = pgTable("action_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  condominiumId: varchar("condominium_id").references(() => condominiums.id).notNull(),
+  recordingId: varchar("recording_id").references(() => meetingRecordings.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  assignee: text("assignee"),
+  dueDate: timestamp("due_date"),
+  status: text("status").notNull().default("todo"), // todo/in_progress/done
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+export const insertMeetingRecordingSchema = createInsertSchema(meetingRecordings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertActionItemSchema = createInsertSchema(actionItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 export const insertAiSearchHistorySchema = createInsertSchema(aiSearchHistory).omit({
   id: true,
   createdAt: true
@@ -381,3 +423,9 @@ export type InsertEvaluationItemsMaster = z.infer<typeof insertEvaluationItemsMa
 
 export type EvaluationCheck = typeof evaluationChecks.$inferSelect;
 export type InsertEvaluationCheck = z.infer<typeof insertEvaluationCheckSchema>;
+
+export type MeetingRecording = typeof meetingRecordings.$inferSelect;
+export type InsertMeetingRecording = z.infer<typeof insertMeetingRecordingSchema>;
+
+export type ActionItem = typeof actionItems.$inferSelect;
+export type InsertActionItem = z.infer<typeof insertActionItemSchema>;
