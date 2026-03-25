@@ -114,6 +114,12 @@ const FEATURE_BUTTONS: FeatureBtn[] = [
     activePatterns: [(loc) => loc.startsWith("/longterm")],
   },
   {
+    label: "管理適正評価",
+    icon: Upload,
+    href: (id) => `/evaluation/check?condominiumId=${id}`,
+    activePatterns: [(loc) => loc.startsWith("/evaluation")],
+  },
+  {
     label: "規約改訂",
     icon: FileText,
     href: (id) => `/condominiums/${id}/analysis`,
@@ -121,12 +127,6 @@ const FEATURE_BUTTONS: FeatureBtn[] = [
       (loc) => /^\/condominiums\/[^/]+\/(analysis|regulation-analysis|ai-revision|knowledge|wiki)/.test(loc),
       (loc) => ["/ai-revision", "/knowledge", "/standard-regulations", "/revision-years"].some(p => loc === p || loc.startsWith(p + "/")),
     ],
-  },
-  {
-    label: "管理適正評価",
-    icon: Upload,
-    href: (id) => `/evaluation/check?condominiumId=${id}`,
-    activePatterns: [(loc) => loc.startsWith("/evaluation")],
   },
 ];
 
