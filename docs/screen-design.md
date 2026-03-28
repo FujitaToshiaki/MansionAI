@@ -89,7 +89,10 @@
 
 ### 2-1. マンション一覧
 
-**スクリーンショット**: `01_condominium_list.png`  
+**スクリーンショット**: `01_condominium_list.png`
+
+![マンション一覧](screenshots/01_condominium_list.png)
+
 **URL**: `/condominiums`  
 **画面タイトル**: マンション管理 / マンション一覧
 
@@ -141,7 +144,10 @@
 
 ### 2-2. 物件詳細 — 基本情報タブ
 
-**スクリーンショット**: `02_condominium_detail_basic.png`  
+**スクリーンショット**: `02_condominium_detail_basic.png`
+
+![物件詳細（基本情報）](screenshots/02_condominium_detail_basic.png)
+
 **URL**: `/condominiums/:id`（デフォルトタブ）  
 **アクティブタブ**: 基本情報
 
@@ -197,7 +203,10 @@
 
 ### 2-3. 物件詳細 — 組合員リストタブ
 
-**スクリーンショット**: `03_condominium_detail_members.png`  
+**スクリーンショット**: `03_condominium_detail_members.png`
+
+![物件詳細（組合員リスト）](screenshots/03_condominium_detail_members.png)
+
 **アクティブタブ**: 組合員リスト
 
 #### 画面概要
@@ -231,7 +240,10 @@
 
 ### 2-4. 物件詳細 — 各種専門部会タブ
 
-**スクリーンショット**: `04_condominium_detail_committees.png`  
+**スクリーンショット**: `04_condominium_detail_committees.png`
+
+![物件詳細（各種専門部会）](screenshots/04_condominium_detail_committees.png)
+
 **アクティブタブ**: 各種専門部会
 
 #### 画面概要
@@ -263,7 +275,10 @@
 
 ### 2-5. 物件詳細 — 特記事項タブ
 
-**スクリーンショット**: `05_condominium_detail_notes.png`  
+**スクリーンショット**: `05_condominium_detail_notes.png`
+
+![物件詳細（特記事項）](screenshots/05_condominium_detail_notes.png)
+
 **アクティブタブ**: 特記事項
 
 #### 画面概要
@@ -285,7 +300,10 @@
 
 ### 2-6. 物件詳細 — その他ファイルタブ
 
-**スクリーンショット**: `06_condominium_detail_files.png`  
+**スクリーンショット**: `06_condominium_detail_files.png`
+
+![物件詳細（その他ファイル）](screenshots/06_condominium_detail_files.png)
+
 **アクティブタブ**: その他ファイル
 
 #### 画面概要
@@ -323,7 +341,10 @@
 
 ### 3-1. チャット相談
 
-**スクリーンショット**: `07_consultation_chat.png`  
+**スクリーンショット**: `07_consultation_chat.png`
+
+![チャット相談](screenshots/07_consultation_chat.png)
+
 **URL**: `/consultation/chat?condominiumId=:id`  
 **アクティブタブ**: チャット相談
 
@@ -356,7 +377,10 @@
 
 ### 3-2. 相談履歴
 
-**スクリーンショット**: `08_consultation_history.png`  
+**スクリーンショット**: `08_consultation_history.png`
+
+![相談履歴](screenshots/08_consultation_history.png)
+
 **URL**: `/consultation/history?condominiumId=:id`  
 **アクティブタブ**: 相談履歴
 
@@ -399,7 +423,10 @@
 
 ### 4-1. 議案一覧
 
-**スクリーンショット**: `09_proposals_list.png`  
+**スクリーンショット**: `09_proposals_list.png`
+
+![議案一覧](screenshots/09_proposals_list.png)
+
 **URL**: `/proposals/list?condominiumId=:id`  
 **アクティブメニュー**: 議案一覧
 
@@ -452,7 +479,10 @@
 
 ### 4-2. AI議案書生成
 
-**スクリーンショット**: `10_proposals_generate.png`  
+**スクリーンショット**: `10_proposals_generate.png`
+
+![AI議案書生成](screenshots/10_proposals_generate.png)
+
 **URL**: `/proposals/generate?condominiumId=:id`  
 **ページタイトル**: 新規議案書作成（AIアシスト）
 
@@ -480,7 +510,10 @@ AIを使って議案書の本文・文案を自動生成する画面。左にフ
 
 ### 4-3. 議案詳細・編集
 
-**スクリーンショット**: `11_proposals_edit.png`  
+**スクリーンショット**: `11_proposals_edit.png`
+
+![議案詳細・編集](screenshots/11_proposals_edit.png)
+
 **URL**: `/proposals/edit?condominiumId=:id`  
 **ページタイトル**: 議案詳細
 
@@ -521,7 +554,10 @@ AIを使って議案書の本文・文案を自動生成する画面。左にフ
 
 ### 5-1. 議事録一覧
 
-**スクリーンショット**: `12_minutes_list.png`  
+**スクリーンショット**: `12_minutes_list.png`
+
+![議事録一覧](screenshots/12_minutes_list.png)
+
 **URL**: `/minutes/list?condominiumId=:id`  
 **ページタイトル**: 議事録管理
 
@@ -569,7 +605,10 @@ AIを使って議案書の本文・文案を自動生成する画面。左にフ
 
 ### 5-2. 音声・メモ取込
 
-**スクリーンショット**: `13_minutes_import.png`  
+**スクリーンショット**: `13_minutes_import.png`
+
+![音声・メモ取込](screenshots/13_minutes_import.png)
+
 **URL**: `/minutes/import?condominiumId=:id`  
 **ページタイトル**: 音声・メモ取込
 
@@ -612,7 +651,10 @@ AI議事録生成の素材（テキストメモ・音声ファイル）を取り
 
 ### 5-3. AI議事録生成
 
-**スクリーンショット**: `14_minutes_generate.png`  
+**スクリーンショット**: `14_minutes_generate.png`
+
+![AI議事録生成](screenshots/14_minutes_generate.png)
+
 **URL**: `/minutes/generate?condominiumId=:id`  
 **ページタイトル**: AI議事録生成
 
@@ -651,7 +693,10 @@ AI議事録生成の素材（テキストメモ・音声ファイル）を取り
 
 ### 5-4. 決定事項管理
 
-**スクリーンショット**: `15_minutes_actions.png`  
+**スクリーンショット**: `15_minutes_actions.png`
+
+![決定事項管理](screenshots/15_minutes_actions.png)
+
 **URL**: `/minutes/actions?condominiumId=:id`  
 **ページタイトル**: 決定事項管理
 
@@ -692,7 +737,10 @@ AI議事録生成の素材（テキストメモ・音声ファイル）を取り
 
 ### 6-1. 修繕計画ダッシュボード
 
-**スクリーンショット**: `16_longterm_dashboard.png`  
+**スクリーンショット**: `16_longterm_dashboard.png`
+
+![修繕計画ダッシュボード](screenshots/16_longterm_dashboard.png)
+
 **URL**: `/longterm/dashboard?condominiumId=:id`  
 **ページタイトル**: 長期修繕計画ダッシュボード
 
@@ -750,7 +798,10 @@ AI議事録生成の素材（テキストメモ・音声ファイル）を取り
 
 ### 6-2. 修繕項目一覧
 
-**スクリーンショット**: `17_longterm_items.png`  
+**スクリーンショット**: `17_longterm_items.png`
+
+![修繕項目一覧](screenshots/17_longterm_items.png)
+
 **URL**: `/longterm/items?condominiumId=:id`  
 **ページタイトル**: 修繕項目一覧
 
@@ -792,7 +843,10 @@ AI議事録生成の素材（テキストメモ・音声ファイル）を取り
 
 ### 6-3. 修繕履歴
 
-**スクリーンショット**: `18_longterm_history.png`  
+**スクリーンショット**: `18_longterm_history.png`
+
+![修繕履歴](screenshots/18_longterm_history.png)
+
 **URL**: `/longterm/history?condominiumId=:id`  
 **ページタイトル**: 修繕履歴
 
@@ -835,7 +889,10 @@ AI議事録生成の素材（テキストメモ・音声ファイル）を取り
 
 ### 6-4. 積立金シミュレーション
 
-**スクリーンショット**: `19_longterm_simulation.png`  
+**スクリーンショット**: `19_longterm_simulation.png`
+
+![積立金シミュレーション](screenshots/19_longterm_simulation.png)
+
 **URL**: `/longterm/simulation?condominiumId=:id`  
 **ページタイトル**: 修繕積立金シミュレーション
 
@@ -898,7 +955,10 @@ AI議事録生成の素材（テキストメモ・音声ファイル）を取り
 
 ### 6-5. AI見直し分析
 
-**スクリーンショット**: `20_longterm_analysis.png`  
+**スクリーンショット**: `20_longterm_analysis.png`
+
+![AI見直し分析](screenshots/20_longterm_analysis.png)
+
 **URL**: `/longterm/analysis?condominiumId=:id`  
 **ページタイトル**: AI長期修繕計画見直し分析
 
@@ -944,7 +1004,10 @@ AIが現行の長期修繕計画を分析し、見直しポイント・提案事
 
 ### 7-1. 規約改訂分析
 
-**スクリーンショット**: `21_regulation_analysis.png`  
+**スクリーンショット**: `21_regulation_analysis.png`
+
+![規約改訂分析](screenshots/21_regulation_analysis.png)
+
 **URL**: `/condominiums/:id/regulation-analysis`  
 **ページタイトル**: 規約改訂分析結果
 
@@ -1007,7 +1070,10 @@ AIが現行の長期修繕計画を分析し、見直しポイント・提案事
 
 ### 7-2. AI改訂案生成
 
-**スクリーンショット**: `22_ai_revision.png`  
+**スクリーンショット**: `22_ai_revision.png`
+
+![AI改訂案生成](screenshots/22_ai_revision.png)
+
 **URL**: `/condominiums/:id/ai-revision`  
 **ページタイトル**: AI改訂案生成
 
@@ -1082,7 +1148,10 @@ AIが現行の長期修繕計画を分析し、見直しポイント・提案事
 
 ### 7-3. ナレッジベース管理
 
-**スクリーンショット**: `23_knowledge_base.png`  
+**スクリーンショット**: `23_knowledge_base.png`
+
+![ナレッジベース管理](screenshots/23_knowledge_base.png)
+
 **URL**: `/condominiums/:id/knowledge`  
 **ページタイトル**: ナレッジベース管理
 
@@ -1108,7 +1177,10 @@ RAG（検索補強生成）用のドキュメントをアップロード・管�
 
 ### 7-4. 規約Wiki
 
-**スクリーンショット**: `24_regulation_wiki.png`  
+**スクリーンショット**: `24_regulation_wiki.png`
+
+![規約Wiki](screenshots/24_regulation_wiki.png)
+
 **URL**: `/condominiums/:id/wiki`  
 **ページタイトル**: 規約Wiki
 
@@ -1136,7 +1208,10 @@ RAG（検索補強生成）用のドキュメントをアップロード・管�
 
 ### 7-5. 年度別改訂管理
 
-**スクリーンショット**: `25_revision_years.png`  
+**スクリーンショット**: `25_revision_years.png`
+
+![年度別改訂管理](screenshots/25_revision_years.png)
+
 **URL**: `/revision-years?condominiumId=:id`  
 **ページタイトル**: 年度別改訂管理
 
@@ -1186,7 +1261,10 @@ RAG（検索補強生成）用のドキュメントをアップロード・管�
 
 ### 8-1. セルフチェック実施
 
-**スクリーンショット**: `26_evaluation_check.png`  
+**スクリーンショット**: `26_evaluation_check.png`
+
+![セルフチェック実施](screenshots/26_evaluation_check.png)
+
 **URL**: `/evaluation/check?condominiumId=:id`  
 **ページタイトル**: 管理適正評価
 
@@ -1225,7 +1303,10 @@ RAG（検索補強生成）用のドキュメントをアップロード・管�
 
 ### 8-2. スコア詳細・改善策
 
-**スクリーンショット**: `27_evaluation_score.png`  
+**スクリーンショット**: `27_evaluation_score.png`
+
+![スコア詳細・改善策](screenshots/27_evaluation_score.png)
+
 **URL**: `/evaluation/score?condominiumId=:id`  
 **ページタイトル**: 管理適正評価
 
@@ -1286,7 +1367,10 @@ RAG（検索補強生成）用のドキュメントをアップロード・管�
 
 ### 8-3. 評価履歴・推移
 
-**スクリーンショット**: `28_evaluation_history.png`  
+**スクリーンショット**: `28_evaluation_history.png`
+
+![評価履歴・推移](screenshots/28_evaluation_history.png)
+
 **URL**: `/evaluation/history?condominiumId=:id`  
 **ページタイトル**: 管理適正評価
 
