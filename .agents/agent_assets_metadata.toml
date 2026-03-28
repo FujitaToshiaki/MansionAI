@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "uRvbBYbXvNJ6058gAveyS"
+uri = "file://docs/マンション管理AI_設計書類.zip"
+type = "unspecified"
+title = "マンション管理AI 設計書類一式"
