@@ -69,15 +69,19 @@ async function capturePage(page: Page, url: string, filePath: string, waitMs = 3
   console.log(`  ✓ saved: ${path.basename(filePath)}`);
 }
 
-async function captureTab(page: Page, tabValue: string, filePath: string) {
-  try {
-    await page.click(`[data-value="${tabValue}"], button[value="${tabValue}"]`);
-  } catch {
-    await page.evaluate((v) => {
-      const btn = [...document.querySelectorAll('[role="tab"]')]
-        .find(el => el.getAttribute('data-value') === v || el.textContent?.trim().includes(v));
-      (btn as HTMLElement | undefined)?.click();
-    }, tabValue);
+async function captureTab(page: Page, tabText: string, filePath: string) {
+  const tabs = await page.$$('[role="tab"]');
+  let clicked = false;
+  for (const tab of tabs) {
+    const text = await tab.evaluate((el: Element) => el.textContent?.trim() ?? '');
+    if (text === tabText) {
+      await tab.click();
+      clicked = true;
+      break;
+    }
+  }
+  if (!clicked) {
+    console.warn(`  ⚠ Tab "${tabText}" not found`);
   }
   await new Promise(r => setTimeout(r, 1500));
 
@@ -88,7 +92,7 @@ async function captureTab(page: Page, tabValue: string, filePath: string) {
   await removeClipPaths(page);
   await new Promise(r => setTimeout(r, 500));
   await page.screenshot({ path: filePath, fullPage: false });
-  console.log(`  ✓ tab [${tabValue}]: ${path.basename(filePath)}`);
+  console.log(`  ✓ tab [${tabText}]: ${path.basename(filePath)}`);
 }
 
 function out(name: string) {
@@ -103,10 +107,10 @@ async function batch1(browser: Browser) {
 
   await capturePage(page, `${BASE_URL}/condominiums/${CONDO_ID}`, out('02_condominium_detail_basic'));
 
-  await captureTab(page, 'members', out('03_condominium_detail_members'));
-  await captureTab(page, 'committees', out('04_condominium_detail_committees'));
-  await captureTab(page, 'notes', out('05_condominium_detail_notes'));
-  await captureTab(page, 'files', out('06_condominium_detail_files'));
+  await captureTab(page, '組合員リスト', out('03_condominium_detail_members'));
+  await captureTab(page, '各種専門部会', out('04_condominium_detail_committees'));
+  await captureTab(page, '特記事項', out('05_condominium_detail_notes'));
+  await captureTab(page, 'その他ファイル', out('06_condominium_detail_files'));
 
   await page.close();
 }
