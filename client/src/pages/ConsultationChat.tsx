@@ -38,12 +38,10 @@ export default function ConsultationChat() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
   const handleSend = () => {
@@ -78,31 +76,32 @@ export default function ConsultationChat() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500">
-        <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">マンション詳細</Link>
-        <span className="mx-2">{'>'}</span>
-        <span className="text-gray-400">AIチャット</span>
-        <span className="mx-2">{'>'}</span>
-        <span>チャット相談</span>
-      </nav>
-
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold flex items-center">
-          <MessageSquare className="mr-2 h-6 w-6 text-orange-500" />
-          チャット相談
-        </h1>
+    <div className="flex flex-col h-full gap-4 overflow-hidden">
+      {/* Header row */}
+      <div className="flex items-center justify-between flex-shrink-0">
+        <div>
+          <nav className="text-sm text-gray-500 mb-1">
+            <Link href={`/condominiums/${condominiumId}`} className="hover:text-gray-700">マンション詳細</Link>
+            <span className="mx-2">{'>'}</span>
+            <span className="text-gray-400">AIチャット</span>
+            <span className="mx-2">{'>'}</span>
+            <span>チャット相談</span>
+          </nav>
+          <h1 className="text-2xl font-bold flex items-center">
+            <MessageSquare className="mr-2 h-6 w-6 text-orange-500" />
+            チャット相談
+          </h1>
+        </div>
         <SubNav items={[
           { label: "チャット相談", path: `/consultation/chat?condominiumId=${condominiumId}`, icon: MessageSquare },
           { label: "相談履歴", path: `/consultation/history?condominiumId=${condominiumId}`, icon: History },
         ]} />
       </div>
 
-      <div className="flex gap-4 overflow-hidden h-[calc(100vh-260px)]">
+      <div className="flex gap-4 min-h-0 flex-1">
         {/* Main Chat Area */}
-        <Card className="flex-1 flex flex-col bg-white">
-          <CardHeader className="border-b py-3 px-4">
+        <Card className="flex-1 flex flex-col bg-white min-h-0">
+          <CardHeader className="border-b py-3 px-4 flex-shrink-0">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center">
                 <MessageSquare className="mr-2 h-5 w-5 text-orange-500" />
@@ -169,11 +168,11 @@ export default function ConsultationChat() {
                   </div>
                 </div>
               )}
-              <div ref={scrollRef} />
+              <div ref={bottomRef} />
             </div>
           </ScrollArea>
 
-          <div className="p-4 border-t bg-gray-50/50">
+          <div className="p-4 border-t bg-gray-50/50 flex-shrink-0">
             <div className="flex gap-2">
               <Input
                 placeholder="メッセージを入力してください..."
