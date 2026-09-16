@@ -11,6 +11,7 @@ import path from "path";
 import crypto from "crypto";
 import { extractTextFromMultipleImages, generateMinutes } from "./gemini";
 import {
+  createConsultationClosingAudio,
   createConsultationFinalQuestionAudio,
   createRealtimeConsultationCall,
   generateConsultationReportDraft,
@@ -861,6 +862,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Consultation final question audio error:", error);
       res.status(502).json({ error: "最後の質問の音声を準備できませんでした" });
+    }
+  });
+
+  // The closing prompt is also fixed server-side: it must not be generated
+  // from the transcript or supplied by the browser.
+  app.get("/api/realtime/consultation-closing", async (_req, res) => {
+    try {
+      const audio = await createConsultationClosingAudio();
+      res
+        .status(200)
+        .type("audio/mpeg")
+        .set("Cache-Control", "no-store")
+        .send(audio);
+    } catch (error) {
+      console.error("Consultation closing audio error:", error);
+      res.status(502).json({ error: "登録確認の音声を準備できませんでした" });
     }
   });
 

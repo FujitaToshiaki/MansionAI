@@ -49,8 +49,10 @@ const TRANSCRIPTION_DRAIN_TIMEOUT_MS = 8_000;
 const CONNECTION_TIMEOUT_MS = 15_000;
 const FINAL_QUESTION_TEXT = "住民の方が希望する対応は何ですか？";
 const FINAL_QUESTION_AUDIO_ENDPOINT = "/api/realtime/consultation-final-question";
+const CLOSING_AUDIO_ENDPOINT = "/api/realtime/consultation-closing";
 const FINAL_QUESTION_TURN_COUNT = 4;
 const FINAL_QUESTION_SILENCE_DURATION_MS = 1_800;
+const FIXED_AUDIO_PLAYBACK_TIMEOUT_MS = 20_000;
 
 type FinalQuestionState =
   | "idle"
@@ -76,6 +78,8 @@ export default function ConsultationChat() {
   const [partialTranscript, setPartialTranscript] = useState("");
   const [finalQuestionState, setFinalQuestionState] = useState<FinalQuestionState>("idle");
   const [reportDraft, setReportDraft] = useState<ReportDraft | null>(null);
+  const [isPlayingClosingAudio, setIsPlayingClosingAudio] = useState(false);
+  const [closingAudioWarning, setClosingAudioWarning] = useState<string | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isRegisteringReport, setIsRegisteringReport] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -84,6 +88,12 @@ export default function ConsultationChat() {
   const finalQuestionObjectUrlRef = useRef<string | null>(null);
   const finalQuestionRequestIdRef = useRef(0);
   const finalQuestionStateRef = useRef<FinalQuestionState>("idle");
+  const closingAudioRef = useRef<HTMLAudioElement>(null);
+  const closingAudioObjectUrlRef = useRef<string | null>(null);
+  const closingAudioRequestIdRef = useRef(0);
+  const closingAudioAbortControllerRef = useRef<AbortController | null>(null);
+  const closingAudioRejectRef = useRef<((error: Error) => void) | null>(null);
+  const mountedRef = useRef(true);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const dataChannelRef = useRef<RTCDataChannel | null>(null);
   const microphoneStreamRef = useRef<MediaStream | null>(null);
@@ -111,6 +121,7 @@ export default function ConsultationChat() {
 
   useEffect(() => {
     return () => {
+      mountedRef.current = false;
       intentionalCloseRef.current = true;
       if (chatResponseTimerRef.current !== null) {
         window.clearTimeout(chatResponseTimerRef.current);
@@ -144,6 +155,31 @@ export default function ConsultationChat() {
     releaseFinalQuestionAudio();
   };
 
+  const releaseClosingAudio = () => {
+    const audio = closingAudioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.onended = null;
+      audio.onerror = null;
+      audio.removeAttribute("src");
+      if (typeof audio.load === "function") audio.load();
+    }
+    if (closingAudioObjectUrlRef.current) {
+      URL.revokeObjectURL(closingAudioObjectUrlRef.current);
+      closingAudioObjectUrlRef.current = null;
+    }
+  };
+
+  const cleanupClosingAudio = () => {
+    closingAudioRequestIdRef.current += 1;
+    closingAudioAbortControllerRef.current?.abort();
+    closingAudioAbortControllerRef.current = null;
+    const reject = closingAudioRejectRef.current;
+    closingAudioRejectRef.current = null;
+    releaseClosingAudio();
+    reject?.(new Error("登録確認の音声再生が中断されました"));
+  };
+
   const setMicrophoneSuspended = (suspended: boolean) => {
     microphoneStreamRef.current?.getTracks().forEach((track) => {
       track.enabled = !suspended;
@@ -153,6 +189,7 @@ export default function ConsultationChat() {
   const closeRealtimeConnection = () => {
     connectionReadyRef.current = false;
     cleanupFinalQuestionAudio();
+    cleanupClosingAudio();
     updateFinalQuestionState("idle");
     microphoneStreamRef.current?.getTracks().forEach((track) => track.stop());
     microphoneStreamRef.current = null;
@@ -173,7 +210,10 @@ export default function ConsultationChat() {
       chatResponseTimerRef.current = null;
     }
     cleanupFinalQuestionAudio();
+    cleanupClosingAudio();
     updateFinalQuestionState("idle");
+    setIsPlayingClosingAudio(false);
+    setClosingAudioWarning(null);
     setPartialTranscript("");
     transcriptOrderRef.current = [];
     transcriptByItemRef.current.clear();
@@ -505,7 +545,7 @@ export default function ConsultationChat() {
       await audio.play();
       if (
         requestId !== finalQuestionRequestIdRef.current ||
-        finalQuestionStateRef.current !== "playing"
+        (finalQuestionStateRef.current as FinalQuestionState) !== "playing"
       ) {
         return;
       }
@@ -516,6 +556,90 @@ export default function ConsultationChat() {
         requestId,
         error instanceof Error ? error.message : "最後の質問の音声を再生できませんでした",
       );
+    }
+  };
+
+  /**
+   * Play the server-owned closing prompt and resolve only after the browser
+   * has emitted `ended`. The dialog is opened by the caller only after this
+   * promise resolves, so the spoken response cannot be cut off by the popup.
+   */
+  const playFixedClosingAudio = async (): Promise<void> => {
+    const requestId = ++closingAudioRequestIdRef.current;
+    const controller = new AbortController();
+    closingAudioAbortControllerRef.current = controller;
+    const isActive = () =>
+      mountedRef.current &&
+      !intentionalCloseRef.current &&
+      requestId === closingAudioRequestIdRef.current;
+    let fetchTimeout: number | null = null;
+
+    try {
+      fetchTimeout = window.setTimeout(() => controller.abort(), CONNECTION_TIMEOUT_MS);
+      let response: Response;
+      try {
+        response = await fetch(CLOSING_AUDIO_ENDPOINT, {
+          method: "GET",
+          headers: { Accept: "audio/mpeg" },
+          signal: controller.signal,
+        });
+      } catch (error) {
+        if (controller.signal.aborted) {
+          throw new Error("登録確認の音声取得がタイムアウトしました");
+        }
+        throw error;
+      } finally {
+        if (fetchTimeout !== null) window.clearTimeout(fetchTimeout);
+        fetchTimeout = null;
+      }
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? "登録確認の音声を取得できませんでした");
+      }
+      const audioBlob = await response.blob();
+      if (!audioBlob.size || !audioBlob.type.startsWith("audio/")) {
+        throw new Error("登録確認の音声データが不正です");
+      }
+      if (!isActive()) throw new Error("登録確認の音声再生が中断されました");
+
+      const audio = closingAudioRef.current;
+      if (!audio) throw new Error("登録確認の音声要素がありません");
+      releaseClosingAudio();
+      const objectUrl = URL.createObjectURL(audioBlob);
+      closingAudioObjectUrlRef.current = objectUrl;
+      audio.src = objectUrl;
+      audio.currentTime = 0;
+
+      await new Promise<void>((resolve, reject) => {
+        let settled = false;
+        let playbackTimeout: number | null = null;
+        const finish = (error?: Error) => {
+          if (settled) return;
+          settled = true;
+          if (playbackTimeout !== null) window.clearTimeout(playbackTimeout);
+          audio.onended = null;
+          audio.onerror = null;
+          if (error) reject(error);
+          else resolve();
+        };
+        closingAudioRejectRef.current = (error) => finish(error);
+        audio.onended = () => finish();
+        audio.onerror = () => finish(new Error("登録確認の音声データを再生できませんでした"));
+        playbackTimeout = window.setTimeout(() => {
+          finish(new Error("登録確認の音声再生がタイムアウトしました"));
+        }, FIXED_AUDIO_PLAYBACK_TIMEOUT_MS);
+        void audio.play().catch((error) => {
+          finish(error instanceof Error ? error : new Error("登録確認の音声を再生できませんでした"));
+        });
+      });
+      if (!isActive()) throw new Error("登録確認の音声再生が中断されました");
+    } finally {
+      if (fetchTimeout !== null) window.clearTimeout(fetchTimeout);
+      if (closingAudioAbortControllerRef.current === controller) {
+        closingAudioAbortControllerRef.current = null;
+      }
+      closingAudioRejectRef.current = null;
+      releaseClosingAudio();
     }
   };
 
@@ -703,7 +827,7 @@ export default function ConsultationChat() {
       });
       const body = await response.json().catch(() => ({})) as ReportDraft & { error?: string };
       if (!response.ok) throw new Error(body.error ?? "報告書の下書きを作成できませんでした");
-      setReportDraft({
+      const nextDraft: ReportDraft = {
         category: body.category || "報告",
         title: body.title || "音声相談の報告",
         facts: body.facts || "未確認",
@@ -712,9 +836,30 @@ export default function ConsultationChat() {
         request: body.request || "未確認",
         action: body.action || "未確認",
         priority: body.priority === "high" || body.priority === "low" ? body.priority : "medium",
-      });
+      };
+      if (!mountedRef.current || intentionalCloseRef.current) return;
+
+      // Keep the generated draft in state while the fixed closing prompt is
+      // played. It is never saved automatically.
+      setReportDraft(nextDraft);
+      setIsGeneratingDraft(false);
+      setIsPlayingClosingAudio(true);
+      let closingWarning: string | null = null;
+      try {
+        await playFixedClosingAudio();
+      } catch (error) {
+        if (!mountedRef.current || intentionalCloseRef.current) return;
+        closingWarning = error instanceof Error
+          ? error.message
+          : "登録確認の音声を再生できませんでした";
+      } finally {
+        if (mountedRef.current) setIsPlayingClosingAudio(false);
+      }
+      if (!mountedRef.current || intentionalCloseRef.current) return;
+      setClosingAudioWarning(closingWarning);
       setIsReportDialogOpen(true);
     } catch (error) {
+      if (!mountedRef.current || intentionalCloseRef.current) return;
       closeRealtimeConnection();
       toast({
         title: "報告を確定できませんでした",
@@ -722,8 +867,10 @@ export default function ConsultationChat() {
         variant: "destructive",
       });
     } finally {
-      setIsGeneratingDraft(false);
-      setIsStoppingRecording(false);
+      if (mountedRef.current) {
+        setIsGeneratingDraft(false);
+        setIsStoppingRecording(false);
+      }
       endingConversationRef.current = false;
     }
   };
@@ -822,7 +969,10 @@ export default function ConsultationChat() {
   const closeReportDialog = (open: boolean) => {
     if (isRegisteringReport) return;
     setIsReportDialogOpen(open);
-    if (!open) setReportDraft(null);
+    if (!open) {
+      setReportDraft(null);
+      setClosingAudioWarning(null);
+    }
   };
 
   return (
@@ -861,18 +1011,28 @@ export default function ConsultationChat() {
                   size="sm"
                   variant={isRecording ? "destructive" : "outline"}
                   onClick={isRecording ? finishVoiceConversation : startVoiceReport}
-                  disabled={isStartingRecording || isStoppingRecording || isGeneratingDraft}
+                  disabled={isStartingRecording || isStoppingRecording || isGeneratingDraft || isPlayingClosingAudio}
                   className={!isRecording ? "border-orange-200 text-orange-700 hover:bg-orange-50" : ""}
                   data-testid="button-voice-report"
                 >
-                  {isStartingRecording || isStoppingRecording || isGeneratingDraft ? (
+                  {isStartingRecording || isStoppingRecording || isGeneratingDraft || isPlayingClosingAudio ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : isRecording ? (
                     <Square className="mr-2 h-3.5 w-3.5 fill-current" />
                   ) : (
                     <Mic className="mr-2 h-4 w-4" />
                   )}
-                  {isStartingRecording ? "接続中..." : isStoppingRecording ? "文字起こしを確定中..." : isGeneratingDraft ? "下書きを作成中..." : isRecording ? "会話を終了" : "音声で報告"}
+                  {isStartingRecording
+                    ? "接続中..."
+                    : isStoppingRecording
+                      ? "文字起こしを確定中..."
+                      : isGeneratingDraft
+                        ? "下書きを作成中..."
+                        : isPlayingClosingAudio
+                          ? "登録確認を再生中..."
+                          : isRecording
+                            ? "会話を終了"
+                            : "音声で報告"}
                 </Button>
                 <Tabs defaultValue="all" className="w-auto">
                   <TabsList className="h-8">
@@ -888,11 +1048,13 @@ export default function ConsultationChat() {
 
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
-              {(isRecording || isStoppingRecording || isGeneratingDraft || partialTranscript) && (
+              {(isRecording || isStoppingRecording || isGeneratingDraft || isPlayingClosingAudio || partialTranscript) && (
                 <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
                   <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-orange-800">
                     <span className={`h-2.5 w-2.5 rounded-full bg-orange-500 ${isRecording ? "animate-pulse" : ""}`} />
-                    {isStoppingRecording
+                    {isPlayingClosingAudio
+                      ? "登録確認を再生中"
+                      : isStoppingRecording
                       ? "文字起こしを確定中"
                       : isGeneratingDraft
                         ? "報告書の下書きを作成中"
@@ -954,10 +1116,10 @@ export default function ConsultationChat() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 className="bg-white"
-                disabled={isRecording || isStoppingRecording || isGeneratingDraft}
+                disabled={isRecording || isStoppingRecording || isGeneratingDraft || isPlayingClosingAudio}
                 data-testid="input-chat-message"
               />
-              <Button onClick={handleSend} disabled={isRecording || isStoppingRecording || isGeneratingDraft} className="bg-orange-500 hover:bg-orange-600" data-testid="button-send-message">
+              <Button onClick={handleSend} disabled={isRecording || isStoppingRecording || isGeneratingDraft || isPlayingClosingAudio} className="bg-orange-500 hover:bg-orange-600" data-testid="button-send-message">
                 <Send className="h-4 w-4" />
               </Button>
             </div>
@@ -1001,6 +1163,7 @@ export default function ConsultationChat() {
 
       <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" aria-hidden="true" />
       <audio ref={finalQuestionAudioRef} playsInline className="hidden" aria-hidden="true" />
+      <audio ref={closingAudioRef} playsInline className="hidden" aria-hidden="true" />
 
       <Dialog open={isReportDialogOpen} onOpenChange={closeReportDialog}>
         <DialogContent className="max-w-3xl">
@@ -1016,6 +1179,12 @@ export default function ConsultationChat() {
 
           {reportDraft && (
             <div className="max-h-[65vh] overflow-y-auto space-y-4 pr-1">
+              {closingAudioWarning && (
+                <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="alert">
+                  登録確認の音声を再生できませんでした。内容を確認してから登録してください。
+                  <div className="mt-1 text-xs text-amber-800">{closingAudioWarning}</div>
+                </div>
+              )}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="report-category" className="text-sm font-medium">カテゴリ</label>
