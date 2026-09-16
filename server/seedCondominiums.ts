@@ -7,7 +7,7 @@ export async function seedCondominiums() {
     const condominiums = [
       {
         id: "a7af9126-67ff-47d9-9c24-cf4054aeb63c",
-        name: "メゾンドオプテージ",
+        name: "サンプルレジデンス青楓",
         address: "東京都江東区木場1-2-3",
         units: 437,
         build_year: 1985,
@@ -29,7 +29,7 @@ export async function seedCondominiums() {
       },
       {
         id: "b8bf0237-78ee-48ea-ad35-df5165bfb74d",
-        name: "グランマンションB",
+        name: "ノヴァコート海風",
         address: "神奈川県横浜市港北区2-3-4",
         units: 85,
         build_year: 2006,
@@ -51,7 +51,7 @@ export async function seedCondominiums() {
       },
       {
         id: "6aa176b1-0fb6-4217-b334-dccebfb03d68",
-        name: "パークサイドレジデンス立川",
+        name: "リーフテラス橘",
         address: "東京都立川市錦町3-5-10",
         units: 120,
         build_year: 2001,
@@ -73,7 +73,7 @@ export async function seedCondominiums() {
       },
       {
         id: "c25d20d2-e3ea-46a7-b866-3ca38d553bf8",
-        name: "サンシャインコート川崎",
+        name: "フォレストゲート澄川",
         address: "神奈川県川崎市川崎区砂子1-8-22",
         units: 56,
         build_year: 1998,
@@ -95,7 +95,7 @@ export async function seedCondominiums() {
       },
       {
         id: "86d64213-2915-4433-a906-bb10138e2823",
-        name: "ライオンズマンション浦和",
+        name: "グレイスノート若葉",
         address: "埼玉県さいたま市浦和区仲町2-12-5",
         units: 200,
         build_year: 2010,
@@ -117,7 +117,7 @@ export async function seedCondominiums() {
       },
       {
         id: "7bd45ba6-222f-464f-89bd-3b8f8df8dfa2",
-        name: "コスモポリス千葉中央",
+        name: "セレスティア千景",
         address: "千葉県千葉市中央区富士見1-4-8",
         units: 148,
         build_year: 2003,
@@ -139,7 +139,7 @@ export async function seedCondominiums() {
       },
       {
         id: "1af5d112-b4dc-4d7f-8cd8-3e0077cd5e79",
-        name: "グリーンパレス町田",
+        name: "ブリーズコート光葉",
         address: "東京都町田市原町田4-6-15",
         units: 72,
         build_year: 1994,
@@ -161,7 +161,7 @@ export async function seedCondominiums() {
       },
       {
         id: "cff09745-0233-4b13-b747-c29ed0d69e54",
-        name: "ベルフォーレ新松戸",
+        name: "ベルクレスト新緑",
         address: "千葉県松戸市新松戸3-7-2",
         units: 96,
         build_year: 2008,
@@ -183,7 +183,7 @@ export async function seedCondominiums() {
       },
       {
         id: "09d873ad-3061-438a-8093-278f0df1cbbf",
-        name: "オーシャンビューレジデンス藤沢",
+        name: "アクアノート汐風",
         address: "神奈川県藤沢市片瀬海岸1-10-3",
         units: 65,
         build_year: 2015,
@@ -205,7 +205,7 @@ export async function seedCondominiums() {
       },
       {
         id: "55b3d6d2-6b27-4f6a-8a10-b55c7b07306b",
-        name: "ウィンドミル大宮",
+        name: "ウィンドアーク桜",
         address: "埼玉県さいたま市大宮区桜木町1-15-9",
         units: 310,
         build_year: 1990,
@@ -227,7 +227,7 @@ export async function seedCondominiums() {
       },
       {
         id: "d1e2f3a4-b5c6-7890-abcd-ef1234567890",
-        name: "スカイコート品川",
+        name: "スカイリーフ碧",
         address: "東京都品川区大崎2-1-5",
         units: 180,
         build_year: 2005,
@@ -249,7 +249,7 @@ export async function seedCondominiums() {
       },
       {
         id: "e2f3a4b5-c6d7-8901-bcde-f12345678901",
-        name: "プラウド世田谷",
+        name: "プラムテラス翠",
         address: "東京都世田谷区三軒茶屋1-8-12",
         units: 95,
         build_year: 2012,
@@ -271,7 +271,7 @@ export async function seedCondominiums() {
       },
       {
         id: "f3a4b5c6-d7e8-9012-cdef-012345678902",
-        name: "ライジングサン越谷",
+        name: "ソレイユノヴァ南",
         address: "埼玉県越谷市南越谷4-12-8",
         units: 130,
         build_year: 1999,
@@ -293,7 +293,7 @@ export async function seedCondominiums() {
       },
       {
         id: "a4b5c6d7-e8f9-0123-defa-123456789003",
-        name: "コンフォートハイム千住",
+        name: "コンフォートリーフ千景",
         address: "東京都足立区千住2-5-7",
         units: 68,
         build_year: 1996,
@@ -315,7 +315,7 @@ export async function seedCondominiums() {
       },
       {
         id: "b5c6d7e8-f9a0-1234-efab-234567890004",
-        name: "グランシティ武蔵小杉",
+        name: "グランフォレスト東雲",
         address: "神奈川県川崎市中原区新丸子東3-4-6",
         units: 245,
         build_year: 2014,
@@ -337,7 +337,7 @@ export async function seedCondominiums() {
       },
       {
         id: "c6d7e8f9-a0b1-2345-fabc-345678900005",
-        name: "レジデンスパーク柏",
+        name: "レジデンスノヴァ柏葉",
         address: "千葉県柏市柏3-8-15",
         units: 110,
         build_year: 2002,
@@ -359,7 +359,7 @@ export async function seedCondominiums() {
       },
       {
         id: "d7e8f9a0-b1c2-3456-abcd-456789000006",
-        name: "ビラフォンテーヌ川口",
+        name: "ビラセレーノ川景",
         address: "埼玉県川口市幸町3-1-9",
         units: 78,
         build_year: 2007,
@@ -381,7 +381,7 @@ export async function seedCondominiums() {
       },
       {
         id: "e8f9a0b1-c2d3-4567-bcde-567890000007",
-        name: "ミッドタワー横浜みなとみらい",
+        name: "ミッドオーブ港星",
         address: "神奈川県横浜市西区みなとみらい4-6-2",
         units: 320,
         build_year: 2018,
@@ -403,7 +403,7 @@ export async function seedCondominiums() {
       },
       {
         id: "f9a0b1c2-d3e4-5678-cdef-678900000008",
-        name: "アーバンパレス市川",
+        name: "アーバンリーフ市景",
         address: "千葉県市川市南八幡2-10-3",
         units: 88,
         build_year: 2000,
@@ -425,7 +425,7 @@ export async function seedCondominiums() {
       },
       {
         id: "a0b1c2d3-e4f5-6789-defa-789000000009",
-        name: "フォレストヴィラ八王子",
+        name: "フォレストノート八葉",
         address: "東京都八王子市元本郷町2-3-8",
         units: 52,
         build_year: 1993,

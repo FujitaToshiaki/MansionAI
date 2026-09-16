@@ -254,7 +254,7 @@ export default function OCRProcessing() {
         }
         
         const blob = await response.blob();
-        const file = new File([blob], `メゾンドオプテージ議事録_${i + 1}.jpg`, { type: 'image/jpeg' });
+        const file = new File([blob], `サンプルレジデンス青楓議事録_${i + 1}.jpg`, { type: 'image/jpeg' });
         
         mockFiles.push({
           file,
@@ -274,7 +274,7 @@ export default function OCRProcessing() {
     }
     
     setUploadedFiles(mockFiles);
-    setSelectedCondominium('a7af9126-67ff-47d9-9c24-cf4054aeb63c'); // メゾンドオプテージのID
+    setSelectedCondominium('a7af9126-67ff-47d9-9c24-cf4054aeb63c'); // デモ用物件のID
     setDocumentTitle('令和6年度第5回理事会議事録');
     setMeetingDate('2024-04-17');
     setStep('preview');

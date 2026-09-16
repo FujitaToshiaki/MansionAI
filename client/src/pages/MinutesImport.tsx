@@ -56,7 +56,7 @@ const DEMO_SAMPLE_TEXT = `田中理事長：それでは第1回理事会を開�
 const DEMO_MEETING_TYPE = "理事会";
 const DEMO_MEETING_DATE = "2026-03-25";
 const DEMO_PARTICIPANTS = "田中理事長, 鈴木副理事長, 佐藤会計理事, 山田理事, 高橋理事, 伊藤理事, 渡辺理事";
-const DEMO_LOCATION = "メゾンドオプテージ 集会室";
+const DEMO_LOCATION = "サンプルレジデンス青楓 集会室";
 
 export default function MinutesImport() {
   const search = useSearch();
