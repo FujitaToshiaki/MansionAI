@@ -383,7 +383,7 @@ export default function ConsultationChat() {
             type: "response.create",
             response: {
               output_modalities: ["audio"],
-              instructions: "まず日本語で挨拶し、何が起きたのかを一つだけ質問してください。質問は短く、一度に一問にしてください。",
+              instructions: "会話相手は管理会社の窓口担当者です。日本語で「住民の方から受け付けた内容を報告してください。どのようなお申し出でしたか？」と最初に尋ねてください。住民本人として扱わず、一度に一問にしてください。",
             },
           });
         } catch (error) {
@@ -519,11 +519,11 @@ export default function ConsultationChat() {
   };
 
   const draftContent = (draft: ReportDraft) => [
-    `【事実】\n${draft.facts.trim() || "未確認"}`,
+    `【住民の申告・管理会社の確認事項】\n${draft.facts.trim() || "未確認"}`,
     `【申告された原因】\n${draft.reportedCause.trim() || "未確認"}`,
     `【不明点】\n${draft.unknowns.trim() || "未確認"}`,
-    `【要望】\n${draft.request.trim() || "未確認"}`,
-    `【対応・アクション】\n${draft.action.trim() || "未確認"}`,
+    `【住民の希望する対応】\n${draft.request.trim() || "未確認"}`,
+    `【管理会社の対応済み事項・対応予定】\n${draft.action.trim() || "未確認"}`,
   ].join("\n\n");
 
   const registerReport = async () => {
@@ -824,11 +824,11 @@ export default function ConsultationChat() {
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {([
-                  ["facts", "事実"],
+                  ["facts", "住民の申告・管理会社の確認事項"],
                   ["reportedCause", "申告された原因"],
                   ["unknowns", "不明点"],
-                  ["request", "要望"],
-                  ["action", "対応・アクション"],
+                  ["request", "住民の希望する対応"],
+                  ["action", "管理会社の対応済み事項・対応予定"],
                 ] as Array<[keyof ReportDraft, string]>).map(([field, label]) => (
                   <div className="space-y-2" key={field}>
                     <label htmlFor={`report-${field}`} className="text-sm font-medium">{label}</label>
