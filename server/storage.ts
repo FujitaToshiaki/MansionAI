@@ -159,7 +159,7 @@ export class MemStorage implements IStorage {
     const mockCondominiums: Condominium[] = [
       {
         id: "a7af9126-67ff-47d9-9c24-cf4054aeb63c",
-        name: "サンプルレジデンス青楓",
+        name: "サンプルレジデンスJ",
         address: "東京都○○区××1-2-3",
         units: 120,
         buildYear: 1999,
@@ -222,7 +222,7 @@ export class MemStorage implements IStorage {
         id: randomUUID(),
         condominiumId: firstCondoId,
         type: "regulation_revision",
-        description: "サンプルレジデンス青楓の規約改訂が完了しました",
+        description: "サンプルレジデンスJの規約改訂が完了しました",
         status: "success",
         userId: "mock-user",
         metadata: {},
@@ -329,7 +329,7 @@ export class MemStorage implements IStorage {
         mimeType: "application/pdf",
         ocrStatus: "completed",
         ocrAccuracy: 96.8,
-        ocrText: "管理組合設立届出書　管理組合名：サンプルレジデンス青楓管理組合　設立年月日：2000年4月1日　組合員数：120名　理事長：修繕 未来　副理事長：佐藤花子　理事：5名　監事：2名　管理会社：東京マンション管理株式会社　管理形態：全部委託　所轄官庁：○○区役所",
+        ocrText: "管理組合設立届出書　管理組合名：サンプルレジデンスJ管理組合　設立年月日：2000年4月1日　組合員数：120名　理事長：修繕 未来　副理事長：佐藤花子　理事：5名　監事：2名　管理会社：東京マンション管理株式会社　管理形態：全部委託　所轄官庁：○○区役所",
         uploadedAt: new Date(Date.now() - 604800000),
         processedAt: new Date(Date.now() - 601200000)
       },

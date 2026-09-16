@@ -7,7 +7,7 @@ export async function seedCondominiums() {
     const condominiums = [
       {
         id: "a7af9126-67ff-47d9-9c24-cf4054aeb63c",
-        name: "サンプルレジデンス青楓",
+        name: "サンプルレジデンスJ",
         address: "東京都江東区木場1-2-3",
         units: 437,
         build_year: 1985,

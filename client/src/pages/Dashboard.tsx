@@ -45,14 +45,14 @@ export default function Dashboard() {
           <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
             <img 
               src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&w=80&h=80&fit=crop" 
-              alt="サンプルレジデンス青楓" 
+              alt="サンプルレジデンスJ" 
               className="w-full h-full object-cover"
             />
           </div>
           
           {/* Condominium Info */}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">サンプルレジデンス青楓</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">サンプルレジデンスJ</h1>
             <div className="flex items-center space-x-4 text-sm text-gray-600">
               <span>東京都・・・区×××丁目</span>
               <span>総戸数 / 103戸 / 管理開始日：2020/4/1</span>

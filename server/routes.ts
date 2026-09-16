@@ -545,8 +545,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             meetingDate: '2024年10月',
             meetingType: '第40期通常総会',
             category: '管理規約改定',
-            agenda: 'サンプルレジデンス青楓マンション管理規約変更の件',
-            decision: 'サンプルレジデンス青楓マンション管理規約変更を承認',
+            agenda: 'サンプルレジデンスJマンション管理規約変更の件',
+            decision: 'サンプルレジデンスJマンション管理規約変更を承認',
             result: 'approved',
             votingResults: null,
             relatedArticle: '管理規約第25条 組合管理部分の管理'
@@ -972,7 +972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (altLocationMatch) {
             return altLocationMatch[1].trim();
           }
-          return 'サンプルレジデンス青楓集会室'; // fallback
+          return 'サンプルレジデンスJ集会室'; // fallback
         };
 
         // Extract date from content
@@ -1008,7 +1008,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           agenda: [
             {
               number: 1,
-              title: 'サンプルレジデンス青楓マンション管理規約変更の件',
+              title: 'サンプルレジデンスJマンション管理規約変更の件',
               presenter: '修繕 未来理事長',
               content: foundMinute.content?.slice(0, 300) + '...' || '実際の議事録内容から抽出された議題の詳細',
               result: '可決',
@@ -1205,7 +1205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json([
         {
           id: "doc1",
-          title: "サンプルレジデンス青楓管理規約（現行版）",
+          title: "サンプルレジデンスJ管理規約（現行版）",
           type: "current_regulation",
           description: "現在施行中の管理規約",
           uploadedAt: "2024-03-15T10:00:00Z",
@@ -1214,7 +1214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         {
           id: "doc2", 
-          title: "サンプルレジデンス青楓管理規約（過去版v3.1）",
+          title: "サンプルレジデンスJ管理規約（過去版v3.1）",
           type: "current_regulation",
           description: "2023年版管理規約",
           uploadedAt: "2023-09-01T10:00:00Z", 
@@ -1223,7 +1223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         {
           id: "doc3",
-          title: "サンプルレジデンス青楓管理規約（過去版v3.0）",
+          title: "サンプルレジデンスJ管理規約（過去版v3.0）",
           type: "current_regulation", 
           description: "2022年版管理規約",
           uploadedAt: "2022-03-01T10:00:00Z",
@@ -1428,7 +1428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sampleMinutesContent = `
 第40期通常総会議事録
 開催日時：令和6年10月26日（土）午前10時00分～午前12時30分
-開催場所：サンプルレジデンス青楓集会室
+開催場所：サンプルレジデンスJ集会室
 出席者：45名（委任状含む）
 総戸数：68戸
 議長：修繕 未来（理事長）
@@ -1439,7 +1439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 第39期第2回臨時総会議事録
 開催日時：令和5年8月15日（火）午後7時00分～午後8時30分
-開催場所：サンプルレジデンス青楓集会室
+開催場所：サンプルレジデンスJ集会室
 出席者：38名（委任状含む）
 総戸数：68戸
 議長：修繕 未来（理事長）
@@ -1448,7 +1448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 第39期通常総会議事録
 開催日時：令和5年10月28日（土）午前10時00分～午前12時00分
-開催場所：サンプルレジデンス青楓集会室
+開催場所：サンプルレジデンスJ集会室
 出席者：41名（委任状含む）
 総戸数：68戸
 議長：修繕 未来（理事長）
@@ -1459,7 +1459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add to knowledge base
       const doc = await knowledgeService.addKnowledgeDocument(
         condominiumId,
-        'サンプルレジデンス青楓議事録データ',
+        'サンプルレジデンスJ議事録データ',
         sampleMinutesContent,
         'meeting_minutes',
         { source: 'manual_load' }

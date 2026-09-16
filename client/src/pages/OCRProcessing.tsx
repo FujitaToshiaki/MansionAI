@@ -254,7 +254,7 @@ export default function OCRProcessing() {
         }
         
         const blob = await response.blob();
-        const file = new File([blob], `サンプルレジデンス青楓議事録_${i + 1}.jpg`, { type: 'image/jpeg' });
+        const file = new File([blob], `サンプルレジデンスJ議事録_${i + 1}.jpg`, { type: 'image/jpeg' });
         
         mockFiles.push({
           file,

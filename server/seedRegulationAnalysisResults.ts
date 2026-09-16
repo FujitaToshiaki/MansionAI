@@ -24,7 +24,7 @@ export async function seedRegulationAnalysisResults() {
     try {
       await pool.query(`
         INSERT INTO condominiums (id, name, address, units, build_year, management_start_date, current_regulation_version, law_revision_status, assigned_manager, created_at)
-        VALUES ($1, 'サンプルレジデンス青楓', '東京都港区', 50, 2010, '2010-01-01', '5.0', 'completed', '修繕 未来', NOW())
+        VALUES ($1, 'サンプルレジデンスJ', '東京都港区', 50, 2010, '2010-01-01', '5.0', 'completed', '修繕 未来', NOW())
         ON CONFLICT (id) DO NOTHING
       `, [condominiumId]);
       console.log(`[SEED] Condominium insert/update completed`);

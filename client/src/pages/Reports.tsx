@@ -99,7 +99,7 @@ export default function Reports() {
           { name: 'その他', value: 9, color: COLORS[4] },
         ],
         complianceStatus: [
-          { condominium: 'サンプルレジデンス青楓', compliance: 92, issues: 2, status: 'excellent' },
+          { condominium: 'サンプルレジデンスJ', compliance: 92, issues: 2, status: 'excellent' },
           { condominium: 'ノヴァコート海風', compliance: 78, issues: 5, status: 'good' },
           { condominium: 'ルミナスコート朝凪', compliance: 65, issues: 8, status: 'warning' },
           { condominium: 'レジデンス月白', compliance: 45, issues: 12, status: 'critical' },

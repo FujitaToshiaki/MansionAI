@@ -213,7 +213,7 @@ export function KnowledgeBase({ condominiumId }: KnowledgeBaseProps) {
                   id="title"
                   value={uploadTitle}
                   onChange={(e) => setUploadTitle(e.target.value)}
-                  placeholder="例: サンプルレジデンス青楓管理規約第5版"
+                  placeholder="例: サンプルレジデンスJ管理規約第5版"
                 />
               </div>
 
