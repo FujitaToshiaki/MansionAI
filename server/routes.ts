@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { KnowledgeService } from "./knowledgeService";
@@ -10,10 +10,11 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { extractTextFromMultipleImages, generateMinutes } from "./gemini";
-import { transcribeAudio } from "./openai";
+import { createRealtimeTranscriptionCall, transcribeAudio } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
+  const realtimeSessionRequests = new Map<string, number[]>();
 
   // Ensure required upload directories exist at startup
   await fs.mkdir("uploads/audio", { recursive: true });
@@ -811,6 +812,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   });
+
+  app.post(
+    "/api/realtime/transcription-session",
+    express.text({ type: "application/sdp", limit: "64kb" }),
+    async (req, res) => {
+      try {
+        const now = Date.now();
+        const recentRequests = (realtimeSessionRequests.get(req.ip) ?? [])
+          .filter((timestamp) => now - timestamp < 60_000);
+        if (recentRequests.length >= 5) {
+          return res.status(429).json({ error: "音声入力の開始回数が多すぎます。1分ほど待ってから再度お試しください" });
+        }
+        realtimeSessionRequests.set(req.ip, [...recentRequests, now]);
+
+        if (typeof req.body !== "string" || !req.body.startsWith("v=0")) {
+          return res.status(400).json({ error: "有効なWebRTC接続情報が必要です" });
+        }
+
+        const answerSdp = await createRealtimeTranscriptionCall(req.body);
+        res.type("application/sdp").send(answerSdp);
+      } catch (error) {
+        console.error("Realtime transcription session error:", error);
+        res.status(502).json({ error: "音声入力セッションを開始できませんでした" });
+      }
+    },
+  );
 
   // Get meeting minutes for a condominium
   app.get('/api/condominiums/:id/minutes', async (req, res) => {

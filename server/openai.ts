@@ -8,6 +8,52 @@ function getOpenAIClient(): OpenAI {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
+export async function createRealtimeTranscriptionCall(sdp: string): Promise<string> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY environment variable is not set");
+  }
+
+  const session = {
+    type: "transcription",
+    audio: {
+      input: {
+        transcription: {
+          model: "gpt-4o-mini-transcribe",
+          language: "ja",
+          prompt: "マンション管理で発生したクレームの聞き取りです。日時、場所、申告者、対象者、発生内容、要望を正確に文字起こししてください。",
+        },
+        noise_reduction: { type: "near_field" },
+        turn_detection: {
+          type: "server_vad",
+          threshold: 0.5,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 700,
+        },
+      },
+    },
+  };
+
+  const formData = new FormData();
+  formData.set("sdp", sdp);
+  formData.set("session", JSON.stringify(session));
+
+  const response = await fetch("https://api.openai.com/v1/realtime/calls", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: formData,
+  });
+
+  const body = await response.text();
+  if (!response.ok) {
+    console.error("Realtime API session error:", response.status, body);
+    throw new Error(`Realtime API session creation failed (${response.status})`);
+  }
+
+  return body;
+}
+
 export interface OCRResult {
   text: string;
   accuracy: number;

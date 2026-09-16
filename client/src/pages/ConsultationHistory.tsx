@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { History, Star, MessageSquare } from "lucide-react";
+import { History, MessageSquare, AlertCircle } from "lucide-react";
 import { SubNav } from "@/components/SubNav";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -15,48 +16,35 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const MOCK_HISTORY = [
-  {
-    id: "1",
-    date: "2025/03/10 14:20",
-    category: "法令解釈",
-    summary: "2025年改正区分所有法における「多数決」の要件緩和について",
-    rating: 5,
-  },
-  {
-    id: "2",
-    date: "2025/03/05 10:15",
-    category: "クレーム",
-    summary: "ベランダでの喫煙に関するトラブル対応と掲示物案の作成",
-    rating: 4,
-  },
-  {
-    id: "3",
-    date: "2025/02/28 16:45",
-    category: "運用判断",
-    summary: "理事会のオンライン開催を導入するための規約改訂手順",
-    rating: 5,
-  },
-  {
-    id: "4",
-    date: "2025/02/15 09:30",
-    category: "その他",
-    summary: "管理費等の滞納者に対する督促状の送付スケジュール",
-    rating: 3,
-  },
-  {
-    id: "5",
-    date: "2025/02/01 11:00",
-    category: "法令解釈",
-    summary: "大規模修繕工事における専有部分への立ち入り権限の確認",
-    rating: 4,
-  },
-];
+interface ConsultationLog {
+  id: string;
+  category: string;
+  title: string;
+  content: string;
+  response: string | null;
+  status: string;
+  priority: string;
+  consulted_at: string;
+}
 
 export default function ConsultationHistory() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const condominiumId = params.get("condominiumId") ?? "";
+  const { data: history = [], isLoading, isError } = useQuery<ConsultationLog[]>({
+    queryKey: [`/api/condominiums/${condominiumId}/consultation-logs`],
+    enabled: Boolean(condominiumId),
+  });
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const thisMonthCount = history.filter((item) => item.consulted_at?.slice(0, 7) === currentMonth).length;
+  const openCount = history.filter((item) => item.status !== "resolved").length;
+  const formatDate = (value: string) => new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
 
   return (
     <div className="space-y-6">
@@ -86,7 +74,7 @@ export default function ConsultationHistory() {
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">今月の相談件数</p>
-              <p className="text-3xl font-bold text-gray-900">5件</p>
+              <p className="text-3xl font-bold text-gray-900">{thisMonthCount}件</p>
             </div>
             <div className="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center">
               <MessageSquare className="h-6 w-6 text-orange-600" />
@@ -96,16 +84,11 @@ export default function ConsultationHistory() {
         <Card className="bg-white">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">評価平均</p>
-              <div className="flex items-center gap-1">
-                <p className="text-3xl font-bold text-gray-900">4.2</p>
-                <div className="flex text-yellow-400">
-                  <Star className="h-5 w-5 fill-current" />
-                </div>
-              </div>
+              <p className="text-sm font-medium text-gray-600">未対応・対応中</p>
+              <p className="text-3xl font-bold text-gray-900">{openCount}件</p>
             </div>
             <div className="h-12 w-12 bg-yellow-50 rounded-full flex items-center justify-center">
-              <Star className="h-6 w-6 text-yellow-500" />
+              <AlertCircle className="h-6 w-6 text-yellow-600" />
             </div>
           </CardContent>
         </Card>
@@ -123,33 +106,35 @@ export default function ConsultationHistory() {
                 <TableHead className="w-[150px]">日時</TableHead>
                 <TableHead className="w-[100px]">カテゴリ</TableHead>
                 <TableHead>概要</TableHead>
-                <TableHead className="w-[120px]">評価</TableHead>
+                <TableHead className="w-[120px]">ステータス</TableHead>
                 <TableHead className="w-[80px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MOCK_HISTORY.map((item) => (
+              {isLoading && (
+                <TableRow><TableCell colSpan={5} className="py-8 text-center text-gray-500">読み込み中...</TableCell></TableRow>
+              )}
+              {isError && (
+                <TableRow><TableCell colSpan={5} className="py-8 text-center text-red-600">相談履歴を読み込めませんでした</TableCell></TableRow>
+              )}
+              {!isLoading && !isError && history.length === 0 && (
+                <TableRow><TableCell colSpan={5} className="py-8 text-center text-gray-500">相談履歴はありません</TableCell></TableRow>
+              )}
+              {history.map((item) => (
                 <TableRow key={item.id} className="cursor-pointer hover:bg-gray-50">
-                  <TableCell className="text-sm text-gray-600">{item.date}</TableCell>
+                  <TableCell className="text-sm text-gray-600">{formatDate(item.consulted_at)}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-[10px] font-normal">
                       {item.category}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm font-medium text-gray-900">
-                    {item.summary.length > 30 ? `${item.summary.substring(0, 30)}...` : item.summary}
+                    {item.title.length > 30 ? `${item.title.substring(0, 30)}...` : item.title}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-3 w-3 ${
-                            i < item.rating ? "text-yellow-400 fill-current" : "text-gray-200"
-                          }`}
-                        />
-                      ))}
-                    </div>
+                    <Badge variant={item.status === "resolved" ? "secondary" : "outline"}>
+                      {item.status === "resolved" ? "解決済み" : item.status === "in_progress" ? "対応中" : "未対応"}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Dialog>
@@ -160,20 +145,20 @@ export default function ConsultationHistory() {
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl">
                         <DialogHeader>
-                          <DialogTitle>{item.summary}</DialogTitle>
-                          <DialogDescription>相談日: {item.date} | カテゴリ: {item.category}</DialogDescription>
+                          <DialogTitle>{item.title}</DialogTitle>
+                          <DialogDescription>相談日: {formatDate(item.consulted_at)} | カテゴリ: {item.category}</DialogDescription>
                         </DialogHeader>
                         <div className="mt-4 space-y-4">
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <h4 className="text-sm font-bold mb-2">ユーザーの相談内容</h4>
                             <p className="text-sm text-gray-700 leading-relaxed">
-                              {item.summary}に関する具体的な質問内容と背景情報がここに表示されます。
+                              {item.content}
                             </p>
                           </div>
                           <div className="bg-white border-l-4 border-orange-500 p-4 shadow-sm">
                             <h4 className="text-sm font-bold text-orange-800 mb-2">AIの回答</h4>
                             <p className="text-sm text-gray-700 leading-relaxed">
-                              相談内容に基づいたAIによるアドバイスや法的根拠の提示、推奨されるアクションプランがここに表示されます。
+                              {item.response || "対応内容はまだ登録されていません。"}
                             </p>
                           </div>
                         </div>

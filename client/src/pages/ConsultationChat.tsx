@@ -3,12 +3,24 @@ import { useSearch } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, Send, User, Bot, HelpCircle, History } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { MessageSquare, Send, User, Bot, HelpCircle, History, Mic, Square, Loader2, AlertTriangle } from "lucide-react";
 import { SubNav } from "@/components/SubNav";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 interface Message {
   id: string;
@@ -38,11 +50,316 @@ export default function ConsultationChat() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isStartingRecording, setIsStartingRecording] = useState(false);
+  const [isStoppingRecording, setIsStoppingRecording] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [partialTranscript, setPartialTranscript] = useState("");
+  const [isComplaintDialogOpen, setIsComplaintDialogOpen] = useState(false);
+  const [complaintTitle, setComplaintTitle] = useState("");
+  const [complaintContent, setComplaintContent] = useState("");
+  const [complaintPriority, setComplaintPriority] = useState("medium");
+  const [isRegisteringComplaint, setIsRegisteringComplaint] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const dataChannelRef = useRef<RTCDataChannel | null>(null);
+  const microphoneStreamRef = useRef<MediaStream | null>(null);
+  const transcriptSegmentsRef = useRef<string[]>([]);
+  const partialTranscriptRef = useRef("");
+  const transcriptOrderRef = useRef<string[]>([]);
+  const transcriptByItemRef = useRef<Map<string, string>>(new Map());
+  const partialByItemRef = useRef<Map<string, string>>(new Map());
+  const lastTranscriptEventAtRef = useRef(0);
+  const recordingActiveRef = useRef(false);
+  const intentionalCloseRef = useRef(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    return () => {
+      microphoneStreamRef.current?.getTracks().forEach((track) => track.stop());
+      dataChannelRef.current?.close();
+      peerConnectionRef.current?.close();
+    };
+  }, []);
+
+  const closeRealtimeConnection = () => {
+    recordingActiveRef.current = false;
+    microphoneStreamRef.current?.getTracks().forEach((track) => track.stop());
+    microphoneStreamRef.current = null;
+    dataChannelRef.current?.close();
+    dataChannelRef.current = null;
+    peerConnectionRef.current?.close();
+    peerConnectionRef.current = null;
+  };
+
+  const rebuildTranscript = () => {
+    const completed = transcriptOrderRef.current
+      .map((itemId) => transcriptByItemRef.current.get(itemId))
+      .filter((text): text is string => Boolean(text));
+    const partial = transcriptOrderRef.current
+      .map((itemId) => partialByItemRef.current.get(itemId))
+      .filter((text): text is string => Boolean(text))
+      .join("");
+
+    transcriptSegmentsRef.current = completed;
+    partialTranscriptRef.current = partial;
+    setVoiceTranscript(completed.join("\n"));
+    setPartialTranscript(partial);
+  };
+
+  const rememberTranscriptItem = (itemId: string, previousItemId?: string) => {
+    if (!itemId || transcriptOrderRef.current.includes(itemId)) return;
+    const previousIndex = previousItemId ? transcriptOrderRef.current.indexOf(previousItemId) : -1;
+    if (previousIndex >= 0) {
+      transcriptOrderRef.current.splice(previousIndex + 1, 0, itemId);
+    } else {
+      transcriptOrderRef.current.push(itemId);
+    }
+  };
+
+  const prepareComplaintConfirmation = () => {
+    const completedTranscript = transcriptSegmentsRef.current.join("\n").trim();
+    const transcript = completedTranscript || partialTranscriptRef.current.trim() || voiceTranscript.trim();
+    if (!transcript) {
+      toast({
+        title: "音声を認識できませんでした",
+        description: "マイクに向かって内容を話してから、もう一度お試しください。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setComplaintContent(transcript);
+    setComplaintTitle(transcript.length > 32 ? `${transcript.slice(0, 32)}…` : transcript);
+    setComplaintPriority("medium");
+    setIsComplaintDialogOpen(true);
+  };
+
+  const handleRealtimeEvent = (event: MessageEvent<string>) => {
+    try {
+      const payload = JSON.parse(event.data);
+
+      if (payload.type === "input_audio_buffer.committed") {
+        rememberTranscriptItem(String(payload.item_id ?? ""), payload.previous_item_id);
+      }
+
+      if (payload.type === "conversation.item.input_audio_transcription.delta") {
+        const itemId = String(payload.item_id ?? "");
+        rememberTranscriptItem(itemId);
+        partialByItemRef.current.set(
+          itemId,
+          (partialByItemRef.current.get(itemId) ?? "") + (payload.delta ?? ""),
+        );
+        lastTranscriptEventAtRef.current = Date.now();
+        rebuildTranscript();
+      }
+
+      if (payload.type === "conversation.item.input_audio_transcription.completed") {
+        const itemId = String(payload.item_id ?? "");
+        rememberTranscriptItem(itemId);
+        const transcript = String(payload.transcript ?? "").trim();
+        if (transcript) {
+          transcriptByItemRef.current.set(itemId, transcript);
+        }
+        partialByItemRef.current.delete(itemId);
+        lastTranscriptEventAtRef.current = Date.now();
+        rebuildTranscript();
+      }
+
+      if (payload.type === "error") {
+        console.error("Realtime API event error:", payload);
+        toast({
+          title: "音声入力エラー",
+          description: payload.error?.message ?? "音声の処理中にエラーが発生しました。",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to parse Realtime API event:", error);
+    }
+  };
+
+  const handleUnexpectedRealtimeClose = () => {
+    if (intentionalCloseRef.current || !recordingActiveRef.current) return;
+    closeRealtimeConnection();
+    setIsRecording(false);
+    setIsStartingRecording(false);
+    setIsStoppingRecording(false);
+    toast({
+      title: "音声接続が切断されました",
+      description: "入力内容は登録されていません。ネットワークを確認してもう一度お試しください。",
+      variant: "destructive",
+    });
+  };
+
+  const startVoiceComplaint = async () => {
+    if (!condominiumId) {
+      toast({
+        title: "物件を選択してください",
+        description: "物件詳細からチャット相談を開いてください。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsStartingRecording(true);
+    setVoiceTranscript("");
+    setPartialTranscript("");
+    transcriptSegmentsRef.current = [];
+    partialTranscriptRef.current = "";
+    transcriptOrderRef.current = [];
+    transcriptByItemRef.current.clear();
+    partialByItemRef.current.clear();
+    lastTranscriptEventAtRef.current = 0;
+    intentionalCloseRef.current = false;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+      microphoneStreamRef.current = stream;
+
+      const peerConnection = new RTCPeerConnection();
+      peerConnectionRef.current = peerConnection;
+      peerConnection.addEventListener("connectionstatechange", () => {
+        if (["failed", "disconnected"].includes(peerConnection.connectionState)) {
+          handleUnexpectedRealtimeClose();
+        }
+      });
+      stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
+
+      const dataChannel = peerConnection.createDataChannel("oai-events");
+      dataChannelRef.current = dataChannel;
+      dataChannel.addEventListener("message", handleRealtimeEvent);
+      dataChannel.addEventListener("error", handleUnexpectedRealtimeClose);
+      dataChannel.addEventListener("close", handleUnexpectedRealtimeClose);
+
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      const response = await fetch("/api/realtime/transcription-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/sdp" },
+        body: offer.sdp,
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error ?? "音声入力セッションを開始できませんでした");
+      }
+
+      const answerSdp = await response.text();
+      await peerConnection.setRemoteDescription({ type: "answer", sdp: answerSdp });
+      recordingActiveRef.current = true;
+      setIsRecording(true);
+    } catch (error) {
+      closeRealtimeConnection();
+      const message = error instanceof DOMException && error.name === "NotAllowedError"
+        ? "マイクの使用が許可されていません。ブラウザの設定をご確認ください。"
+        : error instanceof Error ? error.message : "音声入力を開始できませんでした。";
+      toast({ title: "音声入力を開始できません", description: message, variant: "destructive" });
+    } finally {
+      setIsStartingRecording(false);
+    }
+  };
+
+  const stopVoiceComplaint = async () => {
+    setIsStoppingRecording(true);
+    setIsRecording(false);
+    intentionalCloseRef.current = true;
+    microphoneStreamRef.current?.getTracks().forEach((track) => track.stop());
+
+    if (dataChannelRef.current?.readyState === "open") {
+      dataChannelRef.current.send(JSON.stringify({ type: "input_audio_buffer.commit" }));
+    }
+
+    const drainStartedAt = Date.now();
+    await new Promise<void>((resolve) => {
+      const timer = window.setInterval(() => {
+        const elapsed = Date.now() - drainStartedAt;
+        const quietFor = Date.now() - lastTranscriptEventAtRef.current;
+        const hasTranscript = transcriptByItemRef.current.size > 0 || partialByItemRef.current.size > 0;
+        if ((hasTranscript && quietFor >= 900) || elapsed >= 5000) {
+          window.clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
+    closeRealtimeConnection();
+    setIsStoppingRecording(false);
+    prepareComplaintConfirmation();
+  };
+
+  const registerComplaint = async () => {
+    if (!complaintTitle.trim() || !complaintContent.trim()) {
+      toast({ title: "入力内容を確認してください", description: "件名とクレーム内容は必須です。", variant: "destructive" });
+      return;
+    }
+
+    setIsRegisteringComplaint(true);
+    try {
+      const response = await fetch(`/api/condominiums/${condominiumId}/consultation-logs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: "クレーム",
+          title: complaintTitle.trim(),
+          content: complaintContent.trim(),
+          status: "open",
+          priority: complaintPriority,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("クレームの登録に失敗しました");
+      }
+      await queryClient.invalidateQueries({
+        queryKey: [`/api/condominiums/${condominiumId}/consultation-logs`],
+      });
+
+      const timestamp = new Date();
+      setMessages((current) => [
+        ...current,
+        {
+          id: `voice-${Date.now()}`,
+          role: "user",
+          content: complaintContent.trim(),
+          timestamp,
+        },
+        {
+          id: `registered-${Date.now()}`,
+          role: "ai",
+          content: "内容をクレームとして登録しました。相談履歴から確認できます。",
+          timestamp,
+        },
+      ]);
+      setIsComplaintDialogOpen(false);
+      setVoiceTranscript("");
+      setPartialTranscript("");
+      transcriptSegmentsRef.current = [];
+      partialTranscriptRef.current = "";
+      transcriptOrderRef.current = [];
+      transcriptByItemRef.current.clear();
+      partialByItemRef.current.clear();
+      toast({ title: "クレームを登録しました", description: "相談履歴に未対応のクレームとして保存しました。" });
+    } catch (error) {
+      toast({
+        title: "登録できませんでした",
+        description: error instanceof Error ? error.message : "時間をおいて再度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegisteringComplaint(false);
+    }
+  };
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -107,19 +424,54 @@ export default function ConsultationChat() {
                 <MessageSquare className="mr-2 h-5 w-5 text-orange-500" />
                 AI管理業務相談
               </CardTitle>
-              <Tabs defaultValue="all" className="w-auto">
-                <TabsList className="h-8">
-                  <TabsTrigger value="all" className="text-xs">すべて</TabsTrigger>
-                  <TabsTrigger value="complaint" className="text-xs">クレーム</TabsTrigger>
-                  <TabsTrigger value="law" className="text-xs">法令解釈</TabsTrigger>
-                  <TabsTrigger value="operation" className="text-xs">運用判断</TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={isRecording ? "destructive" : "outline"}
+                  onClick={isRecording ? stopVoiceComplaint : startVoiceComplaint}
+                  disabled={isStartingRecording || isStoppingRecording}
+                  className={!isRecording ? "border-orange-200 text-orange-700 hover:bg-orange-50" : ""}
+                  data-testid="button-voice-complaint"
+                >
+                  {isStartingRecording || isStoppingRecording ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : isRecording ? (
+                    <Square className="mr-2 h-3.5 w-3.5 fill-current" />
+                  ) : (
+                    <Mic className="mr-2 h-4 w-4" />
+                  )}
+                  {isStartingRecording ? "接続中..." : isStoppingRecording ? "整理中..." : isRecording ? "録音を終了" : "音声でクレーム入力"}
+                </Button>
+                <Tabs defaultValue="all" className="w-auto">
+                  <TabsList className="h-8">
+                    <TabsTrigger value="all" className="text-xs">すべて</TabsTrigger>
+                    <TabsTrigger value="complaint" className="text-xs">クレーム</TabsTrigger>
+                    <TabsTrigger value="law" className="text-xs">法令解釈</TabsTrigger>
+                    <TabsTrigger value="operation" className="text-xs">運用判断</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
             </div>
           </CardHeader>
           
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
+              {(isRecording || isStoppingRecording || voiceTranscript || partialTranscript) && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-red-800">
+                    <span className={`h-2.5 w-2.5 rounded-full bg-red-500 ${isRecording ? "animate-pulse" : ""}`} />
+                    {isRecording ? "クレーム内容を聞き取り中" : isStoppingRecording ? "文字起こしを確定中" : "音声入力内容"}
+                  </div>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800">
+                    {voiceTranscript}
+                    {partialTranscript && (
+                      <span className="text-gray-500">{voiceTranscript ? "\n" : ""}{partialTranscript}</span>
+                    )}
+                    {!voiceTranscript && !partialTranscript && "発生した状況をマイクに向かってお話しください。"}
+                  </p>
+                </div>
+              )}
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -224,6 +576,76 @@ export default function ConsultationChat() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={isComplaintDialogOpen} onOpenChange={setIsComplaintDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              クレームとして登録しますか？
+            </DialogTitle>
+            <DialogDescription>
+              音声から文字起こしした内容を確認・修正してください。「登録する」を押すまで保存されません。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="complaint-title" className="text-sm font-medium">件名</label>
+              <Input
+                id="complaint-title"
+                value={complaintTitle}
+                onChange={(event) => setComplaintTitle(event.target.value)}
+                data-testid="input-complaint-title"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="complaint-content" className="text-sm font-medium">クレーム内容</label>
+              <Textarea
+                id="complaint-content"
+                value={complaintContent}
+                onChange={(event) => setComplaintContent(event.target.value)}
+                className="min-h-40"
+                data-testid="textarea-complaint-content"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">優先度</label>
+              <Select value={complaintPriority} onValueChange={setComplaintPriority}>
+                <SelectTrigger data-testid="select-complaint-priority">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">高</SelectItem>
+                  <SelectItem value="medium">中</SelectItem>
+                  <SelectItem value="low">低</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsComplaintDialogOpen(false)}
+              disabled={isRegisteringComplaint}
+            >
+              登録しない
+            </Button>
+            <Button
+              type="button"
+              onClick={registerComplaint}
+              disabled={isRegisteringComplaint}
+              className="bg-orange-600 hover:bg-orange-700"
+              data-testid="button-confirm-complaint"
+            >
+              {isRegisteringComplaint && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              登録する
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
