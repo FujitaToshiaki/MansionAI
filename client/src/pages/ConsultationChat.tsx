@@ -200,6 +200,9 @@ export default function ConsultationChat() {
 
       if (type === "response.created" && responseId) {
         activeResponseIdsRef.current.add(responseId);
+        if (endingConversationRef.current) {
+          sendRealtimeEvent({ type: "response.cancel" });
+        }
       }
       if (type === "response.done" && responseId) {
         activeResponseIdsRef.current.delete(responseId);
@@ -242,6 +245,9 @@ export default function ConsultationChat() {
         partialByItemRef.current.delete(itemId);
         completedTranscriptionItemsRef.current.add(itemId);
         rebuildUserTranscript();
+        if (transcriptByItemRef.current.size >= 5 && !endingConversationRef.current) {
+          void finishVoiceConversation();
+        }
       }
 
       if (type === "conversation.item.input_audio_transcription.failed") {
@@ -450,6 +456,7 @@ export default function ConsultationChat() {
   });
 
   const finishVoiceConversation = async () => {
+    if (endingConversationRef.current) return;
     if (!peerConnectionRef.current && !isRecording) return;
     setIsStoppingRecording(true);
     setIsRecording(false);
@@ -458,6 +465,10 @@ export default function ConsultationChat() {
 
     try {
       const channel = dataChannelRef.current;
+      if (channel?.readyState === "open" && activeResponseIdsRef.current.size > 0) {
+        sendRealtimeEvent({ type: "response.cancel" });
+      }
+      if (remoteAudioRef.current) remoteAudioRef.current.pause();
       // server_vad normally commits on speech_stopped. Give that event a
       // moment to arrive before falling back to an explicit commit, which
       // avoids sending an empty commit after an automatic one.
