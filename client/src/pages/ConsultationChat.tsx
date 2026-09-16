@@ -236,6 +236,7 @@ export default function ConsultationChat() {
 
       if (type === "conversation.item.input_audio_transcription.completed" ||
         type === "conversation.item.input_audio_transcription.done") {
+        const alreadyCompleted = completedTranscriptionItemsRef.current.has(itemId);
         rememberTranscriptItem(itemId, payload.previous_item_id);
         const transcript = (payload.transcript ?? partialByItemRef.current.get(itemId) ?? "").trim();
         if (transcript) {
@@ -245,8 +246,21 @@ export default function ConsultationChat() {
         partialByItemRef.current.delete(itemId);
         completedTranscriptionItemsRef.current.add(itemId);
         rebuildUserTranscript();
-        if (transcriptByItemRef.current.size >= 5 && !endingConversationRef.current) {
-          void finishVoiceConversation();
+        if (transcript && !alreadyCompleted && !endingConversationRef.current) {
+          const answerCount = transcriptByItemRef.current.size;
+          if (answerCount >= 5) {
+            void finishVoiceConversation();
+          } else {
+            sendRealtimeEvent({
+              type: "response.create",
+              response: {
+                output_modalities: ["audio"],
+                instructions: answerCount === 4
+                  ? "管理会社の窓口担当者への最後の質問です。復唱や前置きなしで「住民の方が希望する対応は何ですか？」とだけ質問し、回答を待ってください。追加質問をしないでください。"
+                  : "会話相手は管理会社の窓口担当者です。住民本人ではありません。回答を復唱せず、受付内容の不足点を一つだけ短く質問してください。住民の希望する対応は最後に聞くため、今はそれ以外を確認してください。",
+              },
+            });
+          }
         }
       }
 
@@ -389,7 +403,7 @@ export default function ConsultationChat() {
             type: "response.create",
             response: {
               output_modalities: ["audio"],
-              instructions: "会話相手は管理会社の窓口担当者です。日本語で「住民の方から受け付けた内容を報告してください。どのようなお申し出でしたか？」と最初に尋ねてください。住民本人として扱わず、一度に一問にしてください。",
+              instructions: "会話相手は管理会社の窓口担当者です。前置きや挨拶を省き、日本語で「どのようなお申し出ですか？」とだけ質問してください。",
             },
           });
         } catch (error) {
