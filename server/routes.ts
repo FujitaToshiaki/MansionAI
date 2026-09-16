@@ -10,7 +10,11 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { extractTextFromMultipleImages, generateMinutes } from "./gemini";
-import { createRealtimeTranscriptionCall, transcribeAudio } from "./openai";
+import {
+  createRealtimeConsultationCall,
+  generateConsultationReportDraft,
+  transcribeAudio,
+} from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const knowledgeService = new KnowledgeService();
@@ -814,30 +818,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post(
-    "/api/realtime/transcription-session",
+    ["/api/realtime/consultation-session", "/api/realtime/transcription-session"],
     express.text({ type: "application/sdp", limit: "64kb" }),
     async (req, res) => {
       try {
         const now = Date.now();
-        const recentRequests = (realtimeSessionRequests.get(req.ip) ?? [])
+        const requestKey = req.ip ?? "unknown";
+        const recentRequests = (realtimeSessionRequests.get(requestKey) ?? [])
           .filter((timestamp) => now - timestamp < 60_000);
         if (recentRequests.length >= 5) {
           return res.status(429).json({ error: "音声入力の開始回数が多すぎます。1分ほど待ってから再度お試しください" });
         }
-        realtimeSessionRequests.set(req.ip, [...recentRequests, now]);
+        realtimeSessionRequests.set(requestKey, [...recentRequests, now]);
 
         if (typeof req.body !== "string" || !req.body.startsWith("v=0")) {
           return res.status(400).json({ error: "有効なWebRTC接続情報が必要です" });
         }
 
-        const answerSdp = await createRealtimeTranscriptionCall(req.body);
+        const answerSdp = await createRealtimeConsultationCall(req.body);
         res.type("application/sdp").send(answerSdp);
       } catch (error) {
-        console.error("Realtime transcription session error:", error);
-        res.status(502).json({ error: "音声入力セッションを開始できませんでした" });
+        console.error("Realtime consultation session error:", error);
+        const message = error instanceof Error && error.message.includes("timed out")
+          ? "音声入力セッションの接続がタイムアウトしました"
+          : "音声入力セッションを開始できませんでした";
+        res.status(502).json({ error: message });
       }
     },
   );
+
+  app.post("/api/consultation/report-draft", async (req, res) => {
+    const transcriptSchema = z.object({
+      transcript: z.array(z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().trim().min(1).max(20_000),
+      })).min(1).max(100),
+    });
+
+    const parsed = transcriptSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: "報告書作成に必要な面談記録が不足しています" });
+    }
+
+    const totalCharacters = parsed.data.transcript.reduce((sum, turn) => sum + turn.content.length, 0);
+    if (totalCharacters > 100_000) {
+      return res.status(413).json({ error: "面談記録が長すぎるため報告書を作成できません" });
+    }
+
+    try {
+      const draft = await generateConsultationReportDraft(parsed.data.transcript);
+      res.json(draft);
+    } catch (error) {
+      console.error("Consultation report draft error:", error);
+      res.status(502).json({ error: "報告書の下書きを作成できませんでした" });
+    }
+  });
 
   // Get meeting minutes for a condominium
   app.get('/api/condominiums/:id/minutes', async (req, res) => {
