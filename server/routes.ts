@@ -11,6 +11,7 @@ import path from "path";
 import crypto from "crypto";
 import { extractTextFromMultipleImages, generateMinutes } from "./gemini";
 import {
+  createConsultationFinalQuestionAudio,
   createRealtimeConsultationCall,
   generateConsultationReportDraft,
   transcribeAudio,
@@ -846,6 +847,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     },
   );
+
+  // The browser is not allowed to provide text for this prompt. Keeping this
+  // endpoint parameterless makes the final question deterministic.
+  app.get("/api/realtime/consultation-final-question", async (_req, res) => {
+    try {
+      const audio = await createConsultationFinalQuestionAudio();
+      res
+        .status(200)
+        .type("audio/mpeg")
+        .set("Cache-Control", "no-store")
+        .send(audio);
+    } catch (error) {
+      console.error("Consultation final question audio error:", error);
+      res.status(502).json({ error: "最後の質問の音声を準備できませんでした" });
+    }
+  });
 
   app.post("/api/consultation/report-draft", async (req, res) => {
     const transcriptSchema = z.object({

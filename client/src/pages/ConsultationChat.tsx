@@ -47,6 +47,19 @@ const FAQ_ITEMS = [
 
 const TRANSCRIPTION_DRAIN_TIMEOUT_MS = 8_000;
 const CONNECTION_TIMEOUT_MS = 15_000;
+const FINAL_QUESTION_TEXT = "住民の方が希望する対応は何ですか？";
+const FINAL_QUESTION_AUDIO_ENDPOINT = "/api/realtime/consultation-final-question";
+const FINAL_QUESTION_TURN_COUNT = 4;
+const FINAL_QUESTION_SILENCE_DURATION_MS = 1_800;
+
+type FinalQuestionState =
+  | "idle"
+  | "listening"
+  | "loading"
+  | "playing"
+  | "awaiting-answer"
+  | "answer-completed"
+  | "finishing";
 
 export default function ConsultationChat() {
   const search = useSearch();
@@ -61,11 +74,16 @@ export default function ConsultationChat() {
   const [isStoppingRecording, setIsStoppingRecording] = useState(false);
   const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
   const [partialTranscript, setPartialTranscript] = useState("");
+  const [finalQuestionState, setFinalQuestionState] = useState<FinalQuestionState>("idle");
   const [reportDraft, setReportDraft] = useState<ReportDraft | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isRegisteringReport, setIsRegisteringReport] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
+  const finalQuestionAudioRef = useRef<HTMLAudioElement>(null);
+  const finalQuestionObjectUrlRef = useRef<string | null>(null);
+  const finalQuestionRequestIdRef = useRef(0);
+  const finalQuestionStateRef = useRef<FinalQuestionState>("idle");
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const dataChannelRef = useRef<RTCDataChannel | null>(null);
   const microphoneStreamRef = useRef<MediaStream | null>(null);
@@ -83,8 +101,6 @@ export default function ConsultationChat() {
   const realtimeErrorRef = useRef<string | null>(null);
   const intentionalCloseRef = useRef(false);
   const endingConversationRef = useRef(false);
-  const closingAnnouncementRef = useRef(false);
-  const closingAnnouncementDoneRef = useRef<(() => void) | null>(null);
   const connectionReadyRef = useRef(false);
   const chatResponseTimerRef = useRef<number | null>(null);
   const { toast } = useToast();
@@ -103,8 +119,41 @@ export default function ConsultationChat() {
     };
   }, []);
 
+  const updateFinalQuestionState = (nextState: FinalQuestionState) => {
+    finalQuestionStateRef.current = nextState;
+    setFinalQuestionState(nextState);
+  };
+
+  const releaseFinalQuestionAudio = () => {
+    const audio = finalQuestionAudioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.onended = null;
+      audio.onerror = null;
+      audio.removeAttribute("src");
+      if (typeof audio.load === "function") audio.load();
+    }
+    if (finalQuestionObjectUrlRef.current) {
+      URL.revokeObjectURL(finalQuestionObjectUrlRef.current);
+      finalQuestionObjectUrlRef.current = null;
+    }
+  };
+
+  const cleanupFinalQuestionAudio = () => {
+    finalQuestionRequestIdRef.current += 1;
+    releaseFinalQuestionAudio();
+  };
+
+  const setMicrophoneSuspended = (suspended: boolean) => {
+    microphoneStreamRef.current?.getTracks().forEach((track) => {
+      track.enabled = !suspended;
+    });
+  };
+
   const closeRealtimeConnection = () => {
     connectionReadyRef.current = false;
+    cleanupFinalQuestionAudio();
+    updateFinalQuestionState("idle");
     microphoneStreamRef.current?.getTracks().forEach((track) => track.stop());
     microphoneStreamRef.current = null;
     dataChannelRef.current?.close();
@@ -123,6 +172,8 @@ export default function ConsultationChat() {
       window.clearTimeout(chatResponseTimerRef.current);
       chatResponseTimerRef.current = null;
     }
+    cleanupFinalQuestionAudio();
+    updateFinalQuestionState("idle");
     setPartialTranscript("");
     transcriptOrderRef.current = [];
     transcriptByItemRef.current.clear();
@@ -202,15 +253,12 @@ export default function ConsultationChat() {
 
       if (type === "response.created" && responseId) {
         activeResponseIdsRef.current.add(responseId);
-        if (endingConversationRef.current && !closingAnnouncementRef.current) {
+        if (endingConversationRef.current) {
           sendRealtimeEvent({ type: "response.cancel" });
         }
       }
       if (type === "response.done" && responseId) {
         activeResponseIdsRef.current.delete(responseId);
-      }
-      if (type === "output_audio_buffer.stopped" && closingAnnouncementRef.current) {
-        closingAnnouncementDoneRef.current?.();
       }
 
       if (type === "input_audio_buffer.speech_started") {
@@ -232,6 +280,9 @@ export default function ConsultationChat() {
       }
 
       if (type === "conversation.item.input_audio_transcription.delta") {
+        const acceptsUserAudio = finalQuestionStateRef.current === "listening" ||
+          finalQuestionStateRef.current === "awaiting-answer";
+        if (!acceptsUserAudio) return;
         rememberTranscriptItem(itemId, payload.previous_item_id);
         const text = (partialByItemRef.current.get(itemId) ?? "") + (payload.delta ?? "");
         partialByItemRef.current.set(itemId, text);
@@ -241,28 +292,38 @@ export default function ConsultationChat() {
 
       if (type === "conversation.item.input_audio_transcription.completed" ||
         type === "conversation.item.input_audio_transcription.done") {
+        const acceptsUserAudio = finalQuestionStateRef.current === "listening" ||
+          finalQuestionStateRef.current === "awaiting-answer";
         const alreadyCompleted = completedTranscriptionItemsRef.current.has(itemId);
-        rememberTranscriptItem(itemId, payload.previous_item_id);
         const transcript = (payload.transcript ?? partialByItemRef.current.get(itemId) ?? "").trim();
-        if (transcript) {
+        if (acceptsUserAudio) {
+          rememberTranscriptItem(itemId, payload.previous_item_id);
+        }
+        if (transcript && acceptsUserAudio) {
           transcriptByItemRef.current.set(itemId, transcript);
           updateConversationMessage(`user-${itemId}`, "user", transcript);
         }
         partialByItemRef.current.delete(itemId);
         completedTranscriptionItemsRef.current.add(itemId);
         rebuildUserTranscript();
-        if (transcript && !alreadyCompleted && !endingConversationRef.current) {
-          const answerCount = transcriptByItemRef.current.size;
-          if (answerCount >= 5) {
+        const isFinalAnswer = finalQuestionStateRef.current === "awaiting-answer";
+        const shouldHandleTranscript = transcript && acceptsUserAudio &&
+          (!alreadyCompleted || isFinalAnswer) && !endingConversationRef.current;
+        if (shouldHandleTranscript) {
+          if (isFinalAnswer) {
+            updateFinalQuestionState("answer-completed");
             void finishVoiceConversation();
+            return;
+          }
+          const answerCount = transcriptByItemRef.current.size;
+          if (answerCount >= FINAL_QUESTION_TURN_COUNT) {
+            void askFixedFinalQuestion();
           } else {
             sendRealtimeEvent({
               type: "response.create",
               response: {
                 output_modalities: ["audio"],
-                instructions: answerCount === 4
-                  ? "管理会社の窓口担当者への最後の質問です。復唱や前置きなしで「住民の方が希望する対応は何ですか？」とだけ質問し、回答を待ってください。追加質問をしないでください。"
-                  : "会話相手は管理会社の窓口担当者です。住民本人ではありません。第三者の窓口担当者へ伝えるという表現は禁止です。回答を復唱せず、受付内容の不足点を一つだけ短く質問してください。住民の希望する対応は最後に聞くため、今はそれ以外を確認してください。",
+                instructions: "あなたは管理会社の窓口担当者である目の前の会話相手と直接話す受付アシスタントです。回答を復唱せず、前置きや相づちを省き、受付内容の不足事項を一つだけ短く日本語で質問してください。住民や第三者に確認・伝達するよう依頼してはいけません。最後の固定質問は画面側で後から尋ねるため、ここでは生成・言い換え・先取りしないでください。",
               },
             });
           }
@@ -353,6 +414,108 @@ export default function ConsultationChat() {
     channel.addEventListener("close", onClose);
   });
 
+  const failFinalQuestion = (requestId: number, description: string) => {
+    if (requestId !== finalQuestionRequestIdRef.current) return;
+    cleanupFinalQuestionAudio();
+    setMicrophoneSuspended(false);
+    updateFinalQuestionState("listening");
+    if (!intentionalCloseRef.current && !endingConversationRef.current) {
+      toast({
+        title: "最後の質問を再生できません",
+        description,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const askFixedFinalQuestion = async () => {
+    if (endingConversationRef.current || finalQuestionStateRef.current !== "listening") return;
+
+    const requestId = ++finalQuestionRequestIdRef.current;
+    updateFinalQuestionState("loading");
+    setMicrophoneSuspended(true);
+
+    try {
+      if (!dataChannelRef.current || dataChannelRef.current.readyState !== "open") {
+        throw new Error("音声接続が利用できません");
+      }
+
+      // Give the Realtime session a longer pause window before the operator
+      // answers. This is sent before playback and is not a client-supplied
+      // prompt, so a multi-clause answer is not cut off after a short pause.
+      sendRealtimeEvent({
+        type: "session.update",
+        session: {
+          audio: {
+            input: {
+              turn_detection: {
+                type: "server_vad",
+                silence_duration_ms: FINAL_QUESTION_SILENCE_DURATION_MS,
+              },
+            },
+          },
+        },
+      });
+      if (activeResponseIdsRef.current.size > 0) {
+        sendRealtimeEvent({ type: "response.cancel" });
+      }
+      remoteAudioRef.current?.pause();
+
+      const response = await fetch(FINAL_QUESTION_AUDIO_ENDPOINT, {
+        method: "GET",
+        headers: { Accept: "audio/mpeg" },
+        signal: AbortSignal.timeout(CONNECTION_TIMEOUT_MS),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? "最後の質問の音声を取得できませんでした");
+      }
+      const audioBlob = await response.blob();
+      if (!audioBlob.size || !audioBlob.type.startsWith("audio/")) {
+        throw new Error("最後の質問の音声データが不正です");
+      }
+      if (
+        requestId !== finalQuestionRequestIdRef.current ||
+        intentionalCloseRef.current ||
+        endingConversationRef.current
+      ) {
+        return;
+      }
+
+      const audio = finalQuestionAudioRef.current;
+      if (!audio) throw new Error("最後の質問を再生する音声要素がありません");
+      releaseFinalQuestionAudio();
+      const objectUrl = URL.createObjectURL(audioBlob);
+      finalQuestionObjectUrlRef.current = objectUrl;
+      audio.src = objectUrl;
+      audio.currentTime = 0;
+      audio.onended = () => {
+        if (requestId !== finalQuestionRequestIdRef.current) return;
+        releaseFinalQuestionAudio();
+        setMicrophoneSuspended(false);
+        updateFinalQuestionState("awaiting-answer");
+      };
+      audio.onerror = () => {
+        failFinalQuestion(requestId, "最後の質問の音声データを再生できませんでした");
+      };
+      updateFinalQuestionState("playing");
+      await audio.play();
+      if (
+        requestId !== finalQuestionRequestIdRef.current ||
+        finalQuestionStateRef.current !== "playing"
+      ) {
+        return;
+      }
+      updateConversationMessage(`ai-final-question-${requestId}`, "ai", FINAL_QUESTION_TEXT);
+    } catch (error) {
+      if (requestId !== finalQuestionRequestIdRef.current || intentionalCloseRef.current) return;
+      failFinalQuestion(
+        requestId,
+        error instanceof Error ? error.message : "最後の質問の音声を再生できませんでした",
+      );
+    }
+  };
+
   const startVoiceReport = async () => {
     if (!condominiumId) {
       toast({
@@ -404,11 +567,12 @@ export default function ConsultationChat() {
       dataChannel.addEventListener("close", handleUnexpectedRealtimeClose);
       dataChannel.addEventListener("open", () => {
         try {
+          updateFinalQuestionState("listening");
           sendRealtimeEvent({
             type: "response.create",
             response: {
               output_modalities: ["audio"],
-              instructions: "会話相手は管理会社の窓口担当者です。前置きや挨拶を省き、日本語で「どのようなお申し出ですか？」とだけ質問してください。",
+              instructions: "あなたは管理会社の窓口担当者である目の前の会話相手と直接話す受付アシスタントです。短い導入を一度だけ述べ（例:「承知しました。状況をお聞きします。」）、続けて「どのようなお申し出ですか？」と一つだけ日本語で質問してください。住民本人や第三者に確認・伝達するよう依頼してはいけません。最後の固定音声質問は画面側で後から尋ねるため、ここでは生成しないでください。",
             },
           });
         } catch (error) {
@@ -476,10 +640,27 @@ export default function ConsultationChat() {
 
   const finishVoiceConversation = async () => {
     if (endingConversationRef.current) return;
+    if (finalQuestionStateRef.current === "loading" || finalQuestionStateRef.current === "playing") {
+      toast({
+        title: "最後の質問を再生中です",
+        description: "質問の再生が終わるまでお待ちください。",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (finalQuestionStateRef.current === "awaiting-answer") {
+      toast({
+        title: "最後の回答をお待ちしています",
+        description: "住民の方が希望する対応を自由にお話しください。",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!peerConnectionRef.current && !isRecording) return;
     setIsStoppingRecording(true);
     setIsRecording(false);
     endingConversationRef.current = true;
+    updateFinalQuestionState("finishing");
     microphoneStreamRef.current?.getTracks().forEach((track) => track.stop());
 
     try {
@@ -499,26 +680,6 @@ export default function ConsultationChat() {
         sendRealtimeEvent({ type: "input_audio_buffer.commit" });
       }
       await waitForCommittedTranscriptions();
-      if (channel?.readyState === "open") {
-        closingAnnouncementRef.current = true;
-        await new Promise<void>((resolve) => {
-          const timer = window.setTimeout(resolve, 10000);
-          closingAnnouncementDoneRef.current = () => {
-            window.clearTimeout(timer);
-            resolve();
-          };
-          void remoteAudioRef.current?.play().catch(() => {});
-          sendRealtimeEvent({
-            type: "response.create",
-            response: {
-              output_modalities: ["audio"],
-              instructions: "会話相手は管理会社の窓口担当者です。次の一文だけをそのまま音声で言ってください。「この内容で問合せを登録します」。結果の説明、内容の復唱、追加質問、第三者に伝える約束、保存済みという発言は一切しないでください。この後、担当者の承認を得る個票登録ポップアップが開きます。",
-            },
-          });
-        });
-        closingAnnouncementDoneRef.current = null;
-        closingAnnouncementRef.current = false;
-      }
       closeRealtimeConnection();
 
       const transcript = conversationRef.current
@@ -558,8 +719,6 @@ export default function ConsultationChat() {
         variant: "destructive",
       });
     } finally {
-      closingAnnouncementRef.current = false;
-      closingAnnouncementDoneRef.current = null;
       setIsGeneratingDraft(false);
       setIsStoppingRecording(false);
       endingConversationRef.current = false;
@@ -730,10 +889,20 @@ export default function ConsultationChat() {
                 <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
                   <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-orange-800">
                     <span className={`h-2.5 w-2.5 rounded-full bg-orange-500 ${isRecording ? "animate-pulse" : ""}`} />
-                    {isRecording ? "音声で報告を聞き取り中" : isStoppingRecording ? "文字起こしを確定中" : "報告書の下書きを作成中"}
+                    {isStoppingRecording
+                      ? "文字起こしを確定中"
+                      : isGeneratingDraft
+                        ? "報告書の下書きを作成中"
+                        : finalQuestionState === "loading"
+                          ? "最後の質問を準備中"
+                          : finalQuestionState === "playing"
+                            ? "最後の質問を再生中"
+                            : finalQuestionState === "awaiting-answer"
+                              ? "最後の回答をお待ちしています"
+                              : "音声で報告を聞き取り中"}
                   </div>
                   <p className="text-sm leading-relaxed text-orange-900">
-                    AIが質問します。終了するまで、話した内容とAIの質問がこの画面に表示されます。
+                    AIが質問します。管理会社の窓口担当者であるあなたが、住民から聞いた内容を自由にお話しください。最後の質問への回答を聞き終えると、確認用の下書きが開きます。
                   </p>
                   {partialTranscript && (
                     <p className="mt-2 whitespace-pre-wrap text-sm text-gray-600">{partialTranscript}</p>
@@ -828,6 +997,7 @@ export default function ConsultationChat() {
       </div>
 
       <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" aria-hidden="true" />
+      <audio ref={finalQuestionAudioRef} playsInline className="hidden" aria-hidden="true" />
 
       <Dialog open={isReportDialogOpen} onOpenChange={closeReportDialog}>
         <DialogContent className="max-w-3xl">
