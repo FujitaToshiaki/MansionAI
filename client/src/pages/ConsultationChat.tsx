@@ -83,6 +83,8 @@ export default function ConsultationChat() {
   const realtimeErrorRef = useRef<string | null>(null);
   const intentionalCloseRef = useRef(false);
   const endingConversationRef = useRef(false);
+  const closingAnnouncementRef = useRef(false);
+  const closingAnnouncementDoneRef = useRef<(() => void) | null>(null);
   const connectionReadyRef = useRef(false);
   const chatResponseTimerRef = useRef<number | null>(null);
   const { toast } = useToast();
@@ -200,12 +202,15 @@ export default function ConsultationChat() {
 
       if (type === "response.created" && responseId) {
         activeResponseIdsRef.current.add(responseId);
-        if (endingConversationRef.current) {
+        if (endingConversationRef.current && !closingAnnouncementRef.current) {
           sendRealtimeEvent({ type: "response.cancel" });
         }
       }
       if (type === "response.done" && responseId) {
         activeResponseIdsRef.current.delete(responseId);
+      }
+      if (type === "output_audio_buffer.stopped" && closingAnnouncementRef.current) {
+        closingAnnouncementDoneRef.current?.();
       }
 
       if (type === "input_audio_buffer.speech_started") {
@@ -257,7 +262,7 @@ export default function ConsultationChat() {
                 output_modalities: ["audio"],
                 instructions: answerCount === 4
                   ? "管理会社の窓口担当者への最後の質問です。復唱や前置きなしで「住民の方が希望する対応は何ですか？」とだけ質問し、回答を待ってください。追加質問をしないでください。"
-                  : "会話相手は管理会社の窓口担当者です。住民本人ではありません。回答を復唱せず、受付内容の不足点を一つだけ短く質問してください。住民の希望する対応は最後に聞くため、今はそれ以外を確認してください。",
+                  : "会話相手は管理会社の窓口担当者です。住民本人ではありません。第三者の窓口担当者へ伝えるという表現は禁止です。回答を復唱せず、受付内容の不足点を一つだけ短く質問してください。住民の希望する対応は最後に聞くため、今はそれ以外を確認してください。",
               },
             });
           }
@@ -494,6 +499,26 @@ export default function ConsultationChat() {
         sendRealtimeEvent({ type: "input_audio_buffer.commit" });
       }
       await waitForCommittedTranscriptions();
+      if (channel?.readyState === "open") {
+        closingAnnouncementRef.current = true;
+        await new Promise<void>((resolve) => {
+          const timer = window.setTimeout(resolve, 10000);
+          closingAnnouncementDoneRef.current = () => {
+            window.clearTimeout(timer);
+            resolve();
+          };
+          void remoteAudioRef.current?.play().catch(() => {});
+          sendRealtimeEvent({
+            type: "response.create",
+            response: {
+              output_modalities: ["audio"],
+              instructions: "会話相手は管理会社の窓口担当者です。次の一文だけをそのまま音声で言ってください。「この内容で問合せを登録します」。結果の説明、内容の復唱、追加質問、第三者に伝える約束、保存済みという発言は一切しないでください。この後、担当者の承認を得る個票登録ポップアップが開きます。",
+            },
+          });
+        });
+        closingAnnouncementDoneRef.current = null;
+        closingAnnouncementRef.current = false;
+      }
       closeRealtimeConnection();
 
       const transcript = conversationRef.current
@@ -533,6 +558,8 @@ export default function ConsultationChat() {
         variant: "destructive",
       });
     } finally {
+      closingAnnouncementRef.current = false;
+      closingAnnouncementDoneRef.current = null;
       setIsGeneratingDraft(false);
       setIsStoppingRecording(false);
       endingConversationRef.current = false;
@@ -807,10 +834,10 @@ export default function ConsultationChat() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-orange-600" />
-              報告書の下書きを確認
+              問合せ個票登録
             </DialogTitle>
             <DialogDescription>
-              AIが面談記録から整理した下書きです。内容を編集して「登録する」を押すまで保存されません。
+              窓口担当者から伺った内容を入力しています。住民の申告と管理会社の対応内容を確認・修正してください。「登録する」を押すまで保存されません。
             </DialogDescription>
           </DialogHeader>
 
