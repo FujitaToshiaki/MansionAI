@@ -446,11 +446,14 @@ export default function ConsultationChat() {
       sendRealtimeEvent({
         type: "session.update",
         session: {
+          type: "realtime",
           audio: {
             input: {
               turn_detection: {
                 type: "server_vad",
                 silence_duration_ms: FINAL_QUESTION_SILENCE_DURATION_MS,
+                create_response: false,
+                interrupt_response: true,
               },
             },
           },
